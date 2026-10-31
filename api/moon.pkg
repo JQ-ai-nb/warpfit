@@ -1,0 +1,10 @@
+import {
+  "JQ-ai-nb/warpfit/core" @warpfit,
+  "moonbitlang/core/json",
+}
+
+pkgtype(kind: "executable")
+
+options(
+  link: { "js": { "exports": [ "run" ], "format": "esm" } },
+)
