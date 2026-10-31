@@ -1,0 +1,7 @@
+_build/
+.mooncache/
+artifacts/
+work/
+deliverables/
+__pycache__/
+*.pyc
