@@ -1,28 +1,47 @@
+"""Run real local checks and retain complete command results outside source."""
+import argparse
 import json
 import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-root = Path(__file__).parent
+root = Path(__file__).resolve().parent
+parser = argparse.ArgumentParser()
+parser.add_argument('--native', action='store_true', help='Also test/build native; needs a configured C compiler')
+args = parser.parse_args()
+targets = ['wasm', 'wasm-gc', 'js'] + (['native'] if args.native else [])
 commands = [
     ['moon', 'version', '--all'],
     ['moon', 'check', '--target', 'all', '--deny-warn'],
     ['moon', 'fmt', '--check'],
-    ['moon', 'test', '--target', 'wasm-gc', '--deny-warn'],
-    ['moon', 'test', '--target', 'js', '--deny-warn'],
+    ['moon', 'info'],
+    ['git', 'diff', '--exit-code', '--', '*.mbti'],
+]
+for target in targets:
+    commands += [['moon', 'test', '--target', target, '--deny-warn'],
+                 ['moon', 'build', '--target', target, '--deny-warn']]
+commands += [
     ['moon', 'run', 'cmd/demo', '--target', 'js'],
+    ['moon', 'run', 'cmd/calibrate', '--target', 'js'],
+    ['node', 'scripts/build.mjs'],
+    ['node', '--test', 'tests/cli.test.mjs', 'tests/numerical.test.mjs'],
+    [sys.executable, 'scripts/package_check.py'],
 ]
 results = []
 for command in commands:
-    result = subprocess.run(command, cwd=root, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=60)
+    result = subprocess.run(command, cwd=root, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=180)
     entry = {'command': command, 'returncode': result.returncode, 'stdout': result.stdout, 'stderr': result.stderr}
     results.append(entry)
-    print(' '.join(command), '=>', result.returncode)
+    print(' '.join(command), '=>', result.returncode, flush=True)
     if result.returncode:
+        print(result.stdout, result.stderr)
         break
 out = root / 'artifacts'
 out.mkdir(exist_ok=True)
+passed = len(results) == len(commands) and all(x['returncode'] == 0 for x in results)
 (out / 'validation.json').write_text(json.dumps({'recorded_at_utc': datetime.now(timezone.utc).isoformat(),
-    'status': 'local feasibility only', 'results': results}, ensure_ascii=False, indent=2), encoding='utf-8')
-sys.exit(0 if len(results) == len(commands) and all(x['returncode'] == 0 for x in results) else 1)
+    'status': 'passed' if passed else 'failed', 'runtime_targets': targets,
+    'not_checked': [] if args.native else ['native runtime: C toolchain required; use --native'],
+    'results': results}, ensure_ascii=False, indent=2), encoding='utf-8')
+sys.exit(0 if passed else 1)
