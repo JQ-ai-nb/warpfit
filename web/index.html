@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; worker-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'">
+  <title>WarpFit · 可微分时序对齐实验台</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="top"><a class="brand" href="./"><span class="mark">W</span> WarpFit <span class="version">0.1.0</span></a><span class="local"><i></i> MoonBit · 浏览器本地计算</span></header>
+  <main>
+    <section class="intro"><div class="eyebrow">DIFFERENTIABLE TEMPORAL ALIGNMENT</div><h1>把不同节奏，<br><em>对齐成可学习的信号。</em></h1><p>计算 Soft-DTW 与两侧梯度，从多条序列拟合参考模板，再用示例检索相似形状。上传的数据只在本页计算。</p></section>
+    <section class="workflow" aria-label="选择完整使用场景">
+      <button class="scenario selected" data-example="prototype" aria-pressed="true"><span class="num">01</span><strong>学习参考模板</strong><span>长度不一的示例 → 固定长度原型</span></button>
+      <button class="scenario" data-example="training" aria-pressed="false"><span class="num">02</span><strong>查看训练信号</strong><span>多变量序列 → 损失与输入梯度</span></button>
+      <button class="scenario" data-example="retrieval" aria-pressed="false"><span class="num">03</span><strong>按示例检索</strong><span>查询与候选 → 完整评分与排序</span></button>
+    </section>
+    <div class="workspace">
+      <section class="panel editor-panel"><div class="panel-head"><h2>输入请求</h2><label class="file-label">导入 JSON<input id="file" type="file" accept=".json,application/json"></label></div><p class="hint" id="scenario-hint">修改示例或导入自己的数值序列。参数和预算均在 options 中。</p><label class="sr" for="request">版本化 JSON 请求</label><textarea id="request" spellcheck="false" aria-describedby="scenario-hint"></textarea><div class="actions"><button id="run" class="primary">运行计算 <span>↗</span></button><button id="cancel" disabled>取消</button><button id="reset">重置示例</button></div><p class="limits">1–512 个采样点 · 1–16 个特征 · 1–32 条示例 / 候选<br>可设置矩阵、评估次数与逻辑工作量上限。</p></section>
+      <section class="panel results"><div class="panel-head"><h2>计算结果</h2><span id="badge" class="badge">等待运行</span></div><p id="status" role="status" aria-live="polite">运行后查看曲线、优化过程和数值证据。</p><div id="metrics" class="metrics"></div><div id="visuals"></div><details><summary>完整 JSON 结果</summary><pre id="output">尚无结果</pre></details><button id="download" disabled>下载结果 JSON ↓</button></section>
+    </div>
+    <section class="notes"><div><h3>从可解释的数值出发</h3><p>原始 Soft-DTW 可以为负；自项校正值不是置信度。对齐热图表示路径访问占用，行和不要求等于 1。</p></div><div><h3>明确边界</h3><p>本工具采用已发表算法，不主张算法首创。输入需要自行做尺度处理；拟合只保证接受步满足下降条件，不保证全局最优或真实业务准确率。</p></div></section>
+  </main>
+  <footer><span>WarpFit · 蒋琦 / JQ-ai-nb · Apache-2.0</span><nav><a href="https://github.com/JQ-ai-nb/warpfit">源码与验证</a><a href="./WARPFIT_LICENSE">项目许可</a><a href="./MOONBIT_CORE_NOTICE">标准库声明</a></nav></footer>
+  <script type="module" src="./app.mjs"></script>
+</body></html>

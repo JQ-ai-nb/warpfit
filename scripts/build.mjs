@@ -21,4 +21,8 @@ for (const target of ['dist', 'web']) {
   }
   await copyFile(join(root, 'LICENSE'), join(folder, 'WARPFIT_LICENSE'));
 }
+await mkdir(join(root, 'web', 'examples'), { recursive: true });
+for (const name of ['prototype', 'training', 'retrieval']) {
+  await copyFile(join(root, 'examples', `${name}.json`), join(root, 'web', 'examples', `${name}.json`));
+}
 console.log('Built the MoonBit JSON engine for Node and the browser; included license notices.');
