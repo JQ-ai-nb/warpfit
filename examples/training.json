@@ -1,0 +1,8 @@
+{
+  "schema": "warpfit.request/1",
+  "operation": "loss",
+  "objective": "corrected",
+  "x": [[0.2, -0.3], [1.5, 0.8]],
+  "y": [[0, -0.2], [0.6, 0.4], [1.2, 0.9]],
+  "options": { "gamma": 0.8, "feature_weights": [1, 1] }
+}

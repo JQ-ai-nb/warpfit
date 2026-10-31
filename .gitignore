@@ -5,3 +5,8 @@ work/
 deliverables/
 __pycache__/
 *.pyc
+dist/
+web/engine.mjs
+web/MOONBIT_CORE_LICENSE
+web/MOONBIT_CORE_NOTICE
+web/WARPFIT_LICENSE

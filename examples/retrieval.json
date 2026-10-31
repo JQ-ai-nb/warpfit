@@ -1,0 +1,12 @@
+{
+  "schema": "warpfit.request/1",
+  "operation": "rank",
+  "query": [0, 1, 0],
+  "candidates": [
+    { "id": "same", "series": [0, 1, 0] },
+    { "id": "stretched", "series": [0, 0.5, 1, 1, 0] },
+    { "id": "changed", "series": [1, 0, 1] }
+  ],
+  "top_k": 3,
+  "options": { "gamma": 0.4 }
+}

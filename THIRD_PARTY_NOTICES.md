@@ -3,7 +3,7 @@
 ## MoonBit 标准库
 
 实验仅使用 `moonbitlang/core` 的数学、数组和基础类型，标准库采用 Apache-2.0。
-本地验证使用安装工具链附带的匹配版本。当前没有对外分发编译产物；以后打包 JS/Wasm 等产物时应随包保留对应标准库 LICENSE 和 NOTICE。
+本地验证使用安装工具链附带的匹配版本。`node scripts/build.mjs` 将匹配标准库的 LICENSE 和 NOTICE 随生成的 Node / 浏览器引擎复制；对外分发这些编译产物时应一并保留。生成目录同时保留本项目 Apache-2.0 许可证。
 
 ## 算法来源
 
