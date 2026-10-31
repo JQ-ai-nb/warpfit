@@ -32,6 +32,9 @@ try {
   const download = await downloadPromise; assert.equal(download.suggestedFilename(), 'warpfit-rank.json');
   report.checks.push('result JSON download');
   await page.locator('#request').fill('{"schema":"warpfit.request/1","operation":"loss","operation":"fit"}');
+  assert.equal(await page.locator('#download').isDisabled(), true);
+  assert.equal(await page.locator('.metric').count(), 0);
+  report.checks.push('changed input invalidates earlier displayed result');
   result = await execute(); assert.equal(result.ok, false); assert.equal(await page.locator('#badge').textContent(), '输入 / 预算错误');
   report.checks.push('duplicate JSON keys rejected without page error');
   const huge = Array.from({ length: 512 }, (_, i) => Math.sin(i / 25));

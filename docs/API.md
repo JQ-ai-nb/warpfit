@@ -37,7 +37,7 @@ match @warpfit.divergence(prediction, target, 0.4) {
 
 ### 选项与默认值
 
-全部操作的 `options`：gamma=1、feature_weights=[]（全部为1）、max_cells=262144。fit 额外默认 max_steps=60、learning_rate=1、gradient_tolerance=1e-8、improvement_tolerance=1e-10、max_evaluations=512、max_work_units=20000000、example_weights=[]（等权）。rank 额外 max_work_units=20000000，top_k 默认为全部候选。
+全部操作的 `options`：gamma=0.5、feature_weights=[]（全部为1）、max_cells=262144。fit 额外默认 max_steps=60、learning_rate=1、gradient_tolerance=1e-8、improvement_tolerance=1e-10、max_evaluations=512、max_work_units=20000000、example_weights=[]（等权）。rank 额外 max_work_units=20000000，top_k 默认为全部候选。
 
 实际输入和完整配置例子：[prototype.json](../examples/prototype.json)、[training.json](../examples/training.json)、[retrieval.json](../examples/retrieval.json)。数值范围和工作量语义见 [SEMANTICS.md](SEMANTICS.md)。所有错误码由核心和 wire 层稳定字符串给出；判断应使用 code 而非自然语言 message。
 

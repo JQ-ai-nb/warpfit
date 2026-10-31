@@ -8,14 +8,19 @@ const descriptions = {
 function status(text, label = '', kind = '') { $('status').textContent = text; $('badge').textContent = label; $('badge').className = `badge ${kind}`; }
 function busy(value) {
   running = value; $('run').disabled = value; $('cancel').disabled = !value;
+  $('request').readOnly = value;
   for (const b of document.querySelectorAll('.scenario,#reset')) b.disabled = value;
   $('file').disabled = value;
+}
+function clearResult() {
+  lastResult = undefined; $('download').disabled = true;
+  $('metrics').replaceChildren(); $('visuals').replaceChildren(); $('output').textContent = '当前输入尚未计算。';
 }
 async function load(name) {
   try {
     const res = await fetch(`./examples/${name}.json`); if (!res.ok) throw new Error('示例文件不可用');
     const source = await res.text();
-    current = name; $('request').value = source; $('request').scrollLeft = 0; $('request').scrollTop = 0; $('scenario-hint').textContent = descriptions[name];
+    current = name; $('request').value = source; $('request').scrollLeft = 0; $('request').scrollTop = 0; $('scenario-hint').textContent = descriptions[name]; clearResult();
     for (const b of document.querySelectorAll('.scenario')) { const selected = b.dataset.example === name; b.classList.toggle('selected', selected); b.setAttribute('aria-pressed', String(selected)); }
     status('示例已载入。运行后查看结果，也可以直接编辑 JSON。', '等待运行');
   } catch (e) { status(e.message, '加载失败', 'bad'); }
@@ -26,10 +31,14 @@ $('file').onchange = async event => {
   const file = event.target.files[0]; if (!file) return;
   try { if (file.size > 2_000_000) throw new Error('输入文件超过 2,000,000 字节。');
     $('request').value = new TextDecoder('utf-8', { fatal: true }).decode(await file.arrayBuffer());
+    clearResult();
     status('本地文件已载入，尚未计算。', '等待运行');
   } catch (e) { status(e.message, '导入失败', 'bad'); }
   event.target.value = '';
 };
+$('request').addEventListener('input', () => {
+  clearResult(); status('输入已更改，请重新运行以获得对应结果。', '等待运行');
+});
 const ns = 'http://www.w3.org/2000/svg';
 function el(tag, text, className) { const n = document.createElement(tag); if (text !== undefined) n.textContent = text; if (className) n.className = className; return n; }
 function metric(label, value) { const n = el('div', undefined, 'metric'); n.append(el('span', label), el('strong', value)); $('metrics').append(n); }

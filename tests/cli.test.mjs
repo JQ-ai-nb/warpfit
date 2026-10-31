@@ -45,6 +45,8 @@ test('retrieval evaluates the whole candidate set and ranks exact match first', 
   assert.ok(out.matches[1].value < out.matches[2].value);
 });
 test('raw Soft-DTW can be negative; corrected equal sequences are zero', () => {
+  const omitted = JSON.parse(run(JSON.stringify({ schema: 'warpfit.request/1', operation: 'loss', objective: 'raw', x: [0,1], y: [0,1] })));
+  close(omitted.value, -0.5 * Math.log(1 + 2 * Math.exp(-2)));
   const data = { ...request, x: [0, 1], y: [0, 1], objective: 'raw' };
   assert.ok(JSON.parse(run(JSON.stringify(data))).value < 0);
   data.objective = 'corrected'; close(JSON.parse(run(JSON.stringify(data))).value, 0);
