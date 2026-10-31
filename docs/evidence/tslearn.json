@@ -1,0 +1,16 @@
+{
+  "recorded_at_utc": "2026-10-31T09:49:09.602011+00:00",
+  "reference": "tslearn",
+  "reference_version": "0.6.4",
+  "numpy_version": "2.2.6",
+  "cases": 60,
+  "objectives": 120,
+  "fields": [
+    "value",
+    "gradient_x",
+    "gradient_y",
+    "alignment"
+  ],
+  "max_absolute_difference": 1.3159251466277055e-11,
+  "status": "passed"
+}

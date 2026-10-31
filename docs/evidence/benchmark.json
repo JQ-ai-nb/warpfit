@@ -1,0 +1,64 @@
+{
+  "recorded_at_utc": "2026-10-31T09:51:36.899Z",
+  "node": "v24.22.1",
+  "platform": "win32",
+  "arch": "x64",
+  "cpu": "Intel(R) Core(TM) i7-14650HX",
+  "description": "Single-process JS engine, corrected loss incl. both gradients/occupancy and JSON parse/serialization. Two warmups, seven timed calls. Informational, no cross-machine guarantee.",
+  "results": [
+    {
+      "samples": 32,
+      "dimensions": 1,
+      "repeats": 7,
+      "median_ms": 1.0243000000000038,
+      "min_ms": 0.9217000000000013,
+      "max_ms": 2.159700000000001,
+      "value": 0.10369983523738036
+    },
+    {
+      "samples": 32,
+      "dimensions": 3,
+      "repeats": 7,
+      "median_ms": 1.6579999999999941,
+      "min_ms": 0.8627000000000038,
+      "max_ms": 2.390499999999996,
+      "value": 0.1392554318665855
+    },
+    {
+      "samples": 128,
+      "dimensions": 1,
+      "repeats": 7,
+      "median_ms": 10.252899999999997,
+      "min_ms": 9.514700000000005,
+      "max_ms": 11.433300000000003,
+      "value": 0.07275208552398027
+    },
+    {
+      "samples": 128,
+      "dimensions": 3,
+      "repeats": 7,
+      "median_ms": 9.522500000000008,
+      "min_ms": 9.249400000000009,
+      "max_ms": 10.19029999999998,
+      "value": 0.1403707088397539
+    },
+    {
+      "samples": 512,
+      "dimensions": 1,
+      "repeats": 7,
+      "median_ms": 127.12290000000007,
+      "min_ms": 120.65530000000012,
+      "max_ms": 132.07050000000004,
+      "value": 0.07281043475137494
+    },
+    {
+      "samples": 512,
+      "dimensions": 3,
+      "repeats": 7,
+      "median_ms": 123.86720000000014,
+      "min_ms": 122.57809999999995,
+      "max_ms": 130.43349999999987,
+      "value": 0.1403742344896557
+    }
+  ]
+}
