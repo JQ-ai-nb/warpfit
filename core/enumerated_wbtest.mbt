@@ -1,5 +1,5 @@
 ///|
-test "40 cases against complete alignment-path enumeration" {
+test "80 weighted cases against complete alignment-path enumeration" {
   {
     let x = {
       count: 3,
@@ -7,8 +7,9 @@ test "40 cases against complete alignment-path enumeration" {
       values: [-1.6, 1.2, -1.8, -0.7, -0.5, 1.0],
     }
     let y = { count: 2, dimensions: 2, values: [-0.6, 2.0, -1.0, -1.4], }
-    let raw = soft_dtw(x, y, 0.1).unwrap()
-    let corrected = divergence(x, y, 0.1).unwrap()
+    let options = { ..alignment_options(0.1), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 8.78)
     near(corrected.value, 8.78)
     for k, expected in [-2.0, -1.6, -1.6, 1.4, 1.0, 4.8] {
@@ -37,8 +38,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 3, dimensions: 1, values: [-0.6, 1.6, 1.0], }
     let y = { count: 2, dimensions: 1, values: [-0.9, 0.4], }
-    let raw = soft_dtw(x, y, 1.0).unwrap()
-    let corrected = divergence(x, y, 1.0).unwrap()
+    let options = { ..alignment_options(1.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 1.5692375399332972)
     near(corrected.value, 2.173338982887512)
     for
@@ -70,8 +72,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 2, dimensions: 1, values: [0.7, -1.0], }
     let y = { count: 1, dimensions: 1, values: [2.0], }
-    let raw = soft_dtw(x, y, 2.0).unwrap()
-    let corrected = divergence(x, y, 2.0).unwrap()
+    let options = { ..alignment_options(2.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 10.69)
     near(corrected.value, 11.076276956099344)
     for k, expected in [-2.6, -6.0] {
@@ -101,8 +104,9 @@ test "40 cases against complete alignment-path enumeration" {
       dimensions: 2,
       values: [-0.9, -1.8, 0.7, -1.6, -0.2, 0.4],
     }
-    let raw = soft_dtw(x, y, 0.1).unwrap()
-    let corrected = divergence(x, y, 0.1).unwrap()
+    let options = { ..alignment_options(0.1), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 14.629999999865605)
     near(corrected.value, 14.681653437880515)
     for
@@ -145,8 +149,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 2, dimensions: 1, values: [-1.3, 1.5], }
     let y = { count: 2, dimensions: 1, values: [-0.8, -1.5], }
-    let raw = soft_dtw(x, y, 0.4).unwrap()
-    let corrected = divergence(x, y, 0.4).unwrap()
+    let options = { ..alignment_options(0.4), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 8.992240956954742)
     near(corrected.value, 9.084674988771225)
     for k, expected in [-0.8099918550318979, 6.000004358679977] {
@@ -168,8 +173,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 2, dimensions: 1, values: [-0.5, 2.0], }
     let y = { count: 1, dimensions: 1, values: [0.3], }
-    let raw = soft_dtw(x, y, 2.0).unwrap()
-    let corrected = divergence(x, y, 2.0).unwrap()
+    let options = { ..alignment_options(2.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 3.53)
     near(corrected.value, 3.614225210873927)
     for k, expected in [-1.6, 3.4] {
@@ -191,8 +197,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 2, dimensions: 2, values: [1.6, 1.4, -0.8, -0.7], }
     let y = { count: 1, dimensions: 2, values: [0.9, 0.8], }
-    let raw = soft_dtw(x, y, 0.4).unwrap()
-    let corrected = divergence(x, y, 0.4).unwrap()
+    let options = { ..alignment_options(0.4), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 5.99)
     near(corrected.value, 5.990000000003632)
     for
@@ -220,8 +227,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 1, dimensions: 1, values: [-1.7], }
     let y = { count: 4, dimensions: 1, values: [-0.4, -1.8, -1.7, -1.4], }
-    let raw = soft_dtw(x, y, 0.1).unwrap()
-    let corrected = divergence(x, y, 0.1).unwrap()
+    let options = { ..alignment_options(0.1), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 1.7899999999999996)
     near(corrected.value, 1.879409639213013)
     for k, expected in [-2.9999999999999996] {
@@ -249,8 +257,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 1, dimensions: 1, values: [0.3], }
     let y = { count: 3, dimensions: 1, values: [-0.5, 1.3, 0.2], }
-    let raw = soft_dtw(x, y, 1.0).unwrap()
-    let corrected = divergence(x, y, 1.0).unwrap()
+    let options = { ..alignment_options(1.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 1.6500000000000001)
     near(corrected.value, 1.9324019951324862)
     for k, expected in [-0.19999999999999996] {
@@ -275,8 +284,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 2, dimensions: 1, values: [1.5, 0.1], }
     let y = { count: 3, dimensions: 1, values: [1.8, 0.0, -0.9], }
-    let raw = soft_dtw(x, y, 2.0).unwrap()
-    let corrected = divergence(x, y, 2.0).unwrap()
+    let options = { ..alignment_options(2.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, -0.18895769423498399)
     near(corrected.value, 1.631917543778632)
     for k, expected in [0.5000868213283972, 1.7430664047723428] {
@@ -308,8 +318,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 4, dimensions: 1, values: [-2.0, -0.2, 1.4, 1.1], }
     let y = { count: 1, dimensions: 1, values: [1.5], }
-    let raw = soft_dtw(x, y, 1.0).unwrap()
-    let corrected = divergence(x, y, 1.0).unwrap()
+    let options = { ..alignment_options(1.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 15.31)
     near(corrected.value, 15.967531684293903)
     for k, expected in [-7.0, -3.4, -0.20000000000000018, -0.7999999999999998] {
@@ -334,8 +345,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 1, dimensions: 1, values: [1.5], }
     let y = { count: 2, dimensions: 1, values: [1.8, -0.1], }
-    let raw = soft_dtw(x, y, 0.1).unwrap()
-    let corrected = divergence(x, y, 0.1).unwrap()
+    let options = { ..alignment_options(0.1), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 2.6500000000000004)
     near(corrected.value, 2.6500000000000004)
     for k, expected in [2.6] {
@@ -365,8 +377,9 @@ test "40 cases against complete alignment-path enumeration" {
       dimensions: 2,
       values: [1.8, -0.7, 0.5, -1.0, -1.6, 1.9, 0.0, 1.1],
     }
-    let raw = soft_dtw(x, y, 1.0).unwrap()
-    let corrected = divergence(x, y, 1.0).unwrap()
+    let options = { ..alignment_options(1.0), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 6.951503136683075)
     near(corrected.value, 7.136019352485982)
     for
@@ -413,8 +426,9 @@ test "40 cases against complete alignment-path enumeration" {
       dimensions: 2,
       values: [0.2, 0.5, -1.7, -1.8, -0.6, 1.5],
     }
-    let raw = soft_dtw(x, y, 0.1).unwrap()
-    let corrected = divergence(x, y, 0.1).unwrap()
+    let options = { ..alignment_options(0.1), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 10.350000000000001)
     near(corrected.value, 10.350000000000001)
     for k, expected in [4.2, -4.0] {
@@ -436,8 +450,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 2, dimensions: 1, values: [-1.4, -0.4], }
     let y = { count: 3, dimensions: 1, values: [1.8, 0.2, -2.0], }
-    let raw = soft_dtw(x, y, 1.0).unwrap()
-    let corrected = divergence(x, y, 1.0).unwrap()
+    let options = { ..alignment_options(1.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 12.918372578174651)
     near(corrected.value, 13.274342095961334)
     for k, expected in [-6.994159315249094, 2.149953261340696] {
@@ -471,8 +486,9 @@ test "40 cases against complete alignment-path enumeration" {
       values: [-1.5, -1.1, -1.1, -1.8, 1.5, -0.5],
     }
     let y = { count: 2, dimensions: 2, values: [-0.8, 1.6, -1.9, 0.6], }
-    let raw = soft_dtw(x, y, 0.1).unwrap()
-    let corrected = divergence(x, y, 0.1).unwrap()
+    let options = { ..alignment_options(0.1), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 26.949999999999992)
     near(corrected.value, 26.950150118363673)
     for
@@ -511,8 +527,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 3, dimensions: 1, values: [1.4, -0.6, -0.7], }
     let y = { count: 3, dimensions: 1, values: [1.2, 1.6, -0.4], }
-    let raw = soft_dtw(x, y, 1.0).unwrap()
-    let corrected = divergence(x, y, 1.0).unwrap()
+    let options = { ..alignment_options(1.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 0.13948573126960145)
     near(corrected.value, 1.2307279656426018)
     for
@@ -559,8 +576,9 @@ test "40 cases against complete alignment-path enumeration" {
       dimensions: 2,
       values: [0.4, 0.6, 1.2, -0.2, 1.5, -1.2, -0.2, 1.0],
     }
-    let raw = soft_dtw(x, y, 0.4).unwrap()
-    let corrected = divergence(x, y, 0.4).unwrap()
+    let options = { ..alignment_options(0.4), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 5.879999447830767)
     near(corrected.value, 5.9225848025628975)
     for
@@ -607,8 +625,9 @@ test "40 cases against complete alignment-path enumeration" {
       dimensions: 2,
       values: [0.8, 1.7, -0.2, -0.5, 0.7, -2.0],
     }
-    let raw = soft_dtw(x, y, 0.1).unwrap()
-    let corrected = divergence(x, y, 0.1).unwrap()
+    let options = { ..alignment_options(0.1), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 2.24)
     near(corrected.value, 2.2400000000000055)
     for
@@ -648,8 +667,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 2, dimensions: 2, values: [-0.6, 1.2, -1.8, -1.1], }
     let y = { count: 2, dimensions: 2, values: [0.8, 0.5, -0.2, 0.0], }
-    let raw = soft_dtw(x, y, 1.0).unwrap()
-    let corrected = divergence(x, y, 1.0).unwrap()
+    let options = { ..alignment_options(1.0), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 6.036024701470133)
     near(corrected.value, 6.263713171314541)
     for
@@ -691,8 +711,9 @@ test "40 cases against complete alignment-path enumeration" {
       dimensions: 2,
       values: [-2.0, 1.8, -0.2, 1.0, -2.0, -1.7],
     }
-    let raw = soft_dtw(x, y, 0.1).unwrap()
-    let corrected = divergence(x, y, 0.1).unwrap()
+    let options = { ..alignment_options(0.1), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 26.299932453749417)
     near(corrected.value, 26.301562848134246)
     for
@@ -735,8 +756,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 1, dimensions: 1, values: [0.4], }
     let y = { count: 2, dimensions: 1, values: [1.6, -1.7], }
-    let raw = soft_dtw(x, y, 1.0).unwrap()
-    let corrected = divergence(x, y, 1.0).unwrap()
+    let options = { ..alignment_options(1.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 5.8500000000000005)
     near(corrected.value, 5.850018643394751)
     for k, expected in [1.7999999999999998] {
@@ -762,8 +784,9 @@ test "40 cases against complete alignment-path enumeration" {
       dimensions: 2,
       values: [-1.7, 1.1, 0.1, 1.3, -0.6, -1.2],
     }
-    let raw = soft_dtw(x, y, 1.0).unwrap()
-    let corrected = divergence(x, y, 1.0).unwrap()
+    let options = { ..alignment_options(1.0), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 13.107840029990246)
     near(corrected.value, 13.165578013702367)
     for
@@ -803,8 +826,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 1, dimensions: 2, values: [-1.3, 1.6], }
     let y = { count: 2, dimensions: 2, values: [0.2, -0.3, -1.3, 1.8], }
-    let raw = soft_dtw(x, y, 1.0).unwrap()
-    let corrected = divergence(x, y, 1.0).unwrap()
+    let options = { ..alignment_options(1.0), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 5.9)
     near(corrected.value, 5.901279507832707)
     for k, expected in [-3.0, 3.4000000000000004] {
@@ -829,8 +853,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 4, dimensions: 1, values: [1.1, 1.7, -2.0, 1.8], }
     let y = { count: 4, dimensions: 1, values: [-0.2, -0.6, 1.8, 0.5], }
-    let raw = soft_dtw(x, y, 0.4).unwrap()
-    let corrected = divergence(x, y, 0.4).unwrap()
+    let options = { ..alignment_options(0.4), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 8.943852799699389)
     near(corrected.value, 9.238716143662836)
     for
@@ -878,8 +903,9 @@ test "40 cases against complete alignment-path enumeration" {
       dimensions: 2,
       values: [-1.4, -1.7, 0.3, -0.2, 1.2, 2.0, -1.7, 1.5],
     }
-    let raw = soft_dtw(x, y, 1.0).unwrap()
-    let corrected = divergence(x, y, 1.0).unwrap()
+    let options = { ..alignment_options(1.0), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 26.435132868789406)
     near(corrected.value, 26.445151006420126)
     for
@@ -926,8 +952,9 @@ test "40 cases against complete alignment-path enumeration" {
       values: [0.5, -0.4, -1.2, 0.4, -1.0, -1.3],
     }
     let y = { count: 1, dimensions: 2, values: [0.7, 0.4], }
-    let raw = soft_dtw(x, y, 0.1).unwrap()
-    let corrected = divergence(x, y, 0.1).unwrap()
+    let options = { ..alignment_options(0.1), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 10.07)
     near(corrected.value, 10.07000000000002)
     for
@@ -960,8 +987,9 @@ test "40 cases against complete alignment-path enumeration" {
       dimensions: 2,
       values: [0.2, -1.7, -0.5, -1.9, -0.6, -2.0, -1.9, -0.8],
     }
-    let raw = soft_dtw(x, y, 0.4).unwrap()
-    let corrected = divergence(x, y, 0.4).unwrap()
+    let options = { ..alignment_options(0.4), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 20.2)
     near(corrected.value, 20.523403765057086)
     for k, expected in [-6.4, 15.2] {
@@ -990,8 +1018,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 2, dimensions: 2, values: [-1.4, -1.1, 0.8, 1.0], }
     let y = { count: 2, dimensions: 2, values: [1.7, -0.4, -1.7, -1.4], }
-    let raw = soft_dtw(x, y, 0.1).unwrap()
-    let corrected = divergence(x, y, 0.1).unwrap()
+    let options = { ..alignment_options(0.1), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 22.094702238947313)
     near(corrected.value, 22.094702238947313)
     for
@@ -1025,8 +1054,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 2, dimensions: 1, values: [-0.2, 0.6], }
     let y = { count: 1, dimensions: 1, values: [1.7], }
-    let raw = soft_dtw(x, y, 1.0).unwrap()
-    let corrected = divergence(x, y, 1.0).unwrap()
+    let options = { ..alignment_options(1.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 4.82)
     near(corrected.value, 5.180036903571635)
     for k, expected in [-3.8, -2.2] {
@@ -1056,8 +1086,9 @@ test "40 cases against complete alignment-path enumeration" {
       dimensions: 2,
       values: [0.1, 0.9, -1.1, 1.2, 1.1, -1.8, 2.0, 1.3],
     }
-    let raw = soft_dtw(x, y, 0.1).unwrap()
-    let corrected = divergence(x, y, 0.1).unwrap()
+    let options = { ..alignment_options(0.1), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 28.49131631580251)
     near(corrected.value, 28.498916757683865)
     for
@@ -1100,8 +1131,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 3, dimensions: 1, values: [1.0, -0.1, -0.4], }
     let y = { count: 2, dimensions: 1, values: [-1.3, -1.2], }
-    let raw = soft_dtw(x, y, 0.4).unwrap()
-    let corrected = divergence(x, y, 0.4).unwrap()
+    let options = { ..alignment_options(0.4), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 6.936236296566674)
     near(corrected.value, 7.3674602844997725)
     for
@@ -1129,8 +1161,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 1, dimensions: 1, values: [-0.7], }
     let y = { count: 3, dimensions: 1, values: [1.6, -1.7, 1.4], }
-    let raw = soft_dtw(x, y, 2.0).unwrap()
-    let corrected = divergence(x, y, 2.0).unwrap()
+    let options = { ..alignment_options(2.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 10.699999999999998)
     near(corrected.value, 10.724979929164634)
     for k, expected in [-6.799999999999999] {
@@ -1153,8 +1186,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 1, dimensions: 1, values: [-1.0], }
     let y = { count: 4, dimensions: 1, values: [0.3, -1.0, -1.0, -1.8], }
-    let raw = soft_dtw(x, y, 0.1).unwrap()
-    let corrected = divergence(x, y, 0.1).unwrap()
+    let options = { ..alignment_options(0.1), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 2.33)
     near(corrected.value, 2.385151763765136)
     for k, expected in [-1.0] {
@@ -1179,8 +1213,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 1, dimensions: 1, values: [2.0], }
     let y = { count: 3, dimensions: 1, values: [0.8, -1.6, 1.1], }
-    let raw = soft_dtw(x, y, 2.0).unwrap()
-    let corrected = divergence(x, y, 2.0).unwrap()
+    let options = { ..alignment_options(2.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 15.21)
     near(corrected.value, 15.372215660336572)
     for k, expected in [11.399999999999999] {
@@ -1213,8 +1248,9 @@ test "40 cases against complete alignment-path enumeration" {
       dimensions: 2,
       values: [-2.0, 0.8, -0.1, -0.4, 0.5, 1.6],
     }
-    let raw = soft_dtw(x, y, 2.0).unwrap()
-    let corrected = divergence(x, y, 2.0).unwrap()
+    let options = { ..alignment_options(2.0), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 8.130273510969497)
     near(corrected.value, 9.008366941905031)
     for
@@ -1257,8 +1293,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 4, dimensions: 1, values: [-0.7, 0.7, 1.0, -0.6], }
     let y = { count: 3, dimensions: 1, values: [-0.3, -1.3, 1.9], }
-    let raw = soft_dtw(x, y, 2.0).unwrap()
-    let corrected = divergence(x, y, 2.0).unwrap()
+    let options = { ..alignment_options(2.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 6.020053962403088)
     near(corrected.value, 9.231125554140444)
     for
@@ -1297,8 +1334,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 2, dimensions: 2, values: [1.8, 1.8, -0.7, 0.0], }
     let y = { count: 2, dimensions: 2, values: [-1.3, -1.4, -1.3, 1.4], }
-    let raw = soft_dtw(x, y, 0.1).unwrap()
-    let corrected = divergence(x, y, 0.1).unwrap()
+    let options = { ..alignment_options(0.1), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 22.1699999999916)
     near(corrected.value, 22.1699999999916)
     for
@@ -1335,8 +1373,9 @@ test "40 cases against complete alignment-path enumeration" {
   {
     let x = { count: 3, dimensions: 1, values: [-1.2, 2.0, 0.5], }
     let y = { count: 1, dimensions: 1, values: [1.0], }
-    let raw = soft_dtw(x, y, 2.0).unwrap()
-    let corrected = divergence(x, y, 2.0).unwrap()
+    let options = { ..alignment_options(2.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
     near(raw.value, 6.090000000000001)
     near(corrected.value, 6.605103970763893)
     for k, expected in [-4.4, 2.0, -1.0] {
@@ -1358,54 +1397,1478 @@ test "40 cases against complete alignment-path enumeration" {
       near(corrected.gradient_y[k], expected)
     }
   }
-  let x = {
-    count: 4,
-    dimensions: 2,
-    values: [-1.5, 1.3, 1.8, 1.2, -2.0, 0.8, -1.7, -1.7],
+  {
+    let x = {
+      count: 4,
+      dimensions: 2,
+      values: [-1.5, 1.3, 1.8, 1.2, -2.0, 0.8, -1.7, -1.7],
+    }
+    let y = {
+      count: 3,
+      dimensions: 2,
+      values: [1.0, -0.3, -0.3, 0.1, -1.6, 1.0],
+    }
+    let options = { ..alignment_options(1.0), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 21.071521950292983)
+    near(corrected.value, 21.294390428049525)
+    for
+      k, expected in [
+        -5.061692848679697, 3.261736397776203, 2.959103583952242, 2.6702076709532028,
+        -2.3646495275599535, 0.45683790898947413, -0.2044814001102062, -5.405761799500118,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        4.17079278361378, -4.755029208386162, -0.2651054188282034, -1.9113369148655046,
+        0.7660328276120377, 5.6833459450329045,
+      ] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        0.9999999999999996, 0.02570988998075999, 5.4436370631989324e-05, 0.5183285841453595,
+        0.5068974326949233, 0.00011891647073363921, 1.975290168238342e-05, 0.5287290186066783,
+        0.7085654336089416, 1.5486334242017037e-10, 0.001600499740694444, 0.9999999999999996,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        -5.061571028748136, 3.2617327062578525, 2.958978289538097, 2.6702109967319654,
+        -2.3635911934363163, 0.4480477777202813, -0.20553625975125975, -5.396971302491337,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        3.8433624508186837, -4.654279639507995, -0.13953713889752714, -1.872337605932596,
+        0.9678948804764572, 5.543597067221828,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
   }
-  let y = {
-    count: 3,
-    dimensions: 2,
-    values: [1.0, -0.3, -0.3, 0.1, -1.6, 1.0],
+  {
+    let x = { count: 3, dimensions: 1, values: [0.0, -0.6, 1.4], }
+    let y = { count: 4, dimensions: 1, values: [-0.7, -0.9, -0.4, -1.6], }
+    let options = { ..alignment_options(2.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 5.381259297635607)
+    near(corrected.value, 10.140521010712776)
+    for
+      k, expected in [2.5280796494665854, 0.7949223853952604, 6.629705305291175] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -1.4495248913920997, -1.342760662589713, -0.4121596782732756, -6.748262107897934,
+      ] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        1.0, 0.5138286401341755, 0.20075207978987078, 0.013308260435366788, 0.24347529089688474,
+        0.6460543363328342, 0.8677023727214374, 0.35283783725237877, 0.00019757933636264352,
+        0.00657315403228184, 0.16628860098054277, 1.0,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [2.165963093654848, 1.7472523852760182, 6.039491861222155] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -1.562652339415783, -0.8981528789056317, -1.6157693011969845, -5.876132820634623,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
   }
-  let raw = soft_dtw(x, y, 1.0).unwrap()
-  let corrected = divergence(x, y, 1.0).unwrap()
-  near(raw.value, 21.071521950292983)
-  near(corrected.value, 21.294390428049525)
-  for
-    k, expected in [
-      -5.061692848679697, 3.261736397776203, 2.959103583952242, 2.6702076709532028,
-      -2.3646495275599535, 0.45683790898947413, -0.2044814001102062, -5.405761799500118,
-    ] {
+  {
+    let x = { count: 1, dimensions: 2, values: [-1.9, 1.2], }
+    let y = { count: 2, dimensions: 2, values: [1.4, -0.8, 0.4, 0.7], }
+    let options = { ..alignment_options(0.1), feature_weights: [1.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 20.43)
+    near(corrected.value, 20.43)
+    for k, expected in [-11.2, 5.0] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [6.6, -4.0, 4.6, -1.0] {
+      near(raw.gradient_y[k], expected)
+    }
+    for k, expected in [1.0, 1.0] {
+      near(raw.alignment[k], expected)
+    }
+    for k, expected in [-11.2, 5.0] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        6.5999999999999845, -3.999999999999977, 4.600000000000015, -1.000000000000023,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 1, dimensions: 2, values: [-1.7, -0.4], }
+    let y = {
+      count: 3,
+      dimensions: 2,
+      values: [1.9, 0.0, 0.8, -0.2, 1.1, 0.0],
+    }
+    let options = { ..alignment_options(0.4), feature_weights: [0.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 0.3600000000000001)
+    near(corrected.value, 0.8426319209655346)
+    for k, expected in [0.0, -2.0] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [0.0, 0.8, 0.0, 0.4, 0.0, 0.8] {
+      near(raw.gradient_y[k], expected)
+    }
+    for k, expected in [1.0, 1.0, 1.0] {
+      near(raw.alignment[k], expected)
+    }
+    for k, expected in [0.0, -2.0] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        0.0, 0.6503111398949707, 0.0, 0.6993777202100587, 0.0, 0.6503111398949707,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 4, dimensions: 1, values: [0.0, -0.8, 0.5, -0.1], }
+    let y = { count: 3, dimensions: 1, values: [1.9, 1.1, 1.7], }
+    let options = { ..alignment_options(0.4), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 10.755002975951763)
+    near(corrected.value, 11.164675996340593)
+    for
+      k, expected in [
+        -3.9018787596491027, -3.80015071792129, -1.3303408821495426, -3.6584543450147535,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [3.8004950736871415, 5.088087083468729, 3.8022425475788175] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        0.9999999999999999, 0.04630852286674467, 2.7477249457421416e-09, 9.130827960850924e-05,
+        0.9999049270129928, 3.78611240611861e-06, 7.174890895041415e-07, 0.9400960545879752,
+        0.08425983653105068, 1.9513638840498447e-12, 0.024355977086228303, 0.9999999999999999,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        -4.137326809937569, -3.483998149296058, -1.6757911388246187, -3.393708606676443,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [3.4976284685048555, 5.685849260601872, 3.5073469756279603] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 2, dimensions: 2, values: [-0.6, -1.5, 0.9, -1.2], }
+    let y = {
+      count: 3,
+      dimensions: 2,
+      values: [1.5, 0.3, -1.9, -0.7, 1.5, 1.5],
+    }
+    let options = { ..alignment_options(2.0), feature_weights: [0.2, 0.2], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 1.537988026352791)
+    near(corrected.value, 3.355895057455947)
+    for
+      k, expected in [
+        -0.5928343486133448, -1.038317095748802, 0.3186102890072133, -1.28277115695431,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        0.8784605459957949, 0.8161513649894869, -0.9255568048600304, 0.30876500418452907,
+        0.3213203184703671, 1.196171883529096,
+      ] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        1.0, 0.6317037881865817, 0.09680990294091316, 0.1602522749824781, 0.5330989598241144,
+        1.0,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        -0.4089907953609762, -1.0015483850983282, 0.13476673575484466, -1.3195398676047838,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        0.5942432702589683, 0.7421865113889847, -0.4089124668658667, 0.5427523020383433,
+        0.08889325621302988, 1.036149439275784,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 2, dimensions: 1, values: [0.9, -0.7], }
+    let y = { count: 3, dimensions: 1, values: [-0.8, -0.2, 0.8], }
+    let options = { ..alignment_options(1.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 4.274785285084633)
+    near(corrected.value, 5.121590828160805)
+    for k, expected in [4.189515266891548, -3.685273542589377] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -3.4649165534228814, -0.014469084391645626, 2.9751439135123556,
+      ] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        1.0, 0.3475723547290471, 0.12428043243822252, 0.32458276711440576, 0.7501900960122581,
+        1.0,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for k, expected in [3.975265190555257, -3.471023466253086] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -3.0725187580261766, 0.09812553161590444, 2.4701515021081004,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 1, dimensions: 2, values: [0.1, 0.8], }
+    let y = { count: 1, dimensions: 2, values: [-1.0, 0.0], }
+    let options = { ..alignment_options(1.0), feature_weights: [1.0, 0.2], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 1.3380000000000003)
+    near(corrected.value, 1.3380000000000003)
+    for k, expected in [2.2, 0.32000000000000006] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [-2.2, -0.32000000000000006] {
+      near(raw.gradient_y[k], expected)
+    }
+    for k, expected in [1.0] {
+      near(raw.alignment[k], expected)
+    }
+    for k, expected in [2.2, 0.32000000000000006] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for k, expected in [-2.2, -0.32000000000000006] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = {
+      count: 4,
+      dimensions: 2,
+      values: [-1.4, 1.1, 0.0, 1.4, 1.0, 0.1, 0.9, -0.7],
+    }
+    let y = {
+      count: 4,
+      dimensions: 2,
+      values: [-1.7, -1.3, 1.4, -1.3, 1.3, -1.5, -0.9, 0.6],
+    }
+    let options = { ..alignment_options(0.4), feature_weights: [0.0, 2.5], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 42.80519763579795)
+    near(corrected.value, 43.433722137464216)
+    for
+      k, expected in [
+        0.0, 12.000000002199736, 0.0, 13.499999999179074, 0.0, 7.231549975213874,
+        0.0, -3.831320686271542,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        0.0, -16.44282063661378, 0.0, -13.490197157669819, 0.0, -5.639565352693317,
+        0.0, 6.672353856655777,
+      ] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        1.0, 8.656033798699192e-11, 8.642822889790814e-11, 1.4976992727367683e-11,
+        0.312990547256289, 0.6870094526571509, 1.319590139542028e-13, 8.643060233890298e-11,
+        0.029844522632511784, 0.5662934041345214, 0.403867293110448, 0.06894154281557734,
+        0.002845530075432074, 0.08383857227263596, 0.6021567516710632, 1.0,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        0.0, 12.399466421013956, 0.0, 13.100316756888049, 0.0, 7.161090876627407,
+        0.0, -3.7606447642082697,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        0.0, -16.50089815299754, 0.0, -13.846566702752963, 0.0, -5.225118291211162,
+        0.0, 6.672353856640525,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = {
+      count: 3,
+      dimensions: 2,
+      values: [-1.3, -0.1, 0.6, 0.1, 1.7, 0.7],
+    }
+    let y = {
+      count: 4,
+      dimensions: 2,
+      values: [1.1, 0.6, 1.0, 2.0, 0.8, -0.2, 1.2, -1.9],
+    }
+    let options = { ..alignment_options(0.1), feature_weights: [0.2, 0.2], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 3.355185759928824)
+    near(corrected.value, 3.361544703972415)
+    for
+      k, expected in [
+        -0.9600031374004404, -0.2800028641847246, -0.26232580244566267, -0.5455930950387821,
+        0.4417211017892416, 1.0152002160186044,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        1.0349364501438532, 0.37482561225488326, 0.02442103777981412, 0.6863237539386613,
+        -0.07877451629579336, -0.21067073489201713, -0.19997513357101235, -1.0400828880966257,
+      ] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        1.0000000000000002, 3.4097672228441067e-06, 4.935657178930333e-10, 5.747296930055517e-22,
+        0.4940172233854464, 0.692118775467697, 0.6594810908094293, 0.00010361012078175986,
+        0.09944581055515073, 0.30828965457450863, 0.36536945548650823, 1.0000000000000002,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        -0.9594700254886039, -0.2799467471413513, -0.2453208523854493, -0.5360829964610753,
+        0.4241830398171918, 1.0056340003975244,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        1.034187565769448, 0.38530949060929626, 0.025165158317402916, 0.6757877248228981,
+        -0.07841247518315451, -0.21213701255291267, -0.20033241084683487, -1.03856445967438,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = {
+      count: 3,
+      dimensions: 2,
+      values: [1.2, -0.7, 1.1, 1.0, 1.8, 1.3],
+    }
+    let y = { count: 2, dimensions: 2, values: [-0.7, 1.3, 1.0, 2.0], }
+    let options = { ..alignment_options(2.0), feature_weights: [0.2, 0.2], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, -0.5061296273496616)
+    near(corrected.value, 2.6350946703648797)
+    for
+      k, expected in [
+        0.7712566810219615, -0.9519651937964813, 0.4335707478528771, -0.3253638118511586,
+        0.4442990636256037, -0.28,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -1.2921306229487506, 0.8679719265538579, -0.35699586955169177, 0.6893570790937821,
+      ] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        1.0, 0.14070851277451954, 0.5664327212821485, 0.6434797132432519, 0.1242990636256036,
+        1.0,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        0.7688077356552583, -0.6766231309856022, 0.5508522599339675, -0.5181047758448828,
+        0.3294664969112166, -0.36260109881715485,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -1.092256455694528, 0.9502730542467731, -0.5568700368059143, 0.6070559514008669,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 2, dimensions: 2, values: [-1.7, -0.2, 0.2, -0.7], }
+    let y = {
+      count: 3,
+      dimensions: 2,
+      values: [-0.2, 0.3, 1.6, -0.8, 1.7, 1.6],
+    }
+    let options = { ..alignment_options(2.0), feature_weights: [0.2, 2.5], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 14.033706663224333)
+    near(corrected.value, 15.015094608292229)
+    for
+      k, expected in [
+        -0.9609313666116914, -1.6896463654658227, -1.049943303472122, -11.875357093089209,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        0.574401669184352, 3.299947837989003, 0.8353543836651289, -1.2423469934847016,
+        0.6011186172343325, 11.50740261405073,
+      ] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        1.0, 0.27258541619496884, 0.0008225126723032325, 0.1599895675978006, 0.8491814897995892,
+        1.0,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        -0.7690649444965088, -2.3207859118973446, -1.2418097255873046, -11.244217546657687,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        0.6614746159703973, 2.6349006070097536, 0.7483208874211756, -0.5671446253326118,
+        0.6010791666922406, 11.497247476877888,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 1, dimensions: 1, values: [-1.2], }
+    let y = { count: 1, dimensions: 1, values: [-0.5], }
+    let options = { ..alignment_options(0.4), feature_weights: [0.2], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 0.09799999999999999)
+    near(corrected.value, 0.09799999999999999)
+    for k, expected in [-0.27999999999999997] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [0.27999999999999997] {
+      near(raw.gradient_y[k], expected)
+    }
+    for k, expected in [1.0] {
+      near(raw.alignment[k], expected)
+    }
+    for k, expected in [-0.27999999999999997] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for k, expected in [0.27999999999999997] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = {
+      count: 4,
+      dimensions: 2,
+      values: [2.0, 1.7, 0.6, -0.8, 2.0, -0.1, 1.0, 1.3],
+    }
+    let y = {
+      count: 4,
+      dimensions: 2,
+      values: [-2.0, 1.6, 0.2, 1.3, 0.0, 0.0, -1.9, -0.6],
+    }
+    let options = { ..alignment_options(1.0), feature_weights: [2.5, 2.5], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 90.5636949058861)
+    near(corrected.value, 90.57960535025785)
+    for
+      k, expected in [
+        25.271227690642984, 1.6713840527858739, 2.679906186921762, -6.819281692556562,
+        9.999979618476281, -0.5001891733773991, 14.506155022879444, 9.507976921843035,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -20.000000000001016, -0.49999999999905886, -6.100292468284631, 3.179939092785383,
+        -11.856976050630372, 2.9601707985192984, -14.500000000004448, -9.50000000000057,
+      ] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        0.9999999999999999, 0.5856919441169312, 1.9359060317742805e-08, 7.137513472844749e-49,
+        7.837074621131244e-14, 0.4143923544673996, 0.6170404926619814, 3.3793446921465535e-20,
+        1.5123677543916775e-29, 2.9037015935514064e-05, 0.9999718285328413, 2.281099773109375e-13,
+        2.043192494027908e-39, 4.732288508147529e-06, 0.001227218745082378, 0.9999999999999999,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        25.27122768208937, 1.671384037511561, 2.69516120067138, -6.811654174546326,
+        9.98166544100319, -0.5035338347323065, 14.509214195156527, 9.503694080462019,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -19.9999505378686, -0.5000067448353264, -6.113234928316866, 3.0961413512725966,
+        -11.844553890319144, 3.0438265993140536, -14.49952916241586, -9.499851314446271,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 2, dimensions: 2, values: [1.0, 0.1, -1.4, 1.4], }
+    let y = {
+      count: 3,
+      dimensions: 2,
+      values: [-1.1, 1.4, -0.8, 0.8, -0.3, -1.0],
+    }
+    let options = { ..alignment_options(2.0), feature_weights: [2.5, 2.5], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 33.16319087389816)
+    near(corrected.value, 33.95574830510296)
+    for
+      k, expected in [
+        10.657564930700826, -6.558696620272556, -9.158504566206652, 14.96287601711219,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -9.804371450905537, 6.499999999999999, 2.8073989741276164, -2.9024127226181893,
+        5.497912112283748, -12.001766674221443,
+      ] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        1.0, 0.017275226998285934, 0.0003212134948079241, 0.46375236606297654, 0.9876253390373968,
+        1.0,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        10.656481663816779, -6.558109850710364, -9.157421299322605, 14.962289247549998,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -9.40259933391592, 5.696451353579775, 2.4447244437117464, -2.2396127403988633,
+        5.45881452571, -11.861018010020544,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 1, dimensions: 1, values: [1.9], }
+    let y = { count: 2, dimensions: 1, values: [1.0, -0.3], }
+    let options = { ..alignment_options(2.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 5.649999999999999)
+    near(corrected.value, 6.270100415507527)
+    for k, expected in [6.199999999999999] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [-1.7999999999999998, -4.3999999999999995] {
+      near(raw.gradient_y[k], expected)
+    }
+    for k, expected in [1.0, 1.0] {
+      near(raw.alignment[k], expected)
+    }
+    for k, expected in [6.199999999999999] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for k, expected in [-2.400742450954125, -3.7992575490458744] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = {
+      count: 3,
+      dimensions: 2,
+      values: [-1.8, -0.7, 1.5, -1.7, -0.2, 1.2],
+    }
+    let y = { count: 2, dimensions: 2, values: [1.6, 1.5, -0.3, -1.2], }
+    let options = { ..alignment_options(2.0), feature_weights: [1.0, 0.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 10.567258470196823)
+    near(corrected.value, 11.248273878039102)
+    for
+      k, expected in [
+        -6.916745552633518, 0.0, 0.8327428003747919, 0.0, -0.22936971724552335, 0.0,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [7.3976132391860885, 0.0, -1.0842407696818386, 0.0] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        0.9999999999999999, 0.03891518421117274, 0.841217609702824, 0.27805175619871025,
+        0.11926936590153425, 0.9999999999999999,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        -6.8821571965044726, 0.0, 0.25203173332225215, 0.0, 0.31675299367797105,
+        0.0,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for k, expected in [6.927314547636147, 0.0, -0.6139420781318972, 0.0] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = {
+      count: 3,
+      dimensions: 2,
+      values: [0.8, 0.8, -0.3, 1.7, -0.4, 1.4],
+    }
+    let y = { count: 2, dimensions: 2, values: [0.3, 1.6, -0.2, -0.8], }
+    let options = { ..alignment_options(2.0), feature_weights: [0.0, 2.5], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 12.387229030768129)
+    near(corrected.value, 14.15955373518957)
+    for
+      k, expected in [
+        0.0, -3.9999315525282713, 0.0, 0.5052125970177248, 0.0, 10.512704948741865,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [0.0, 3.9874042785793153, 0.0, -11.005390271810635] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        1.0, 8.555933966143519e-06, 0.999781545357645, 0.00042574594711223884, 0.48729505125813616,
+        1.0,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        0.0, -2.711540099736861, 0.0, -1.2070946873576038, 0.0, 10.936620780325784,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for k, expected in [0.0, 3.9784586063027314, 0.0, -10.996444599534051] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 4, dimensions: 1, values: [-2.0, 1.4, -0.3, -0.9], }
+    let y = { count: 4, dimensions: 1, values: [0.0, -0.5, 0.3, -1.7], }
+    let options = { ..alignment_options(2.0), feature_weights: [0.2], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, -5.969585897319858)
+    near(corrected.value, 0.7523220313163819)
+    for
+      k, expected in [
+        -1.0483732571981683, 0.8910022406408282, 0.034673882982336784, 0.07799520148391006,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        0.5730049428324947, -0.2719462882963689, 0.2825698320083755, -0.5389265544534086,
+      ] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        0.9999999999999994, 0.32290476205687196, 0.05877307572471545, 0.00465975247755447,
+        0.45134040829574157, 0.5915969545919261, 0.32509435533030806, 0.03677129851614013,
+        0.15358700129299777, 0.472611706892809, 0.6608080333526228, 0.31051663319768086,
+        0.020347587008194844, 0.13583422819247803, 0.4436378972548819, 0.9999999999999994,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        -0.6594215135976892, 0.23601824722783582, 0.15820695849920718, 0.22049437577955291,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        0.5000309898484088, -0.10939277267969652, -0.1396852950230577, -0.20625099005456188,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 2, dimensions: 2, values: [0.2, -1.0, -1.4, -0.6], }
+    let y = { count: 2, dimensions: 2, values: [-1.3, -1.4, -0.3, -0.4], }
+    let options = { ..alignment_options(0.4), feature_weights: [2.5, 0.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 8.3439944020144)
+    near(corrected.value, 8.344765141847482)
+    for k, expected in [7.743844814276722, 0.0, -5.718567327800518, 0.0] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [-7.281432672199481, 0.0, 5.256155185723278, 0.0] {
+      near(raw.gradient_y[k], expected)
+    }
+    for k, expected in [1.0, 0.09753792571068856, 0.43713465560103865, 1.0] {
+      near(raw.alignment[k], expected)
+    }
+    for k, expected in [7.743843913995526, 0.0, -5.718566427519322, 0.0] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for k, expected in [-7.271817524720784, 0.0, 5.246540038244581, 0.0] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 2, dimensions: 1, values: [-1.8, -0.2], }
+    let y = { count: 3, dimensions: 1, values: [1.0, 1.8, -1.9], }
+    let options = { ..alignment_options(0.4), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 14.719217162652901)
+    near(corrected.value, 14.787716260588285)
+    for k, expected in [-5.60000000255315, -0.6638327831234201] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [5.663832784561528, 4.000000001150546, -3.4000000000355035] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        1.0, 3.595352803147402e-10, 1.7751658169651305e-10, 0.026596993567303332,
+        0.999999999640473, 1.0,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for k, expected in [-5.594700629702002, -0.6691321559745685] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [5.893948207925053, 3.7698845777870096, -3.400000000035492] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 1, dimensions: 2, values: [-1.5, -2.0], }
+    let y = {
+      count: 3,
+      dimensions: 2,
+      values: [1.5, -1.1, 0.6, 1.8, -0.3, 1.3],
+    }
+    let options = { ..alignment_options(0.1), feature_weights: [0.0, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 26.139999999999997)
+    near(corrected.value, 26.147600419219554)
+    for k, expected in [0.0, -15.999999999999998] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [0.0, 1.7999999999999998, 0.0, 7.6, 0.0, 6.6] {
+      near(raw.gradient_y[k], expected)
+    }
+    for k, expected in [1.0, 1.0, 1.0] {
+      near(raw.alignment[k], expected)
+    }
+    for k, expected in [0.0, -15.999999999999998] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        0.0, 1.7999999999999998, 0.0, 7.529490539338795, 0.0, 6.670509460661204,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = {
+      count: 3,
+      dimensions: 2,
+      values: [0.3, -0.1, 0.4, -1.2, -1.2, 0.3],
+    }
+    let y = { count: 2, dimensions: 2, values: [-0.1, 1.1, -0.1, 2.0], }
+    let options = { ..alignment_options(0.1), feature_weights: [1.0, 0.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 1.5374077366658407)
+    near(corrected.value, 1.6439917890977327)
+    for
+      k, expected in [
+        0.8707172190611834, 0.0, 1.0359393446143834, 0.0, -2.2000053550780816, 0.0,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [-1.2737672723790703, 0.0, 1.5671160637815853, 0.0] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        0.9999999999999999, 0.08839652382647932, 0.4737726274571526, 0.5621667171572309,
+        2.43412640104157e-06, 0.9999999999999999,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        0.9351259119406361, 0.0, 0.971530651702686, 0.0, -2.200005355045837, 0.0,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for k, expected in [-1.2737672723790703, 0.0, 1.5671160637815853, 0.0] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 2, dimensions: 2, values: [1.3, -0.9, 1.0, -0.7], }
+    let y = {
+      count: 4,
+      dimensions: 2,
+      values: [0.4, 0.3, 1.0, 1.3, -1.6, -0.5, 2.0, 0.9],
+    }
+    let options = { ..alignment_options(0.1), feature_weights: [2.5, 0.2], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 23.03105239319284)
+    near(corrected.value, 23.039944277388305)
+    for
+      k, expected in [
+        4.528906882784363, -0.49695870456682634, 8.00004913869346, -1.504594717768488,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -4.500049138693457, 0.48000655182579427, -0.02890688278436302, 0.8015468705095198,
+        -13.000000000000002, 0.07999999999999999, 5.0, 0.6400000000000001,
+      ] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        1.0, 0.019271255189575346, 1.844532391722563e-20, 1.3537879277714654e-28,
+        1.6379564485631558e-05, 0.9807352074283668, 1.0, 1.0,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        4.406736566533624, -0.4904429543667869, 8.122219454944197, -1.5111104679685274,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -4.499999035264712, 0.4800132322829604, -0.028956986213108805, 0.8015401900523537,
+        -13.000000000000002, 0.07999999999999999, 5.0, 0.6400000000000001,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 1, dimensions: 1, values: [1.2], }
+    let y = { count: 1, dimensions: 1, values: [1.0], }
+    let options = { ..alignment_options(2.0), feature_weights: [2.5], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 0.09999999999999995)
+    near(corrected.value, 0.09999999999999995)
+    for k, expected in [0.9999999999999998] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [-0.9999999999999998] {
+      near(raw.gradient_y[k], expected)
+    }
+    for k, expected in [1.0] {
+      near(raw.alignment[k], expected)
+    }
+    for k, expected in [0.9999999999999998] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for k, expected in [-0.9999999999999998] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 3, dimensions: 1, values: [-1.3, 1.9, 1.5], }
+    let y = { count: 1, dimensions: 1, values: [1.7], }
+    let options = { ..alignment_options(1.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 9.08)
+    near(corrected.value, 9.577466221148981)
+    for k, expected in [-6.0, 0.3999999999999999, -0.3999999999999999] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [6.0] {
+      near(raw.gradient_y[k], expected)
+    }
+    for k, expected in [1.0, 1.0, 1.0] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        -5.999699390954599, 0.1476093487984662, -0.14790995784386735,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for k, expected in [6.0] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 4, dimensions: 1, values: [0.8, -1.9, -0.9, 0.4], }
+    let y = { count: 2, dimensions: 1, values: [-0.5, -0.6], }
+    let options = { ..alignment_options(0.1), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 4.459190150586839)
+    near(corrected.value, 4.510848132946738)
+    for
+      k, expected in [
+        2.6000000077275107, -2.620492168676848, -0.6157352327363222, 2.000016365880801,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [-2.2794131262252684, 0.9156241540301269] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        1.0, 2.75982519565251e-09, 0.10246080750651357, 0.8975391952533116, 0.04214122329661841,
+        0.9700370901650457, 9.092156000441123e-06, 1.0,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        2.6000000077275107, -2.6204013770570356, -0.6158259053919376, 2.0000162469166036,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for k, expected in [-2.343821819104546, 0.9800328469094048] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 4, dimensions: 1, values: [1.1, -0.4, -0.3, 0.2], }
+    let y = { count: 3, dimensions: 1, values: [0.2, -1.6, -1.0], }
+    let options = { ..alignment_options(1.0), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 2.2884833519840972)
+    near(corrected.value, 4.071461425190017)
+    for
+      k, expected in [
+        1.8028920587709398, 0.7625407973302285, 2.016687022898228, 2.6036567388763165,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -0.781659876936567, -2.9096469834365473, -3.4944697575025967,
+      ] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        1.0000000000000002, 0.000532701120653451, 3.6839808121397283e-06, 0.6683391649061227,
+        0.5623743319572858, 0.1790411654334081, 0.21633312517608602, 0.5205443314658525,
+        0.6282892044736411, 0.022114613425348782, 0.0565713163545324, 1.0000000000000002,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        1.438933982524119, 1.253657355851347, 2.310368024250169, 2.182817255250078,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -0.9608397007716034, -2.3804260747325316, -3.8445108423715757,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 4, dimensions: 1, values: [1.1, -0.2, 0.7, 0.9], }
+    let y = { count: 2, dimensions: 1, values: [-1.7, 1.5], }
+    let options = { ..alignment_options(2.0), feature_weights: [0.2], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, -1.0312055251889514)
+    near(corrected.value, 3.425783703211709)
+    for
+      k, expected in [
+        1.0909048628304054, 0.03039113813328953, 0.014279697753556024, -0.17754956328753677,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [-1.8397636662942687, 0.8817375308645544] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        1.0, 0.1818446073099662, 0.6333778709159703, 0.5141699770827833, 0.28884011149189903,
+        0.8218962789958345, 0.06004849683890696, 1.0,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        0.8752157267900292, 0.4129654637715391, -0.07834876613868974, -0.2518062889931644,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for k, expected in [-1.5722224608342317, 0.6141963254045175] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = {
+      count: 3,
+      dimensions: 2,
+      values: [1.3, -1.3, 2.0, -0.1, 0.6, -1.1],
+    }
+    let y = { count: 1, dimensions: 2, values: [1.3, -1.2], }
+    let options = { ..alignment_options(2.0), feature_weights: [1.0, 2.5], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 4.055)
+    near(corrected.value, 4.511161677408325)
+    for
+      k, expected in [
+        0.0, -0.5000000000000004, 1.4, 5.499999999999999, -1.4000000000000001, 0.49999999999999933,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [2.220446049250313e-16, -5.499999999999997] {
+      near(raw.gradient_y[k], expected)
+    }
+    for k, expected in [1.0, 1.0, 1.0] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        0.15181371540129807, 0.19657790690933818, 0.9557638193558278, 4.304212968465987,
+        -1.1075775347571262, 0.9992091246246725,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for k, expected in [2.220446049250313e-16, -5.499999999999997] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = {
+      count: 4,
+      dimensions: 2,
+      values: [-0.9, 0.2, 1.5, 0.5, -0.7, -0.5, -0.9, 1.9],
+    }
+    let y = { count: 1, dimensions: 2, values: [-0.4, 1.9], }
+    let options = { ..alignment_options(0.1), feature_weights: [0.2, 1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 11.45)
+    near(corrected.value, 11.450000403985737)
+    for
+      k, expected in [
+        -0.2, -3.4, 0.76, -2.8, -0.11999999999999998, -4.8, -0.2, 0.0,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [-0.24000000000000005, 11.0] {
+      near(raw.gradient_y[k], expected)
+    }
+    for k, expected in [1.0, 1.0, 1.0, 1.0] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        -0.19999612447750062, -3.399997577798438, 0.7599961219796353, -2.8000024278785287,
+        -0.1199999975021346, -4.7999999943230325, -0.2, -4.27696328792375e-25,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for k, expected in [-0.24000000000000005, 11.0] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 4, dimensions: 1, values: [-0.6, -2.0, 1.5, 1.5], }
+    let y = { count: 4, dimensions: 1, values: [-0.3, 0.0, 0.8, -0.4], }
+    let options = { ..alignment_options(2.0), feature_weights: [2.5], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 17.962495525298486)
+    near(corrected.value, 21.471504493441703)
+    for
+      k, expected in [
+        -2.4796547661723016, -9.840096249845644, 5.176283422863301, 11.010184776580136,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        3.130245136180241, 7.078105588228728, -4.511162006313766, -9.563905901520693,
+      ] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        0.9999999999999996, 0.31673545695392424, 0.003946219390069623, 0.0018248595800417911,
+        0.19640158915604466, 0.8104381361140638, 0.002596017183248239, 0.003744642539143945,
+        0.004331255738052774, 0.2564237772751773, 0.8909816829266022, 0.01007241067514621,
+        2.0785555962722164e-05, 0.007107175227980446, 0.4161982549618918, 0.9999999999999996,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        -2.9948021876493396, -9.324943218893026, 5.176277813778302, 11.010184776189554,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        3.772294304463509, 7.684952564753529, -6.8414217441671425, -8.482542308475386,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 1, dimensions: 2, values: [1.2, 0.4], }
+    let y = { count: 1, dimensions: 2, values: [-0.7, 0.9], }
+    let options = { ..alignment_options(1.0), feature_weights: [0.0, 0.2], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 0.05)
+    near(corrected.value, 0.05)
+    for k, expected in [0.0, -0.2] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [0.0, 0.2] {
+      near(raw.gradient_y[k], expected)
+    }
+    for k, expected in [1.0] {
+      near(raw.alignment[k], expected)
+    }
+    for k, expected in [0.0, -0.2] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for k, expected in [0.0, 0.2] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 1, dimensions: 1, values: [-0.2], }
+    let y = { count: 3, dimensions: 1, values: [-1.6, -1.7, 0.9], }
+    let options = { ..alignment_options(0.1), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 5.420000000000001)
+    near(corrected.value, 5.47165343799748)
+    for k, expected in [3.6000000000000005] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [-2.8000000000000003, -3.0, 2.2] {
+      near(raw.gradient_y[k], expected)
+    }
+    for k, expected in [1.0, 1.0, 1.0] {
+      near(raw.alignment[k], expected)
+    }
+    for k, expected in [3.6000000000000005] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for k, expected in [-2.864408692879278, -2.9355913071207222, 2.2] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = {
+      count: 4,
+      dimensions: 2,
+      values: [0.9, -0.4, -0.9, -0.8, 0.8, 1.7, 0.6, 1.0],
+    }
+    let y = { count: 2, dimensions: 2, values: [-0.3, 2.0, -0.1, 1.1], }
+    let options = { ..alignment_options(2.0), feature_weights: [0.2, 0.2], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, -0.44889778244427747)
+    near(corrected.value, 3.6184159979438353)
+    for
+      k, expected in [
+        0.5421788963928444, -1.0532683445892665, -0.2999692359378561, -1.058601892868429,
+        0.43699418529275763, 0.13024731839470227, 0.3229765724392843, -0.08775174715476033,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -0.54339294365684, 1.759455624595732, -0.45878747453019025, 0.3099190416220219,
+      ] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        1.0, 0.155447240982111, 0.6294090136654924, 0.46534710205668095, 0.389714851130168,
+        0.7375545855430101, 0.11937936788690076, 1.0,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        0.2908004821751955, -1.0513347146237206, 0.193042554884361, -0.6526623658689945,
+        0.20072727626775255, -0.3324980735217855, 0.3176101048597213, -0.03287951220325278,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -0.5174922223306507, 1.6429023786278802, -0.4846881958563795, 0.42647228758987366,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 3, dimensions: 1, values: [0.9, 1.3, 0.2], }
+    let y = { count: 3, dimensions: 1, values: [-0.5, 2.0, 0.9], }
+    let options = { ..alignment_options(0.4), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 2.6680037456291417)
+    near(corrected.value, 2.88161671590123)
+    for
+      k, expected in [
+        2.4625889366663163, -0.8671252667155323, -1.4005813309790978,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -2.8009256731567405, 1.5808133640902624, 1.025229970094792,
+      ] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        1.0, 0.1533686651516742, 0.05613528848660372, 0.0002571132798318602, 0.8877292174486677,
+        0.46846253738150967, 4.667810453177492e-08, 0.00016149898012340493, 1.0,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        2.692075089064791, -1.2308688790094597, -1.266323871083645,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [-2.80092481781277, 1.4834415311135811, 1.1226009477275032] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 1, dimensions: 2, values: [0.1, 0.7], }
+    let y = { count: 2, dimensions: 2, values: [0.6, 0.9, -2.0, 0.2], }
+    let options = { ..alignment_options(2.0), feature_weights: [1.0, 0.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 4.66)
+    near(corrected.value, 4.725876603133799)
+    for k, expected in [3.2, 0.0] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [1.0, 0.0, -4.2, 0.0] {
+      near(raw.gradient_y[k], expected)
+    }
+    for k, expected in [1.0, 1.0] {
+      near(raw.alignment[k], expected)
+    }
+    for k, expected in [3.2, 0.0] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for k, expected in [0.834240606288535, 0.0, -4.034240606288535, 0.0] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 4, dimensions: 1, values: [1.6, -1.2, -0.6, -0.2], }
+    let y = { count: 1, dimensions: 1, values: [0.9], }
+    let options = { ..alignment_options(0.4), feature_weights: [0.2], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 1.6720000000000002)
+    near(corrected.value, 2.144867131868196)
+    for
+      k, expected in [
+        0.28, -0.8400000000000001, -0.6000000000000001, -0.44000000000000006,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [1.6] {
+      near(raw.gradient_y[k], expected)
+    }
+    for k, expected in [1.0, 1.0, 1.0, 1.0] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        0.24995508662386978, -0.7052956301204734, -0.6271173440365839, -0.5175421124668127,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for k, expected in [1.6] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 4, dimensions: 1, values: [-0.3, 1.9, -0.8, 1.9], }
+    let y = { count: 4, dimensions: 1, values: [-0.3, 0.7, -1.2, -0.1], }
+    let options = { ..alignment_options(0.1), feature_weights: [0.2], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 1.0743171124350614)
+    near(corrected.value, 1.094660201008772)
+    for
+      k, expected in [
+        -0.047680817555756934, 0.48008763616285133, 0.07695058540430724, 0.8000000041200306,
+      ] {
+      near(raw.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -6.238001935457637e-05, -0.42562832915979565, -0.16002018069785717, -0.7236465182544248,
+      ] {
+      near(raw.gradient_y[k], expected)
+    }
+    for
+      k, expected in [
+        0.9999999999999999, 0.11928304789071294, 0.00010075120560811835, 4.836041863345478e-05,
+        7.237189412056619e-05, 0.99988192313282, 2.167975917593889e-08, 0.00010074863671282033,
+        6.536237357650214e-06, 0.011002957981798315, 0.9998992453894533, 0.2729650422194812,
+        9.29710255363174e-18, 2.929543358946879e-12, 3.3214712633973933e-09, 0.9999999999999999,
+      ] {
+      near(raw.alignment[k], expected)
+    }
+    for
+      k, expected in [
+        -0.047625805461692074, 0.48003212119393085, 0.07695159111552739, 0.799999501283666,
+      ] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        0.04256068910948396, -0.46949221048993994, -0.1254593517848512, -0.7569665349661251,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  {
+    let x = { count: 1, dimensions: 1, values: [1.9], }
+    let y = { count: 3, dimensions: 1, values: [0.3, 0.2, -1.7], }
+    let options = { ..alignment_options(0.1), feature_weights: [1.0], }
+    let raw = soft_dtw_with(x, y, options).unwrap()
+    let corrected = divergence_with(x, y, options).unwrap()
+    near(raw.value, 18.409999999999997)
+    near(corrected.value, 18.461653437997477)
+    for k, expected in [13.799999999999999] {
+      near(raw.gradient_x[k], expected)
+    }
+    for k, expected in [-3.1999999999999997, -3.4, -7.199999999999999] {
+      near(raw.gradient_y[k], expected)
+    }
+    for k, expected in [1.0, 1.0, 1.0] {
+      near(raw.alignment[k], expected)
+    }
+    for k, expected in [13.799999999999999] {
+      near(corrected.gradient_x[k], expected)
+    }
+    for
+      k, expected in [
+        -3.264408692879278, -3.335591307120723, -7.199999999999998,
+      ] {
+      near(corrected.gradient_y[k], expected)
+    }
+  }
+  let x = { count: 1, dimensions: 1, values: [0.3], }
+  let y = { count: 3, dimensions: 1, values: [1.7, 0.2, 0.4], }
+  let options = { ..alignment_options(2.0), feature_weights: [1.0], }
+  let raw = soft_dtw_with(x, y, options).unwrap()
+  let corrected = divergence_with(x, y, options).unwrap()
+  near(raw.value, 1.9799999999999998)
+  near(corrected.value, 3.7365530388034154)
+  for k, expected in [-2.8] {
     near(raw.gradient_x[k], expected)
   }
-  for
-    k, expected in [
-      4.17079278361378, -4.755029208386162, -0.2651054188282034, -1.9113369148655046,
-      0.7660328276120377, 5.6833459450329045,
-    ] {
+  for k, expected in [2.8, -0.19999999999999996, 0.20000000000000007] {
     near(raw.gradient_y[k], expected)
   }
-  for
-    k, expected in [
-      0.9999999999999996, 0.02570988998075999, 5.4436370631989324e-05, 0.5183285841453595,
-      0.5068974326949233, 0.00011891647073363921, 1.975290168238342e-05, 0.5287290186066783,
-      0.7085654336089416, 1.5486334242017037e-10, 0.001600499740694444, 0.9999999999999996,
-    ] {
+  for k, expected in [1.0, 1.0, 1.0] {
     near(raw.alignment[k], expected)
   }
-  for
-    k, expected in [
-      -5.061571028748136, 3.2617327062578525, 2.958978289538097, 2.6702109967319654,
-      -2.3635911934363163, 0.4480477777202813, -0.20553625975125975, -5.396971302491337,
-    ] {
+  for k, expected in [-2.8] {
     near(corrected.gradient_x[k], expected)
   }
   for
-    k, expected in [
-      3.8433624508186837, -4.654279639507995, -0.13953713889752714, -1.872337605932596,
-      0.9678948804764572, 5.543597067221828,
-    ] {
+    k, expected in [2.0052624255364693, 0.6764334589740101, 0.11830411548952086] {
     near(corrected.gradient_y[k], expected)
   }
 }
