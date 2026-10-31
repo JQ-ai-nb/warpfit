@@ -14,6 +14,8 @@ pub fn fit_with(Series, Array[Series], FitOptions) -> Result[Fit, WarpError]
 
 pub fn fitting_options(Double, Int32) -> FitOptions
 
+pub fn rank_candidates(Series, Array[Candidate], AlignOptions, Int32, Int32) -> Result[Ranking, WarpError]
+
 pub fn soft_dtw(Series, Series, Double) -> Result[Evaluation, WarpError]
 
 pub fn soft_dtw_with(Series, Series, AlignOptions) -> Result[Evaluation, WarpError]
@@ -27,6 +29,11 @@ pub(all) struct AlignOptions {
   gamma : Double
   feature_weights : Array[Double]
   max_cells : Int32
+}
+
+pub(all) struct Candidate {
+  id : String
+  series : Series
 }
 
 pub(all) struct Divergence {
@@ -65,6 +72,21 @@ pub(all) struct FitOptions {
   max_evaluations : Int32
   max_work_units : Int32
   example_weights : Array[Double]
+}
+
+pub(all) struct Match {
+  id : String
+  input_index : Int32
+  value : Double
+  raw_cross : Double
+  raw_self_candidate : Double
+}
+
+pub(all) struct Ranking {
+  matches : Array[Match]
+  raw_self_query : Double
+  work_units : Int32
+  candidates_evaluated : Int32
 }
 
 pub(all) struct Series {
