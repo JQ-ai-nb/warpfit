@@ -40,7 +40,7 @@ node scripts/serve.mjs
 
 - 纯 MoonBit 数值核心，仅使用标准库；多变量平方欧氏代价、可配置非负特征权重、稳定 soft-min 前向和逆序求导。
 - 原始目标与自项校正严格区分；校正梯度包含自项的两侧导数，不对结果任意截零。
-- 带权模板拟合：缓存固定示例自项，Armijo 回溯、明确容忍度和七种停止原因；返回最后一个完整评估点。
+- 带权模板拟合：缓存固定示例自项，Armijo 回溯、明确容忍度和六种停止原因；返回最后一个完整评估点。
 - 完整候选排名：唯一 ID、稳定并列顺序、预先检查总预算，不返回部分排序。
 - 严格、带版本的 JSON API；拒绝未知字段、重复键、不规则数组和错误预算类型。Node 文件 / stdin CLI 与浏览器使用同一个 MoonBit 引擎。
 - 每条 1..512 采样、1..16 特征，值域 ±10000；每矩阵最多 262144 个格点。fit / rank 最多 32 条；迭代 ≤200，评估 ≤2048，逻辑工作量 ≤1e8。
@@ -57,7 +57,7 @@ node --test tests/cli.test.mjs tests/numerical.test.mjs
 node scripts/benchmark.mjs
 ```
 
-`verify.py --native` 额外验证原生目标，需要 C 编译工具。当前本机 Wasm / Wasm-GC / JS 各通过 31 项 MoonBit 测试，Node 13 项测试通过；Windows 本机缺 MSVC，原生运行交由 CI 三系统环境检查。CI 还重建夹具并检查差异，Linux 执行浏览器流程和移动布局验证。真实远程状态见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)，不以配置文件存在代替通过。
+`verify.py --native` 额外验证原生目标，需要 C 编译工具。当前本机 Wasm / Wasm-GC / JS 各通过 31 项 MoonBit 测试，Node 13 项测试通过；Windows 本机缺 MSVC，原生运行交由 CI 三系统环境检查。CI 还独立重算夹具并在浮点容差内比较，Linux 执行浏览器流程和移动布局验证。真实远程状态见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)，不以配置文件存在代替通过。
 
 两类独立数值证据：80 组小序列穷举所有对齐路径（不同于主实现 DP），检查原始 / 校正值、双方梯度与占用；另以 tslearn 0.6.4 对 60 组、120 个目标交叉验证，最大绝对差 `1.316e-11`。这些结果证明所测输入的数值一致性，不代表真实业务效果。完整方法、版本和结果见 [VALIDATION.md](docs/VALIDATION.md)。
 

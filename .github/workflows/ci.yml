@@ -37,11 +37,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: python verify.py --native
-      - name: Regenerate independent exhaustive fixtures
-        run: |
-          python exhaustive_oracle.py
-          moon fmt
-          git diff --exit-code -- core/enumerated_wbtest.mbt oracle-fixtures.json
+      - name: Recompute independent fixtures with numeric tolerance
+        run: python exhaustive_oracle.py --check
       - name: Browser integration on Linux
         if: runner.os == 'Linux'
         shell: bash

@@ -6,6 +6,7 @@ The generated cases verify the local numerical experiment, not production fitnes
 import json
 import math
 import random
+import sys
 from pathlib import Path
 
 root = Path(__file__).parent
@@ -68,6 +69,28 @@ for index in range(80):
             code += [f'    for k, expected in {arr(value[field])} {{', f'      near({name}.{field}[k], expected)', '    }']
     code += ['  }']
 code += ['}']
-(root/'core'/'enumerated_wbtest.mbt').write_text('\n'.join(code)+'\n',encoding='utf-8')
-(root/'oracle-fixtures.json').write_text(json.dumps(fixtures,indent=2)+'\n',encoding='utf-8')
-print('Generated 80 independent weighted exhaustive-alignment cases (raw/corrected values, both gradients, and cell occupancy).')
+if '--check' in sys.argv:
+    saved = json.loads((root/'oracle-fixtures.json').read_text(encoding='utf-8'))
+    assert len(saved) == len(fixtures) == 80
+    maximum = [0.0]
+    def compare(a,b):
+        if isinstance(a,dict):
+            assert a.keys()==b.keys()
+            for key in a: compare(a[key],b[key])
+        elif isinstance(a,list):
+            assert len(a)==len(b)
+            for left,right in zip(a,b): compare(left,right)
+        else:
+            assert isinstance(a,(int,float)) and isinstance(b,(int,float))
+            maximum[0]=max(maximum[0],abs(a-b))
+            assert abs(a-b)<=1e-12*(1+abs(b)),(a,b)
+    for actual,expected in zip(fixtures,saved):
+        for field in ['x','y','dimensions','gamma','feature_weights']:
+            assert actual[field]==expected[field],field
+        compare(actual['raw'],expected['raw'])
+        compare(actual['corrected'],expected['corrected'])
+    print(f'Checked 80 independently recomputed path fixtures; maximum absolute difference {maximum[0]:.4g}. Cross-platform libm rounding is tolerated, numerical mismatches are not.')
+else:
+    (root/'core'/'enumerated_wbtest.mbt').write_text('\n'.join(code)+'\n',encoding='utf-8')
+    (root/'oracle-fixtures.json').write_text(json.dumps(fixtures,indent=2)+'\n',encoding='utf-8')
+    print('Generated 80 independent weighted exhaustive-alignment cases (raw/corrected values, both gradients, and cell occupancy).')

@@ -13,7 +13,7 @@
 
 ## 独立数值对照
 
-**完整路径枚举**：`python exhaustive_oracle.py` 以固定种子20261031生成80组小序列，长度1..4、维数1..2，包含零 / 非等权特征。对每种可能的单调对齐路径直接求成本与 Gibbs 权重，不使用主程序相同的 DP 递推；验证 raw / corrected 值、两侧梯度和占用。夹具重新生成后由 CI 检查无差异，并同时在 MoonBit 测试与 JSON 引擎中验证。1个 MoonBit 测试包含80组夹具，未把它写成80个测试函数。
+**完整路径枚举**：`python exhaustive_oracle.py` 以固定种子20261031生成80组小序列，长度1..4、维数1..2，包含零 / 非等权特征。对每种可能的单调对齐路径直接求成本与 Gibbs 权重，不使用主程序相同的 DP 递推；验证 raw / corrected 值、两侧梯度和占用。CI 用 `python exhaustive_oracle.py --check` 重新独立计算，输入与参数逐项精确比较，数值结果按 `1e-12*(1+abs(expected))` 比较，容忍不同系统 libm 的末位舍入差异；不将浮点夹具字节相同当作正确性条件。夹具同时在 MoonBit 测试与 JSON 引擎验证。1个 MoonBit 测试包含80组夹具，未把它写成80个测试函数。
 
 **成熟实现交叉对照**：tslearn0.6.4 / NumPy2.2.6，固定种子1031、60组长度1..14 / 维数1..4的加权输入，各检查 raw / corrected，共120个目标。tslearn 的 raw occupancy 在 sqrt(weight) 缩放轴上计算；由该占用独立得到输入梯度，自项导数两侧都计入。值、双方梯度和占用的最大绝对差 `1.3159251466277055e-11`，阈值 atol / rtol 均2e-8。[实际记录](evidence/tslearn.json)。没有移植 tslearn 的优化器，也没有将其原型函数结果冒充相同校正目标的最优解。
 
