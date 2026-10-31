@@ -10,6 +10,10 @@ pub fn divergence_with(Series, Series, AlignOptions) -> Result[Divergence, WarpE
 
 pub fn fit(Series, Array[Series], Double, Int32) -> Result[Fit, WarpError]
 
+pub fn fit_with(Series, Array[Series], FitOptions) -> Result[Fit, WarpError]
+
+pub fn fitting_options(Double, Int32) -> FitOptions
+
 pub fn soft_dtw(Series, Series, Double) -> Result[Evaluation, WarpError]
 
 pub fn soft_dtw_with(Series, Series, AlignOptions) -> Result[Evaluation, WarpError]
@@ -46,6 +50,21 @@ pub(all) struct Fit {
   prototype : Series
   objective : Array[Double]
   accepted_steps : Int32
+  stop : String
+  evaluations : Int32
+  work_units : Int32
+  gradient_norm : Double
+}
+
+pub(all) struct FitOptions {
+  alignment : AlignOptions
+  max_steps : Int32
+  learning_rate : Double
+  gradient_tolerance : Double
+  improvement_tolerance : Double
+  max_evaluations : Int32
+  max_work_units : Int32
+  example_weights : Array[Double]
 }
 
 pub(all) struct Series {

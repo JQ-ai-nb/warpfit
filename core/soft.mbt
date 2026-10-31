@@ -28,13 +28,6 @@ pub(all) struct Divergence {
 }
 
 ///|
-pub(all) struct Fit {
-  prototype : Series
-  objective : Array[Double]
-  accepted_steps : Int32
-}
-
-///|
 fn predecessor_weights(
   a : Double,
   b : Double,
@@ -176,85 +169,4 @@ pub fn divergence_with(
     raw_self_y: yy.value,
     alignment: xy.alignment,
   })
-}
-
-///|
-fn objective(
-  seed : Series,
-  examples : Array[Series],
-  gamma : Double,
-) -> Result[(Double, Array[Double]), WarpError] {
-  if examples.is_empty() || examples.length() > 16 {
-    return Err(failure("example_count", "expected 1..16 examples"))
-  }
-  let gradient = Array::make(seed.values.length(), 0.0)
-  let mut value = 0.0
-  let scale = 1.0 / examples.length().to_double()
-  for example in examples {
-    let r = match divergence(seed, example, gamma) {
-      Ok(v) => v
-      Err(e) => return Err(e)
-    }
-    value += scale * r.value
-    for k = 0; k < gradient.length(); k = k + 1 {
-      gradient[k] += scale * r.gradient_x[k]
-    }
-  }
-  Ok((value, gradient))
-}
-
-///|
-/// A bounded descent experiment. Accepted steps improve the computed objective;
-/// the result is not a certificate of a globally optimal prototype.
-pub fn fit(
-  seed : Series,
-  examples : Array[Series],
-  gamma : Double,
-  steps : Int32,
-) -> Result[Fit, WarpError] {
-  if steps < 0 || steps > 100 {
-    return Err(failure("fit_steps", "expected 0..100 steps"))
-  }
-  let mut state = seed
-  let mut current = match objective(state, examples, gamma) {
-    Ok(v) => v
-    Err(e) => return Err(e)
-  }
-  let history = [current.0]
-  let mut accepted_steps = 0
-  for iteration = 0; iteration < steps; iteration = iteration + 1 {
-    let mut norm2 = 0.0
-    for g in current.1 {
-      norm2 += g * g
-    }
-    if norm2 < 1.0e-16 {
-      break
-    }
-    let mut rate = 1.0
-    let mut improved = false
-    for attempt = 0; attempt < 24; attempt = attempt + 1 {
-      let values = Array::make(state.values.length(), 0.0)
-      for k = 0; k < values.length(); k = k + 1 {
-        values[k] = state.values[k] - rate * current.1[k]
-      }
-      let candidate = { ..state, values, }
-      match objective(candidate, examples, gamma) {
-        Ok(next) =>
-          if next.0 <= current.0 - 1.0e-4 * rate * norm2 {
-            state = candidate
-            current = next
-            history.push(next.0)
-            accepted_steps += 1
-            improved = true
-            break
-          }
-        Err(_) => ()
-      }
-      rate *= 0.5
-    }
-    if !improved {
-      break
-    }
-  }
-  Ok({ prototype: state, objective: history, accepted_steps, })
 }
