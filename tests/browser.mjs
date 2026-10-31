@@ -10,7 +10,8 @@ try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1060 }, deviceScaleFactor: 1 });
   page.on('pageerror', e => report.pageErrors.push(e.message));
   page.on('request', req => { if (!req.url().startsWith(base) && !req.url().startsWith('blob:')) report.externalRequests.push(req.url()); });
-  await page.goto(base); await page.locator('#request').inputValue().then(v => assert.ok(v.length > 50));
+  await page.goto(base);
+  await page.waitForFunction(() => document.getElementById('request').value.length > 50);
   async function execute() {
     await page.locator('#run').click(); await page.waitForFunction(() => !document.getElementById('run').disabled);
     return JSON.parse(await page.locator('#output').textContent());
