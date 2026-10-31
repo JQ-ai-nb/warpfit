@@ -8,7 +8,8 @@ if (args.length === 1 && ['--help', '-h'].includes(args[0])) {
   process.stdout.write(usage); process.exit(0);
 }
 if (args.length === 1 && args[0] === '--version') {
-  process.stdout.write('WarpFit 0.1.0\n'); process.exit(0);
+  const metadata = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+  process.stdout.write(`WarpFit ${metadata.version}\n`); process.exit(0);
 }
 const failure = (code, message) => ({ schema: 'warpfit.response/1', ok: false, error: { code, message } });
 let response;

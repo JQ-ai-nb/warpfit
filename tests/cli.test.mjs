@@ -73,5 +73,7 @@ test('output file contains the same schema and stdout stays empty', () => {
   } finally { rmSync(dir, { recursive: true }); }
 });
 test('help and version are available', () => {
-  assert.match(cli('--help').stdout, /REQUEST/); assert.match(cli('--version').stdout, /0\.1\.0/);
+  assert.match(cli('--help').stdout, /REQUEST/);
+  const metadata = JSON.parse(readFileSync(new URL('../package.json', import.meta.url)));
+  assert.equal(cli('--version').stdout.trim(), `WarpFit ${metadata.version}`);
 });

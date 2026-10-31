@@ -9,7 +9,9 @@
 - `node --test tests/cli.test.mjs tests/numerical.test.mjs`：13项通过。
 - 浏览器自动化：三个场景、图形、下载、重复键错误、Worker取消、390px布局无横向溢出；无 pageerror、无向外部的数据请求。[记录](evidence/browser.json)。
 - 实际 `moon package --list` 及 zip 内容检查：包含核心 / README / 许可，排除 work、deliverables、artifacts、.git 和 node_modules。
-- 原生目标本机因缺 MSVC 无法运行；CI 配置在 Linux / macOS / Windows 检查四个后端，远程真实状态以 [Actions](https://github.com/JQ-ai-nb/warpfit/actions) 对应提交为准。不能把 CI 文件存在当作验证已通过。
+- 原生目标本机因缺 MSVC 无法运行；[d16e3a4 的远程 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/41190749483) 已实际通过 Linux / macOS / Windows 三系统、四后端的检查 / 构建 / 测试，Linux 浏览器流程也通过。最新状态以 [Actions](https://github.com/JQ-ai-nb/warpfit/actions) 对应提交为准。
+- Mooncakes 0.1.0 已实际发布，并在全新模块中从注册表下载，check all、JS / Wasm-GC 运行均通过：解析损失9、预测梯度-6、拟合目标点5、排序首项 exact。当前版本发布后可用 `python scripts/registry_consumer.py` 独立复验；它读取 moon.mod 中的版本，没有 path 依赖或复制本地核心。
+- 公开 [Pages 页面](https://jq-ai-nb.github.io/warpfit/) 已实际运行同一套浏览器用例，三个场景、结果下载、错误处理、取消与移动布局均通过。
 
 ## 独立数值对照
 

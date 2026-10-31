@@ -47,7 +47,7 @@ node bin/warpfit.mjs examples/training.json --out training-result.json
 node bin/warpfit.mjs -
 ```
 
-`-` 从标准输入读取到 EOF。无 `--out` 时输出 JSON 到 stdout；指定后写入对应文件，stdout 为空。错误不回显输入数据。`--help` / `--version` 提供帮助。
+`-` 从标准输入读取到 EOF。无 `--out` 时输出 JSON 到 stdout；指定后写入对应文件，stdout 为空。错误不回显序列数值；未知字段错误会包含字段名。`--help` / `--version` 提供帮助。
 
 CLI 退出码：0=本次计算正常结束（不代表优化收敛或业务正确），2=输入 / schema / 文件错误，3=矩阵或逻辑预算不足，或 fit 停在 evaluation_budget / work_budget。预算耗尽时可能返回 `ok:true` 的最后一个完整模板；调用者必须同时检查 stop。`max_steps` / `line_search_stalled` 也不保证收敛。
 

@@ -57,7 +57,9 @@ node --test tests/cli.test.mjs tests/numerical.test.mjs
 node scripts/benchmark.mjs
 ```
 
-`verify.py --native` 额外验证原生目标，需要 C 编译工具。当前本机 Wasm / Wasm-GC / JS 各通过 31 项 MoonBit 测试，Node 13 项测试通过；Windows 本机缺 MSVC，原生运行交由 CI 三系统环境检查。CI 还独立重算夹具并在浮点容差内比较，Linux 执行浏览器流程和移动布局验证。真实远程状态见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)，不以配置文件存在代替通过。
+`verify.py --native` 额外验证原生目标，需要 C 编译工具。本机 Wasm / Wasm-GC / JS 各通过 31 项 MoonBit 测试，Node 13 项测试通过；Windows 本机缺 MSVC。首次完整远程验证已在 [d16e3a4 的 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/41190749483) 通过 Linux / macOS / Windows × Wasm / Wasm-GC / JS / native 检查、构建和测试，Linux 浏览器流程通过。CI 还独立重算夹具并在浮点容差内比较。最新提交的真实状态见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)。
+
+发布后的独立消费验证：`python scripts/registry_consumer.py` 在新的隔离模块中从 Mooncakes 下载版本，检查 typed API 和 JS / Wasm-GC 运行；不使用 path 依赖或本地核心源码。浏览器演示部署在 [GitHub Pages](https://jq-ai-nb.github.io/warpfit/)，线上三个场景及取消 / 下载 / 移动布局也已实际验证。
 
 两类独立数值证据：80 组小序列穷举所有对齐路径（不同于主实现 DP），检查原始 / 校正值、双方梯度与占用；另以 tslearn 0.6.4 对 60 组、120 个目标交叉验证，最大绝对差 `1.316e-11`。这些结果证明所测输入的数值一致性，不代表真实业务效果。完整方法、版本和结果见 [VALIDATION.md](docs/VALIDATION.md)。
 
