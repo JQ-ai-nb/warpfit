@@ -1,6 +1,6 @@
 ///|
-/// Small local experiment, not a finished contest package.
-/// Formula sources: Cuturi & Blondel (2017), Blondel et al. (2021).
+/// Row-major multivariate observations. All public calculations validate shape
+/// and finite input bounds before allocation. Formula sources are documented.
 pub(all) struct Series {
   count : Int32
   dimensions : Int32
@@ -20,6 +20,11 @@ pub(all) struct Divergence {
   value : Double
   gradient_x : Array[Double]
   gradient_y : Array[Double]
+  raw_cross : Double
+  raw_self_x : Double
+  raw_self_y : Double
+  /// Cross-series visit occupancy, not a row-normalized probability matrix.
+  alignment : Array[Double]
 }
 
 ///|
@@ -27,22 +32,6 @@ pub(all) struct Fit {
   prototype : Series
   objective : Array[Double]
   accepted_steps : Int32
-}
-
-///|
-fn valid(s : Series) -> Bool {
-  if s.count < 1 || s.count > 128 || s.dimensions < 1 || s.dimensions > 8 {
-    return false
-  }
-  if s.values.length() != s.count * s.dimensions {
-    return false
-  }
-  for x in s.values {
-    if x != x || x < -10000.0 || x > 10000.0 {
-      return false
-    }
-  }
-  true
 }
 
 ///|
@@ -71,13 +60,21 @@ pub fn soft_dtw(
   x : Series,
   y : Series,
   gamma : Double,
-) -> Result[Evaluation, String] {
-  if !valid(x) || !valid(y) || x.dimensions != y.dimensions {
-    return Err("nonempty, bounded series with matching dimensions required")
+) -> Result[Evaluation, WarpError] {
+  soft_dtw_with(x, y, alignment_options(gamma))
+}
+
+///|
+pub fn soft_dtw_with(
+  x : Series,
+  y : Series,
+  options : AlignOptions,
+) -> Result[Evaluation, WarpError] {
+  match validate_pair(x, y, options) {
+    Err(e) => return Err(e)
+    Ok(_) => ()
   }
-  if gamma != gamma || gamma <= 0.0 || gamma > 10000.0 {
-    return Err("gamma must be finite and in (0, 10000]")
-  }
+  let gamma = options.gamma
   let n = x.count
   let m = y.count
   let d = x.dimensions
@@ -89,7 +86,7 @@ pub fn soft_dtw(
       let mut local_cost = 0.0
       for k = 0; k < d; k = k + 1 {
         let delta = x.values[(i - 1) * d + k] - y.values[(j - 1) * d + k]
-        local_cost = local_cost + delta * delta
+        local_cost = local_cost + feature_weight(options, k) * delta * delta
       }
       let (v, _, _, _) = predecessor_weights(
         r[(i - 1) * stride + j],
@@ -123,7 +120,10 @@ pub fn soft_dtw(
       for k = 0; k < d; k = k + 1 {
         let xi = (i - 1) * d + k
         let yj = (j - 1) * d + k
-        let grad = 2.0 * a * (x.values[xi] - y.values[yj])
+        let grad = 2.0 *
+          a *
+          feature_weight(options, k) *
+          (x.values[xi] - y.values[yj])
         gx[xi] += grad
         gy[yj] -= grad
       }
@@ -137,16 +137,25 @@ pub fn divergence(
   x : Series,
   y : Series,
   gamma : Double,
-) -> Result[Divergence, String] {
-  let xy = match soft_dtw(x, y, gamma) {
+) -> Result[Divergence, WarpError] {
+  divergence_with(x, y, alignment_options(gamma))
+}
+
+///|
+pub fn divergence_with(
+  x : Series,
+  y : Series,
+  options : AlignOptions,
+) -> Result[Divergence, WarpError] {
+  let xy = match soft_dtw_with(x, y, options) {
     Ok(v) => v
     Err(e) => return Err(e)
   }
-  let xx = match soft_dtw(x, x, gamma) {
+  let xx = match soft_dtw_with(x, x, options) {
     Ok(v) => v
     Err(e) => return Err(e)
   }
-  let yy = match soft_dtw(y, y, gamma) {
+  let yy = match soft_dtw_with(y, y, options) {
     Ok(v) => v
     Err(e) => return Err(e)
   }
@@ -162,6 +171,10 @@ pub fn divergence(
     value: xy.value - 0.5 * xx.value - 0.5 * yy.value,
     gradient_x: gx,
     gradient_y: gy,
+    raw_cross: xy.value,
+    raw_self_x: xx.value,
+    raw_self_y: yy.value,
+    alignment: xy.alignment,
   })
 }
 
@@ -170,9 +183,9 @@ fn objective(
   seed : Series,
   examples : Array[Series],
   gamma : Double,
-) -> Result[(Double, Array[Double]), String] {
+) -> Result[(Double, Array[Double]), WarpError] {
   if examples.is_empty() || examples.length() > 16 {
-    return Err("the experiment accepts 1..16 examples")
+    return Err(failure("example_count", "expected 1..16 examples"))
   }
   let gradient = Array::make(seed.values.length(), 0.0)
   let mut value = 0.0
@@ -198,9 +211,9 @@ pub fn fit(
   examples : Array[Series],
   gamma : Double,
   steps : Int32,
-) -> Result[Fit, String] {
+) -> Result[Fit, WarpError] {
   if steps < 0 || steps > 100 {
-    return Err("the experiment accepts 0..100 steps")
+    return Err(failure("fit_steps", "expected 0..100 steps"))
   }
   let mut state = seed
   let mut current = match objective(state, examples, gamma) {

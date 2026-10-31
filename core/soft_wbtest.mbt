@@ -4,7 +4,7 @@ fn near(a : Double, b : Double, epsilon~ : Double = 1.0e-6) -> Unit raise {
 }
 
 ///|
-fn[T] failed(r : Result[T, String]) -> Bool {
+fn[T, E] failed(r : Result[T, E]) -> Bool {
   match r {
     Err(_) => true
     Ok(_) => false

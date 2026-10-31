@@ -2,19 +2,37 @@
 package "JQ-ai-nb/warpfit/core"
 
 // Values
-pub fn divergence(Series, Series, Double) -> Result[Divergence, String]
+pub fn alignment_options(Double) -> AlignOptions
 
-pub fn fit(Series, Array[Series], Double, Int32) -> Result[Fit, String]
+pub fn divergence(Series, Series, Double) -> Result[Divergence, WarpError]
 
-pub fn soft_dtw(Series, Series, Double) -> Result[Evaluation, String]
+pub fn divergence_with(Series, Series, AlignOptions) -> Result[Divergence, WarpError]
+
+pub fn fit(Series, Array[Series], Double, Int32) -> Result[Fit, WarpError]
+
+pub fn soft_dtw(Series, Series, Double) -> Result[Evaluation, WarpError]
+
+pub fn soft_dtw_with(Series, Series, AlignOptions) -> Result[Evaluation, WarpError]
+
+pub fn validate_series(Series) -> Result[Unit, WarpError]
 
 // Errors
 
 // Types and methods
+pub(all) struct AlignOptions {
+  gamma : Double
+  feature_weights : Array[Double]
+  max_cells : Int32
+}
+
 pub(all) struct Divergence {
   value : Double
   gradient_x : Array[Double]
   gradient_y : Array[Double]
+  raw_cross : Double
+  raw_self_x : Double
+  raw_self_y : Double
+  alignment : Array[Double]
 }
 
 pub(all) struct Evaluation {
@@ -34,6 +52,11 @@ pub(all) struct Series {
   count : Int32
   dimensions : Int32
   values : Array[Double]
+}
+
+pub(all) struct WarpError {
+  code : String
+  message : String
 }
 
 // Type aliases
