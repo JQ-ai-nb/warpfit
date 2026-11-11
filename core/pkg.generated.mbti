@@ -4,6 +4,10 @@ package "JQ-ai-nb/warpfit/core"
 // Values
 pub fn alignment_options(Double) -> AlignOptions
 
+pub fn dba_fit(Series, Array[Series], DbaOptions) -> Result[DbaFit, WarpError]
+
+pub fn dba_options() -> DbaOptions
+
 pub fn divergence(Series, Series, Double) -> Result[Divergence, WarpError]
 
 pub fn divergence_with(Series, Series, AlignOptions) -> Result[Divergence, WarpError]
@@ -38,6 +42,23 @@ pub(all) struct AlignOptions {
 pub(all) struct Candidate {
   id : String
   series : Series
+}
+
+pub(all) struct DbaFit {
+  prototype : Series
+  objective : Array[Double]
+  accepted_steps : Int32
+  stop : String
+  evaluations : Int32
+  work_units : Int32
+}
+
+pub(all) struct DbaOptions {
+  alignment : DtwOptions
+  max_steps : Int32
+  tolerance : Double
+  max_work_units : Int32
+  example_weights : Array[Double]
 }
 
 pub(all) struct Divergence {
