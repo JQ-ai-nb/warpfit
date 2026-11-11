@@ -47,7 +47,8 @@ try {
   process.exitCode = 2;
 }
 if (!process.exitCode) {
+  const stop = response.stop ?? response.clustering?.stop;
   process.exitCode = response.ok
-    ? (['evaluation_budget', 'work_budget'].includes(response.stop) ? 3 : 0)
+    ? (['evaluation_budget', 'work_budget'].includes(stop) ? 3 : 0)
     : (['work_budget', 'cell_limit'].includes(response.error?.code) ? 3 : 2);
 }

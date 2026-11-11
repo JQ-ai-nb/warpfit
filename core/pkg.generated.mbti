@@ -26,6 +26,14 @@ pub fn fit_with(Series, Array[Series], FitOptions) -> Result[Fit, WarpError]
 
 pub fn fitting_options(Double, Int32) -> FitOptions
 
+pub fn pipeline_options() -> PipelineOptions
+
+pub fn prepare_and_cluster(Array[Series], Array[Int32], PipelineOptions) -> Result[PipelineFit, WarpError]
+
+pub fn prepare_series(Series, PreprocessOptions) -> Result[PreparedSeries, WarpError]
+
+pub fn preprocess_options() -> PreprocessOptions
+
 pub fn rank_candidates(Series, Array[Candidate], AlignOptions, Int32, Int32) -> Result[Ranking, WarpError]
 
 pub fn resample_linear(Series, Int32) -> Result[Series, WarpError]
@@ -149,6 +157,30 @@ pub(all) struct Match {
   value : Double
   raw_cross : Double
   raw_self_candidate : Double
+}
+
+pub(all) struct PipelineFit {
+  prepared : Array[PreparedSeries]
+  clustering : ClusterFit
+}
+
+pub(all) struct PipelineOptions {
+  preprocessing : PreprocessOptions
+  clustering : ClusterOptions
+}
+
+pub(all) struct PreparedSeries {
+  series : Series
+  normalized : Bool
+  means : Array[Double]
+  standard_deviations : Array[Double]
+  constant_features : Array[Bool]
+}
+
+pub(all) struct PreprocessOptions {
+  target_count : Int32
+  normalize : Bool
+  epsilon : Double
 }
 
 pub(all) struct Ranking {

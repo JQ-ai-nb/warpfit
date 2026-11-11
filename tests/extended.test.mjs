@@ -47,14 +47,25 @@ test('new input errors identify duplicate centers and strict option names', () =
   const unknown=req({schema,operation:'dtw',x:[0],y:[0],options:{radius:1}});
   assert.equal(unknown.ok,false); assert.equal(unknown.error.code,'unknown_field');
 });
+test('pipeline resamples, normalizes per series and groups by shape despite scale', () => {
+  const out=call('pipeline');assert.equal(out.ok,true);
+  assert.deepEqual(out.clustering.labels,[0,0,1,1]);close(out.clustering.inertia,0);
+  assert.equal(out.prepared[0].series.length,5);close(out.prepared[0].means[0],4);
+  close(out.prepared[1].means[0],300);assert.equal(out.prepared[0].normalized,true);
+  const raw=req({schema,operation:'preprocess',series:[1,2,3],options:{target_count:5,normalize:false}});
+  assert.deepEqual(raw.prepared.series.map(x=>x[0]),[1,1.5,2,2.5,3]);
+  assert.deepEqual(raw.prepared.means,[]);
+});
 test('DBA and clustering CLI expose budget exhaustion without partial output', () => {
   for(const value of [
     {schema,operation:'dba',seed:[2],examples:[[0]],options:{max_work_units:1}},
-    {schema,operation:'cluster',data:[[0],[2],[9],[11]],centers:[[0],[10]],options:{max_work_units:8}}
+    {schema,operation:'cluster',data:[[0],[2],[9],[11]],centers:[[0],[10]],options:{max_work_units:8}},
+    {schema,operation:'pipeline',data:[[0],[2],[9],[11]],seed_indices:[0,2],options:{normalize:false,max_work_units:8}}
   ]) {
     const p=spawnSync(process.execPath,['bin/warpfit.mjs','-'],{input:JSON.stringify(value),encoding:'utf8'});
     assert.equal(p.status,3); const out=JSON.parse(p.stdout);
-    assert.equal(out.ok,true);assert.equal(out.stop,'work_budget');
-    assert.equal(out.history.length,1);
+    assert.equal(out.ok,true);
+    const result=out.clustering??out;
+    assert.equal(result.stop,'work_budget'); assert.equal(result.history.length,1);
   }
 });

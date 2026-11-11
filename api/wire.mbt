@@ -524,9 +524,11 @@ fn dispatch(source : String) -> Json raise WireError {
     "dtw" => ["schema", "operation", "x", "y", "options"]
     "dba" => ["schema", "operation", "seed", "examples", "options"]
     "cluster" => ["schema", "operation", "data", "centers", "options"]
+    "preprocess" => ["schema", "operation", "series", "options"]
+    "pipeline" => ["schema", "operation", "data", "seed_indices", "options"]
     _ => {
       invalid(
-        "operation", "operation must be loss, fit, rank, dtw, dba or cluster",
+        "operation", "operation must be loss, fit, rank, dtw, dba, cluster, preprocess or pipeline",
       )
       abort("unreachable")
     }
@@ -551,6 +553,12 @@ fn dispatch(source : String) -> Json raise WireError {
         "window", "feature_weights", "max_cells", "max_iterations", "max_dba_steps",
         "tolerance", "max_work_units",
       ]
+    "preprocess" => ["target_count", "normalize", "epsilon"]
+    "pipeline" =>
+      [
+        "target_count", "normalize", "epsilon", "window", "feature_weights", "max_cells",
+        "max_iterations", "max_dba_steps", "tolerance", "max_work_units",
+      ]
     _ => common
   }
   let options = match fields.get("options") {
@@ -563,7 +571,9 @@ fn dispatch(source : String) -> Json raise WireError {
     "rank" => ranking(fields, options)
     "dtw" => hard_dtw(fields, options)
     "dba" => hard_dba(fields, options)
-    _ => hard_cluster(fields, options)
+    "cluster" => hard_cluster(fields, options)
+    "preprocess" => preprocess_one(fields, options)
+    _ => pipeline_cluster(fields, options)
   }
 }
 

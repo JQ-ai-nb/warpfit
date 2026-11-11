@@ -1,0 +1,7 @@
+{
+  "schema": "warpfit.request/1",
+  "operation": "pipeline",
+  "data": [[2, 4, 6], [100, 200, 300, 400, 500], [6, 4, 2], [500, 400, 300, 200, 100]],
+  "seed_indices": [0, 2],
+  "options": { "target_count": 5, "normalize": true, "window": 0, "max_work_units": 2000000 }
+}
