@@ -1,5 +1,17 @@
 # 已运行的验证与结果
 
+## 0.2.0 本地扩展（2026-11-11，未推送 / 未发布）
+
+- 本地 Windows 的 `moon check --target all --deny-warn`、格式与生成接口检查通过；Wasm、Wasm-GC、JS 目标各执行 59 项 MoonBit 测试并构建通过。本机缺少 MSVC，native 运行和新版远程多系统 CI **尚未验证**。
+- Node CLI / 数值测试共23项通过；本地 Chrome 覆盖7个页面场景、导入、计算、预算提示、取消、下载及390px布局，无页面错误和外部请求。浏览器证据见 [browser-nov.json](evidence/browser-nov.json)。
+- `tests/exhaustive_hard.test.mjs` 逐一枚举 240 组长度1..4的硬 DTW 合法完整路径，覆盖全部16种长度组合、一维/二维、无窗口及不同窗口，检查最小代价、实际路径和边界。80组 DBA 与30组聚类性质用例另复算目标、逐点最近中心和预算停止状态。
+- `tests/reference_hard.py` 使用 tslearn 0.6.4 / NumPy 2.2.6 对照160组带权硬 DTW、80组单步带权 DBA（含不等长和窗口）、9组聚类、100组预处理及1组完整流程。非例外比较的最大绝对差约2.57e-15，断言容差 rtol=atol=1e-8；结果见 [hard-reference.json](evidence/hard-reference.json)。DBA 是单步对照，不能据此声称任意初始化和收敛行为完全一致。
+- **常量特征的参考差异：**100组预处理对照中有常量维；本项目按标准差≤1e-12归零。tslearn 0.6.4 对其中7个常量特征因浮点舍入输出非零，本项目依照自身明确语义直接验证为0；这些维度没有被当作“与 tslearn 一致”，最大原始差异约2.236。其他维度按参考值比较，详情见证据文件。
+- `node scripts/benchmark_hard.mjs` 在本机 Node v24.22.1 记录长度32/128/512、1/3特征的窗口与无窗口硬 DTW，以及16条64点序列的组合流程。数据为合成输入，JSON处理计入耗时；见 [benchmark-hard.json](evidence/benchmark-hard.json)，不当作 SLA 或与竞品的公平性能比较。
+- 缺口：尚无真实设备数据、用户试用、聚类质量基准、生产采用或初审通过证明。截图中评审意见的后半段不可见，需要继续核对完整要求。扩展并不保证审核结果。
+
+## 以下为 0.1.2 已发布版本的历史记录
+
 本地记录日期：2026-10-31。机器：Windows x64 / Intel Core i7-14650HX，Node v24.22.1，Python3.12；moon0.1.20261021，moonc0.10.17+093cb8f9c。CI 使用官方稳定安装器，日志保留实际版本，不能由本机版本假定未来工具链一致。
 
 ## 实际检查

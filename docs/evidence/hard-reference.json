@@ -1,0 +1,25 @@
+{
+  "recorded_at_utc": "2026-11-11T07:58:24.495063+00:00",
+  "reference": "tslearn",
+  "reference_version": "0.6.4",
+  "numpy_version": "2.2.6",
+  "cases": {
+    "weighted_dtw": 160,
+    "weighted_one_step_dba": 80,
+    "cluster_workflow": 9,
+    "preprocess": 100,
+    "full_pipeline": 1
+  },
+  "max_absolute_error": {
+    "dtw": 1.7763568394002505e-15,
+    "dba": 4.440892098500626e-16,
+    "cluster": 1.7763568394002505e-15,
+    "preprocess": 2.5673907444456745e-15,
+    "pipeline": 0.0
+  },
+  "tolerance": "rtol=atol=1e-8",
+  "preprocess_constant_policy": "Constant features are checked against zero per WarpFit epsilon; tslearn is not used as oracle for those features.",
+  "tslearn_constant_feature_divergences": 7,
+  "tslearn_constant_feature_max_abs": 2.23606797749979,
+  "status": "passed"
+}

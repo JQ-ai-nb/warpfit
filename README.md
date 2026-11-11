@@ -1,8 +1,10 @@
-# WarpFit — 可微分时序对齐与原型拟合
+# WarpFit — 时序对齐、模板学习与聚类
 
-给长度和节奏不同的数值序列提供**可学习的对齐目标**：原始 Soft-DTW、自项校正值、两侧输入梯度、软对齐占用；进一步学习固定长度参考模板，并对完整候选集进行示例检索。
+> **本地开发候选版 0.2.0，本次修改尚未推送或发布。** 它在 2026 年 10 月已公开的 WarpFit 0.1.2 基础上扩展；最后一次留存的公开版本记录是 0.1.2，当前远程最新状态尚需复核。新增功能的测试证据以本地记录为准，不把旧版远程 CI 或 Mooncakes 状态当作新版验收。
 
-目标用户是 MoonBit 时序模型、传感器周期与离线数值应用开发者。逐点误差和直接平均要求采样位置一致；普通 DTW 距离不直接给出平滑训练梯度。WarpFit 自己计算、求导和优化，不依赖 Python 运行时或外部学习服务，也不是其他参赛项目的插件。浏览器演示在本地 Worker 计算用户数据。
+为不同长度、节奏和量纲的数值序列提供一套**有界的时序分析流程**：按采样点重采样、逐维标准化、硬 DTW 约束对齐、DBA 模板与 DTW 聚类；保留原有 Soft-DTW 损失、两侧梯度、可微分模板拟合和示例检索。
+
+目标用户是 MoonBit 时序模型、传感器周期与离线数值应用开发者。逐点误差和直接平均要求采样位置一致；调用者可以根据问题选择硬路径对齐、带梯度的软目标，或对未标记序列做分组。核心使用 MoonBit 标准库，不依赖 Python 运行时或外部学习服务；浏览器演示在本地 Worker 计算用户数据。
 
 维护者 / 个人参赛申请人：**蒋琦**；GitHub / Mooncakes：**JQ-ai-nb**。Apache-2.0。设计、编码与测试使用 AI 辅助，维护者负责理解与核实成果。算法来自公开论文，**不宣称算法首创或世界唯一**。
 
@@ -15,7 +17,12 @@ moon check --target all --deny-warn
 moon test --target wasm-gc --deny-warn
 moon run cmd/demo --target js
 moon run cmd/calibrate --target js
+moon run cmd/series_pipeline --target js
 node scripts/build.mjs
+node bin/warpfit.mjs examples/align.json
+node bin/warpfit.mjs examples/dba.json
+node bin/warpfit.mjs examples/clusters.json
+node bin/warpfit.mjs examples/pipeline.json
 node bin/warpfit.mjs examples/prototype.json
 node bin/warpfit.mjs examples/training.json --out result.json
 node bin/warpfit.mjs examples/retrieval.json
@@ -24,9 +31,19 @@ node scripts/serve.mjs
 
 最后打开 <http://127.0.0.1:4194>：选择场景，编辑 / 导入 JSON，运行后查看曲线、目标轨迹、梯度、热图或排序，下载完整结果。可终止 Worker 取消计算。页面不持久保存或上传输入。
 
-库包导入：`"JQ-ai-nb/warpfit/core" @warpfit`。安装发布版时用 `moon add JQ-ai-nb/warpfit`；注册表可用状态以 [Mooncakes 包页面](https://mooncakes.io/docs/JQ-ai-nb/warpfit) 为准。接口签名见 [pkg.generated.mbti](core/pkg.generated.mbti)，JSON 与 CLI 契约见 [API.md](docs/API.md)。
+库包导入：`"JQ-ai-nb/warpfit/core" @warpfit`。此前发布并验证的 0.1.2 **没有本地新增的 0.2.0 接口**；[Mooncakes 包页面](https://mooncakes.io/docs/JQ-ai-nb/warpfit)当前状态尚需复核，不能用 `moon add` 假称已安装本地修订版。类型化示例见 [cmd/series_pipeline](cmd/series_pipeline/main.mbt)，签名见 [pkg.generated.mbti](core/pkg.generated.mbti)，JSON 与 CLI 契约见 [API.md](docs/API.md)。
 
 ## 三个完整工作流
+
+以下新增示例是本地 0.2.0 的合成数据，执行前先运行 `node scripts/build.mjs`：
+
+| 使用者及问题 | 输入 / 操作 | 已验证输出 |
+|---|---|---|
+| 生产信号分析开发者：周期信号存在有限的时间偏移 | `examples/align.json`，两条四点序列和 `window=1` | 返回完整硬 DTW 路径与距离 0；改为 `window=0` 时平方路径代价为 2 |
+| 传感器模板开发者：重复动作长度不一致 | `examples/dba.json`，三条观测和四点初始模板 | 经硬 DTW 路径与 DBA 更新，目标从约 0.166667 降至 0.118056；返回模板、轨迹与终止原因 |
+| 多设备分析开发者：量纲、长度不同且需按形状分组 | `examples/pipeline.json`，四条序列、两个初始样本下标 | 重采样、逐维标准化后分组标签 `[0,0,1,1]`，返回每条预处理统计、中心、目标和预算状态 |
+
+原有 0.1.x 工作流在本地仍可运行：
 
 | 使用者及问题 | 输入 / 操作 | 可验证输出 |
 |---|---|---|
@@ -38,6 +55,10 @@ node scripts/serve.mjs
 
 ## 实现范围
 
+- 硬 DTW：加权平方局部代价、完整路径、确定性并列顺序及 Sakoe-Chiba 窗口；不等长窗口沿较长轴延伸。
+- 加权 DBA：按硬对齐路径迭代更新固定长度模板；明确记录目标、预算和停止原因，支持不同长度及特征权重。
+- DTW k-means：调用方给初始中心，反复执行最近中心分配和 DBA 更新；空簇返回明确错误，不隐藏或丢弃数据。
+- 线性重采样、逐序列逐特征标准化，以及组合为“预处理 → 聚类”的类型接口和 JSON 工作流。
 - 纯 MoonBit 数值核心，仅使用标准库；多变量平方欧氏代价、可配置非负特征权重、稳定 soft-min 前向和逆序求导。
 - 原始目标与自项校正严格区分；校正梯度包含自项的两侧导数，不对结果任意截零。
 - 带权模板拟合：缓存固定示例自项，Armijo 回溯、明确容忍度和六种停止原因；返回最后一个完整评估点。
@@ -45,29 +66,28 @@ node scripts/serve.mjs
 - 严格、带版本的 JSON API；拒绝未知字段、重复键、不规则数组和错误预算类型。Node 文件 / stdin CLI 与浏览器使用同一个 MoonBit 引擎。
 - 每条 1..512 采样、1..16 特征，值域 ±10000；每矩阵最多 262144 个格点。fit / rank 最多 32 条；迭代 ≤200，评估 ≤2048，逻辑工作量 ≤1e8。
 
-复杂度和边界见 [SEMANTICS.md](docs/SEMANTICS.md)。逻辑工作量是矩阵格点 × 特征数，不是墙钟时限。原始 Soft-DTW 可为负，对齐占用的行和不要求等于1；拟合不保证全局最优。需由调用方做尺度处理、选择 gamma / 原型长度。没有 GPU、实时设备接入、缺失数据插值、自动分类或大规模索引。
+复杂度和边界见 [SEMANTICS.md](docs/SEMANTICS.md)。工作量按完整矩阵格点 × 特征数保守计费，不是墙钟时限；预处理另受数据规模限制，不计入聚类工作量。窗口限制允许的路径，当前仍遍历并分配完整 DP 矩阵。原始 Soft-DTW 可为负；DBA / 聚类不保证全局最优，初始中心与尺度选择会影响结果。重采样基于样本下标，不支持真实时间戳或缺失值；没有 GPU、实时设备接入、自动确定簇数或大规模索引。
 
 ## 验证与可复现性
 
 ```text
 python verify.py
-python exhaustive_oracle.py
-moon fmt
-node --test tests/cli.test.mjs tests/numerical.test.mjs
-node scripts/benchmark.mjs
+python exhaustive_oracle.py --check
+node --test tests/cli.test.mjs tests/numerical.test.mjs tests/extended.test.mjs tests/exhaustive_hard.test.mjs tests/properties_hard.test.mjs
+node scripts/benchmark_hard.mjs
 ```
 
-`verify.py --native` 额外验证原生目标，需要 C 编译工具。本机 Wasm / Wasm-GC / JS 各通过 31 项 MoonBit 测试，Node 13 项测试通过；Windows 本机缺 MSVC。首次完整远程验证已在 [d16e3a4 的 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/41190749483) 通过 Linux / macOS / Windows × Wasm / Wasm-GC / JS / native 检查、构建和测试，Linux 浏览器流程通过。CI 还独立重算夹具并在浮点容差内比较。最新提交的真实状态见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)。
+本地 Wasm / Wasm-GC / JS 各通过 59 项 MoonBit 测试，Node 23 项测试通过；Chrome 自动化覆盖 7 个场景、文件导入、预算提醒及手机布局。本机缺 MSVC，**新版 native 运行和三系统远程 CI 尚未验证**。`verify.py --native` 需要先配置 C 编译工具。旧版的 [远程 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/41191496193) 不代表本地新代码已通过远程检查。
 
-发布后的独立消费验证：`python scripts/registry_consumer.py` 在新的隔离模块中从 Mooncakes 下载版本，检查 typed API 和 JS / Wasm-GC 运行；不使用 path 依赖或本地核心源码。浏览器演示部署在 [GitHub Pages](https://jq-ai-nb.github.io/warpfit/)，线上三个场景及取消 / 下载 / 移动布局也已实际验证。
+此前 0.1.2 的注册表独立消费测试和线上演示已经验证；本地 0.2.0 尚未发布，不得声称新增功能已完成注册表安装测试。待授权推送并发布后，再用 `python scripts/registry_consumer.py` 验证发布版。
 
-两类独立数值证据：80 组小序列穷举所有对齐路径（不同于主实现 DP），检查原始 / 校正值、双方梯度与占用；另以 tslearn 0.6.4 对 60 组、120 个目标交叉验证，最大绝对差 `1.316e-11`。这些结果证明所测输入的数值一致性，不代表真实业务效果。完整方法、版本和结果见 [VALIDATION.md](docs/VALIDATION.md)。
+新增硬 DTW 有 240 组小样例通过全路径穷举；另对照 tslearn 0.6.4 验证 160 组硬 DTW、80 组单步 DBA、9 组聚类、100 组预处理及一个完整流程。常量特征采用本库明确的阈值归零语义，与参考库的浮点边界行为有差异，单独披露于 [VALIDATION.md](docs/VALIDATION.md)。数值一致性不证明业务效果。
 
 ## 与已有工作的关系
 
 Soft-DTW 和自项校正来自 [Cuturi / Blondel 2017](https://proceedings.mlr.press/v70/cuturi17a.html) 与 [Blondel 等 2021](https://proceedings.mlr.press/v130/blondel21a.html)。其他语言已有成熟实现，不能把用 MoonBit 重写本身当作算法创新。
 
-在本次查证的 [MoonSTRtree 轨迹公开接口](https://github.com/LING71671/MoonSTRtree/blob/main/src/extensions/trajectory/pkg.generated.mbti) 中已有普通 DTW / Fréchet；WarpFit 的不同任务是返回可用于训练的平滑输入梯度并实际优化模板，不以“又一个距离函数”申报。[tslearn](https://github.com/tslearn-team/tslearn) 已有 Soft-DTW、原型与聚类等更广能力；我们的贡献定位为 **MoonBit 可直接嵌入、JS / Wasm 可用的独立学习内核及可核对的资源 / 输入契约**，不声称比 tslearn 更完整、更快或更准确。
+查证的 [MoonSTRtree 轨迹公开接口](https://github.com/LING71671/MoonSTRtree/blob/main/src/extensions/trajectory/pkg.generated.mbti)已有普通 DTW / Fréchet；[moon-geometry 的二维轨迹接口](https://github.com/walkzzz/moon-geometry/blob/main/spatial/dtw/pkg.generated.mbti)已有普通及窗口 DTW。两者与本项目存在实际重合；WarpFit 面向多变量数值序列，提供硬 / 软对齐、模板拟合、预处理到聚类的组合。[tslearn](https://github.com/tslearn-team/tslearn)已覆盖更广的相关算法，本项目不声称比它更完整、更快或更准确，也不把 MoonBit 重写、窗口 DTW 或 DBA 宣称为算法首创。
 
 详细比较、检索限制及与既往工程的关系见 [RELATED_WORK.md](docs/RELATED_WORK.md)。未发现同类不等于生态不存在；没有完整审计全部公开 / 私有工程。本项目从论文公式独立编写数值核心，没有复制上述工程源码或测试夹具。许可与分发说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 

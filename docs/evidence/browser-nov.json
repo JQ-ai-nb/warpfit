@@ -1,0 +1,23 @@
+{
+  "browser": "157.0.8103.50",
+  "checks": [
+    "prototype fitting and optimization charts",
+    "training workflow and visualization",
+    "retrieval workflow and visualization",
+    "result JSON download",
+    "align workflow and visualization",
+    "dba workflow and visualization",
+    "clusters workflow and visualization",
+    "pipeline workflow and visualization",
+    "local JSON import computes user input",
+    "preprocessing visualization works for custom input",
+    "pipeline nested budget stop is visible",
+    "changed input invalidates earlier displayed result",
+    "duplicate JSON keys rejected without page error",
+    "worker cancellation discards incomplete result",
+    "390px mobile layout and working compute"
+  ],
+  "pageErrors": [],
+  "externalRequests": [],
+  "status": "passed"
+}

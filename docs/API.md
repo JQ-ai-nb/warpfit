@@ -12,7 +12,7 @@ let target : @warpfit.Series = {
   count: 3, dimensions: 1, values: [0.0, 0.8, 1.1],
 }
 match @warpfit.divergence(prediction, target, 0.4) {
-  Ok(result) => println(result.gradient_x)
+  Ok(result) => println(result.value)
   Err(error) => println(error.code)
 }
 ```
@@ -30,6 +30,11 @@ match @warpfit.divergence(prediction, target, 0.4) {
 | `loss` | `x`, `y` | `value`, `gradient_x`, `gradient_y`, `alignment`, `components` |
 | `fit` | `seed`, `examples` | `prototype`, `history`, `accepted_steps`, `stop`, `evaluations`, `work_units`, `gradient_norm` |
 | `rank` | `query`, `candidates:[{id,series}]` | `matches`, `raw_self_query`, `work_units`, `candidates_evaluated` |
+| `dtw` | `x`, `y` | `distance`, `squared_cost`, `path`, `visited_cells` |
+| `dba` | `seed`, `examples` | `prototype`, `history`, `accepted_steps`, `stop`, `evaluations`, `work_units` |
+| `cluster` | `data`, `centers` | `centers`, `labels`, `inertia`, `history`, `iterations`, `stop`, `work_units` |
+| `preprocess` | `series` | `prepared`：处理后的序列及均值、标准差、常量特征标记 |
+| `pipeline` | `data`, `seed_indices` | `prepared` 和嵌套的 `clustering`（中心、标签、目标和状态） |
 
 序列可以写成一维数组 `[0,1,0]`，也可以是等长行的二维数组 `[[0,2],[1,3]]`。输出序列和梯度一律为二维行数组。不同序列可有不同采样数，但特征数必须相同。`loss.objective` 默认为 `corrected`，可设 `raw`。raw 的 `components` 为 null；corrected 返回 cross / self_x / self_y。
 
@@ -37,9 +42,13 @@ match @warpfit.divergence(prediction, target, 0.4) {
 
 ### 选项与默认值
 
-全部操作的 `options`：gamma=0.5、feature_weights=[]（全部为1）、max_cells=262144。fit 额外默认 max_steps=60、learning_rate=1、gradient_tolerance=1e-8、improvement_tolerance=1e-10、max_evaluations=512、max_work_units=20000000、example_weights=[]（等权）。rank 额外 max_work_units=20000000，top_k 默认为全部候选。
+原有 `loss` / `fit` / `rank` 的公共 `options`：gamma=0.5、feature_weights=[]（全部为1）、max_cells=262144。fit 额外默认 max_steps=60、learning_rate=1、gradient_tolerance=1e-8、improvement_tolerance=1e-10、max_evaluations=512、max_work_units=20000000、example_weights=[]（等权）。rank 额外 max_work_units=20000000，top_k 默认为全部候选。
 
-实际输入和完整配置例子：[prototype.json](../examples/prototype.json)、[training.json](../examples/training.json)、[retrieval.json](../examples/retrieval.json)。数值范围和工作量语义见 [SEMANTICS.md](SEMANTICS.md)。所有错误码由核心和 wire 层稳定字符串给出；判断应使用 code 而非自然语言 message。
+新增 `dtw` / `dba` / `cluster` / `pipeline`：`window` 省略表示无限制；非负整数表示 Sakoe-Chiba 半径，不等长时沿较长轴延伸。`feature_weights=[]` 为全1，`max_cells=262144`。dba 的 `max_steps=30`、`tolerance=1e-8`、`max_work_units=20000000`、`example_weights=[]`；cluster / pipeline 的 `max_iterations=20`、`max_dba_steps=20`、`tolerance=1e-8`、`max_work_units=20000000`。
+
+`preprocess` / `pipeline`：`target_count=0` 表示保持长度，1..512 表示按样本下标重采样；`normalize=true` 表示对每条序列独立逐特征标准化，`epsilon=1e-12`。先重采样后标准化。`pipeline.seed_indices` 是原始输入数组中不重复的零基下标，对应预处理后的初始中心。常量特征的标准化输出为0；`normalize=false` 时均值、标准差和常量标记数组为空。JSON 禁止 `window:-1`；省略 `window` 才表示不约束（MoonBit 类型接口用 -1）。
+
+实际输入和完整配置例子：[align.json](../examples/align.json)、[dba.json](../examples/dba.json)、[clusters.json](../examples/clusters.json)、[pipeline.json](../examples/pipeline.json)，以及原有的 [prototype.json](../examples/prototype.json)、[training.json](../examples/training.json)、[retrieval.json](../examples/retrieval.json)。数值范围和工作量语义见 [SEMANTICS.md](SEMANTICS.md)。所有错误码由核心和 wire 层稳定字符串给出；判断应使用 code 而非自然语言 message。
 
 ```text
 node bin/warpfit.mjs examples/prototype.json
@@ -49,7 +58,7 @@ node bin/warpfit.mjs -
 
 `-` 从标准输入读取到 EOF。无 `--out` 时输出 JSON 到 stdout；指定后写入对应文件，stdout 为空。错误不回显序列数值；未知字段错误会包含字段名。`--help` / `--version` 提供帮助。
 
-CLI 退出码：0=本次计算正常结束（不代表优化收敛或业务正确），2=输入 / schema / 文件错误，3=矩阵或逻辑预算不足，或 fit 停在 evaluation_budget / work_budget。预算耗尽时可能返回 `ok:true` 的最后一个完整模板；调用者必须同时检查 stop。`max_steps` / `line_search_stalled` 也不保证收敛。
+CLI 退出码：0=本次计算正常结束（不代表优化收敛或业务正确），2=输入 / schema / 文件错误，3=矩阵或逻辑预算不足，或 fit / dba / cluster / pipeline 在预算耗尽时停止。预算耗尽时可能返回 `ok:true` 的最后一个完整状态；调用者必须检查 stop，pipeline 的 stop 位于 `clustering.stop`。`max_steps`、`max_iterations`、`line_search_stalled`、`numerical_stall` 均不保证收敛。聚类如果出现空簇返回 `empty_cluster`，可更换初始中心或减少簇数。
 
 ## 浏览器
 
