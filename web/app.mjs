@@ -1,9 +1,12 @@
 const $ = id => document.getElementById(id);
-let current = 'prototype', worker, lastResult, running = false;
+let current = 'prototype', worker, lastResult, running = false, loadNumber = 0;
 const descriptions = {
   prototype: '设备 / 动作模板开发者：从两条不同节奏的示例学习四点参考模板。可调整 seed、examples 和优化预算。',
   training: '时序模型开发者：计算二维预测序列与目标的校正损失、两侧梯度和软对齐占用。梯度可用于外部模型链式求导。',
-  retrieval: '离线序列应用开发者：对完整候选集评分，再输出前 k 项。分数不表示类别概率。'
+  retrieval: '离线序列应用开发者：对完整候选集评分，再输出前 k 项。分数不表示类别概率。',
+  align: '生产数据开发者：限制时间错位的范围，返回两条序列的硬对齐路径与代价；可修改 window 比较路径。',
+  dba: '传感器应用开发者：输入多条不同长度样本和初始模板，沿硬 DTW 路径做迭代平均，得到 DBA 模板。',
+  clusters: '时序分析开发者：输入未标记序列及初始中心，通过 DTW 分配和 DBA 更新得到簇编号与中心。'
 };
 function status(text, label = '', kind = '') { $('status').textContent = text; $('badge').textContent = label; $('badge').className = `badge ${kind}`; }
 function busy(value) {
@@ -17,13 +20,15 @@ function clearResult() {
   $('metrics').replaceChildren(); $('visuals').replaceChildren(); $('output').textContent = '当前输入尚未计算。';
 }
 async function load(name) {
+  const ownLoad = ++loadNumber;
   try {
     const res = await fetch(`./examples/${name}.json`); if (!res.ok) throw new Error('示例文件不可用');
     const source = await res.text();
+    if (ownLoad !== loadNumber) return;
     current = name; $('request').value = source; $('request').scrollLeft = 0; $('request').scrollTop = 0; $('scenario-hint').textContent = descriptions[name]; clearResult();
     for (const b of document.querySelectorAll('.scenario')) { const selected = b.dataset.example === name; b.classList.toggle('selected', selected); b.setAttribute('aria-pressed', String(selected)); }
     status('示例已载入。运行后查看结果，也可以直接编辑 JSON。', '等待运行');
-  } catch (e) { status(e.message, '加载失败', 'bad'); }
+  } catch (e) { if (ownLoad === loadNumber) status(e.message, '加载失败', 'bad'); }
 }
 for (const b of document.querySelectorAll('.scenario')) b.addEventListener('click', () => load(b.dataset.example));
 $('reset').onclick = () => load(current);
@@ -64,9 +69,9 @@ function plot(title, datasets) {
   }); box.append(svg, legend); $('visuals').append(box);
 }
 function channels(label, rows) { const data = series(rows); return data[0].map((_, k) => ({ label: `${label} · 特征 ${k + 1}`, values: data.map(row => row[k]) })); }
-function heatmap(matrix) {
-  const box = el('section', undefined, 'plot'); box.append(el('h3', '软对齐占用 · 行 = x 的采样点，列 = y 的采样点'));
-  const canvas = el('canvas', undefined, 'heat'); canvas.width = matrix[0].length; canvas.height = matrix.length; canvas.setAttribute('role', 'img'); canvas.setAttribute('aria-label', '软对齐占用矩阵；完整数字见 JSON 结果');
+function heatmap(matrix, title = '软对齐占用 · 行 = x 的采样点，列 = y 的采样点') {
+  const box = el('section', undefined, 'plot'); box.append(el('h3', title));
+  const canvas = el('canvas', undefined, 'heat'); canvas.width = matrix[0].length; canvas.height = matrix.length; canvas.setAttribute('role', 'img'); canvas.setAttribute('aria-label', `${title}；完整数字见 JSON 结果`);
   const context = canvas.getContext('2d'); const img = context.createImageData(canvas.width, canvas.height);
   matrix.flat().forEach((value, i) => { const t = Math.max(0, Math.min(1, value)); img.data.set([Math.round(239 - 225*t), Math.round(247 - 127*t), Math.round(243 - 138*t), 255], i*4); });
   context.putImageData(img, 0, 0); box.append(canvas); $('visuals').append(box);
@@ -74,18 +79,42 @@ function heatmap(matrix) {
 function render(result, source, elapsed) {
   $('output').textContent = JSON.stringify(result, null, 2); $('metrics').replaceChildren(); $('visuals').replaceChildren();
   lastResult = result; $('download').disabled = false;
-  if (!result.ok) { status(`${result.error.code}: ${result.error.message}`, '输入 / 预算错误', 'bad'); return; }
+  if (!result.ok) {
+    const hint = result.error.code === 'empty_cluster' ? '；请更换初始中心或减少簇数' : '';
+    status(`${result.error.code}: ${result.error.message}${hint}`, '输入 / 预算错误', 'bad'); return;
+  }
   const request = JSON.parse(source); const budget = ['work_budget', 'evaluation_budget'].includes(result.stop);
-  status(`${result.operation === 'fit' ? `停止原因：${result.stop}。返回最后一次完整评估的模板。` : '计算完成。'} 本机耗时 ${elapsed.toFixed(1)} ms。`, budget ? '预算耗尽' : '已完成', budget ? 'warn' : 'good');
-  if (result.operation === 'fit') {
+  const caution = ['numerical_stall', 'line_search_stalled', 'max_steps', 'max_iterations'].includes(result.stop);
+  const description = result.stop ? `停止原因：${result.stop}。返回最后一次完整评估的结果。` : '计算完成。';
+  status(`${description} 本机耗时 ${elapsed.toFixed(1)} ms。`, budget ? '预算耗尽' : caution ? '检查停止原因' : '已完成', budget || caution ? 'warn' : 'good');
+  if (result.operation === 'fit' || result.operation === 'dba') {
     metric('初始目标', fmt(result.history[0])); metric('最终目标', fmt(result.history.at(-1))); metric('接受步数 / 评估数', `${result.accepted_steps} / ${result.evaluations}`);
     plot('原型前后对比 · 横轴按各自长度归一显示', [...channels('初始', request.seed), ...channels('拟合', result.prototype)]);
-    plot('优化轨迹 · 横轴为接受的步数', [{ label: '校正目标', values: result.history }]);
+    plot('优化轨迹 · 横轴为接受的步数', [{ label: result.operation === 'dba' ? '平均平方 DTW 代价' : '校正目标', values: result.history }]);
     metric('逻辑工作量', String(result.work_units));
   } else if (result.operation === 'loss') {
     metric('目标值', fmt(result.value)); metric('目标类型', result.objective === 'raw' ? '原始' : '自项校正'); metric('矩阵大小', `${result.alignment.length} × ${result.alignment[0].length}`);
     plot('输入序列 · 横轴按各自长度归一显示', [...channels('x', request.x), ...channels('y', request.y)]);
     plot('对 x 的输入梯度', channels('∂L/∂x', result.gradient_x)); heatmap(result.alignment);
+  } else if (result.operation === 'dtw') {
+    metric('DTW 距离', fmt(result.distance)); metric('平方路径代价', fmt(result.squared_cost)); metric('路径格点数', String(result.path.length));
+    plot('输入序列 · 横轴按各自长度归一显示', [...channels('x', request.x), ...channels('y', request.y)]);
+    const rows = series(request.x).length, columns = series(request.y).length;
+    const occupancy = Array.from({ length: rows }, () => Array(columns).fill(0));
+    for (const [i,j] of result.path) occupancy[i][j] = 1;
+    heatmap(occupancy, '硬 DTW 路径 · 深色为选中格点，行 = x，列 = y');
+  } else if (result.operation === 'cluster') {
+    metric('输入序列', String(result.labels.length)); metric('簇数', String(result.centers.length)); metric('平均平方 DTW 代价', fmt(result.inertia));
+    const table=el('table', undefined, 'rank'), head=el('tr');
+    ['簇编号', '样本数', '输入下标（从 0 开始）'].forEach(t=>head.append(el('th',t))); table.append(head);
+    result.centers.forEach((center,k) => {
+      const members=result.labels.flatMap((label,index)=>label===k?[index]:[]);
+      const row=el('tr'); [k,members.length,members.join('、')].forEach(t=>row.append(el('td',String(t)))); table.append(row);
+    }); $('visuals').append(table);
+    const datasets=result.centers.slice(0,4).flatMap((center,k)=>channels(`簇 ${k}`,center).slice(0,3));
+    plot('聚类中心 · 最多显示 4 簇、每簇前 3 个特征；横轴按各自长度归一', datasets);
+    plot('聚类目标轨迹 · 横轴为完整接受的迭代', [{label:'平均平方 DTW 代价',values:result.history}]);
+    metric('完整迭代 / 工作量', `${result.iterations} / ${result.work_units}`);
   } else {
     metric('完整评估候选', String(result.candidates_evaluated)); metric('返回数量', String(result.matches.length)); metric('逻辑工作量', String(result.work_units));
     const table = el('table', undefined, 'rank'), head = el('tr'); ['顺序', '候选 ID', '校正值 ↓'].forEach(t => head.append(el('th', t))); table.append(head);

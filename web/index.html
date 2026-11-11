@@ -3,17 +3,20 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; worker-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'">
-  <title>WarpFit · 可微分时序对齐实验台</title>
+  <title>WarpFit · 时序对齐与学习实验台</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <header class="top"><a class="brand" href="./"><span class="mark">W</span> WarpFit <span class="version">0.1.2</span></a><span class="local"><i></i> MoonBit · 浏览器本地计算</span></header>
+  <header class="top"><a class="brand" href="./"><span class="mark">W</span> WarpFit <span class="version">本地开发版</span></a><span class="local"><i></i> MoonBit · 浏览器本地计算</span></header>
   <main>
-    <section class="intro"><div class="eyebrow">DIFFERENTIABLE TEMPORAL ALIGNMENT</div><h1>把不同节奏，<br><em>对齐成可学习的信号。</em></h1><p>计算 Soft-DTW 与两侧梯度，从多条序列拟合参考模板，再用示例检索相似形状。上传的数据只在本页计算。</p></section>
+    <section class="intro"><div class="eyebrow">TEMPORAL ALIGNMENT &amp; LEARNING</div><h1>把不同节奏，<br><em>对齐成可学习的信号。</em></h1><p>使用 Soft-DTW 与硬 DTW 计算对齐，学习参考模板并发现时序分组。上传的数据只在本页计算。</p></section>
     <section class="workflow" aria-label="选择完整使用场景">
-      <button class="scenario selected" data-example="prototype" aria-pressed="true"><span class="num">01</span><strong>学习参考模板</strong><span>长度不一的示例 → 固定长度原型</span></button>
+      <button class="scenario selected" data-example="prototype" aria-pressed="true"><span class="num">01</span><strong>Soft-DTW 模板</strong><span>可微分目标 → 固定长度原型</span></button>
       <button class="scenario" data-example="training" aria-pressed="false"><span class="num">02</span><strong>查看训练信号</strong><span>多变量序列 → 损失与输入梯度</span></button>
       <button class="scenario" data-example="retrieval" aria-pressed="false"><span class="num">03</span><strong>按示例检索</strong><span>查询与候选 → 完整评分与排序</span></button>
+      <button class="scenario" data-example="align" aria-pressed="false"><span class="num">04</span><strong>约束 DTW 对齐</strong><span>限制路径 → 硬对齐与代价</span></button>
+      <button class="scenario" data-example="dba" aria-pressed="false"><span class="num">05</span><strong>DBA 模板学习</strong><span>硬对齐路径 → 迭代求均值</span></button>
+      <button class="scenario" data-example="clusters" aria-pressed="false"><span class="num">06</span><strong>时序聚类</strong><span>未标记序列 → 分组与中心</span></button>
     </section>
     <div class="workspace">
       <section class="panel editor-panel"><div class="panel-head"><h2>输入请求</h2><label class="file-label">导入 JSON<input id="file" type="file" accept=".json,application/json"></label></div><p class="hint" id="scenario-hint">修改示例或导入自己的数值序列。参数和预算均在 options 中。</p><label class="sr" for="request">版本化 JSON 请求</label><textarea id="request" spellcheck="false" aria-describedby="scenario-hint"></textarea><div class="actions"><button id="run" class="primary">运行计算 <span>↗</span></button><button id="cancel" disabled>取消</button><button id="reset">重置示例</button></div><p class="limits">1–512 个采样点 · 1–16 个特征 · 1–32 条示例 / 候选<br>可设置矩阵、评估次数与逻辑工作量上限。</p></section>
