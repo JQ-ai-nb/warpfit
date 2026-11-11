@@ -22,6 +22,7 @@ from tslearn.metrics import dtw_path
 from tslearn.barycenters import dtw_barycenter_averaging
 from tslearn.clustering import TimeSeriesKMeans
 from tslearn.utils import to_time_series_dataset
+from tslearn.preprocessing import TimeSeriesResampler, TimeSeriesScalerMeanVariance
 
 rng=random.Random(20261111)
 requests=[]
@@ -93,11 +94,45 @@ for trial in range(8):
         options=dict(window=1,max_iterations=10,max_dba_steps=20,tolerance=1e-8)),
         dict(labels=model.labels_.tolist(),centers=model.cluster_centers_.tolist(),inertia=float(model.inertia_)),'cluster')
 
+constant_reference_divergences=0
+constant_reference_max_difference=0.0
+for trial in range(50):
+    n=rng.randint(2,9); d=rng.randint(1,3); target=rng.randint(2,10)
+    raw=sequence(n,d)
+    if trial%5==0:raw[:,d-1]=0.1
+    sampled=TimeSeriesResampler(sz=target).fit_transform(raw[None,:,:])[0]
+    for normalize in [False,True]:
+        expected=TimeSeriesScalerMeanVariance().fit_transform(sampled[None,:,:])[0] if normalize else sampled
+        if normalize:
+            # WarpFit explicitly treats per-feature stdev <= 1e-12 as constant.
+            # tslearn 0.6.4 sometimes amplifies near-zero roundoff for constants.
+            # Check those features against zero, record the actual difference,
+            # and compare all nonconstant features to tslearn without adjustment.
+            constant=np.ptp(sampled,axis=0)<=1e-12
+            if constant.any():
+                diff=float(np.max(np.abs(expected[:,constant])))
+                if diff>1e-8:constant_reference_divergences+=1
+                constant_reference_max_difference=max(constant_reference_max_difference,diff)
+                expected=expected.copy()
+                expected[:,constant]=0.0
+        submit(dict(schema=schema,operation='preprocess',series=raw.tolist(),options=dict(target_count=target,normalize=normalize)),
+            expected.tolist(),'preprocess')
+
+raw_pipeline=[[2,4,6],[100,200,300,400,500],[6,4,2],[500,400,300,200,100]]
+sampled=TimeSeriesResampler(sz=5).fit_transform(to_time_series_dataset(raw_pipeline))
+scaled=TimeSeriesScalerMeanVariance().fit_transform(sampled)
+model=TimeSeriesKMeans(n_clusters=2,metric='dtw',init=scaled[[0,2]],n_init=1,
+    max_iter=10,max_iter_barycenter=20,tol=1e-8,random_state=0,
+    metric_params=dict(global_constraint='sakoe_chiba',sakoe_chiba_radius=0))
+model.fit(scaled)
+submit(dict(schema=schema,operation='pipeline',data=raw_pipeline,seed_indices=[0,2],options=dict(target_count=5,normalize=True,window=0)),
+    dict(prepared=scaled.tolist(),labels=model.labels_.tolist(),centers=model.cluster_centers_.tolist(),inertia=float(model.inertia_)),'pipeline')
+
 process=subprocess.run(['node','scripts/reference.mjs'],input='\n'.join(requests)+'\n',cwd=root,
     capture_output=True,text=True,timeout=180,check=True)
 actual=[json.loads(line) for line in process.stdout.splitlines()]
 assert len(actual)==len(checks)
-max_errors=dict(dtw=0.,dba=0.,cluster=0.)
+max_errors=dict(dtw=0.,dba=0.,cluster=0.,preprocess=0.,pipeline=0.)
 def check(actual,expected,kind):
     error=float(np.max(np.abs(np.asarray(actual)-np.asarray(expected))))
     max_errors[kind]=max(max_errors[kind],error)
@@ -106,14 +141,23 @@ for out,(kind,reference) in zip(actual,checks):
     assert out['ok'],out
     if kind=='dtw': check(out['distance'],reference,kind)
     elif kind=='dba':check(out['prototype'],reference,kind)
-    else:
+    elif kind=='cluster':
         assert out['labels']==reference['labels'],(out['labels'],reference['labels'])
         check(out['centers'],reference['centers'],kind)
         check(out['inertia'],reference['inertia'],kind)
+    elif kind=='preprocess':check(out['prepared']['series'],reference,kind)
+    else:
+        assert out['clustering']['labels']==reference['labels']
+        check([p['series'] for p in out['prepared']],reference['prepared'],kind)
+        check(out['clustering']['centers'],reference['centers'],kind)
+        check(out['clustering']['inertia'],reference['inertia'],kind)
 report=dict(recorded_at_utc=datetime.now(timezone.utc).isoformat(),reference='tslearn',
     reference_version=tslearn.__version__,numpy_version=np.__version__,
-    cases=dict(weighted_dtw=160,weighted_one_step_dba=80,cluster_workflow=9),
-    max_absolute_error=max_errors,tolerance='rtol=atol=1e-8',status='passed')
+    cases=dict(weighted_dtw=160,weighted_one_step_dba=80,cluster_workflow=9,preprocess=100,full_pipeline=1),
+    max_absolute_error=max_errors,tolerance='rtol=atol=1e-8',
+    preprocess_constant_policy='Constant features are checked against zero per WarpFit epsilon; tslearn is not used as oracle for those features.',
+    tslearn_constant_feature_divergences=constant_reference_divergences,
+    tslearn_constant_feature_max_abs=constant_reference_max_difference,status='passed')
 (root/'artifacts').mkdir(exist_ok=True)
 (root/'artifacts/hard-reference.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
 print(json.dumps(report))
