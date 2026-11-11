@@ -28,9 +28,13 @@ pub fn fitting_options(Double, Int32) -> FitOptions
 
 pub fn rank_candidates(Series, Array[Candidate], AlignOptions, Int32, Int32) -> Result[Ranking, WarpError]
 
+pub fn resample_linear(Series, Int32) -> Result[Series, WarpError]
+
 pub fn soft_dtw(Series, Series, Double) -> Result[Evaluation, WarpError]
 
 pub fn soft_dtw_with(Series, Series, AlignOptions) -> Result[Evaluation, WarpError]
+
+pub fn standardize(Series, Double) -> Result[StandardizedSeries, WarpError]
 
 pub fn validate_series(Series) -> Result[Unit, WarpError]
 
@@ -158,6 +162,13 @@ pub(all) struct Series {
   count : Int32
   dimensions : Int32
   values : Array[Double]
+}
+
+pub(all) struct StandardizedSeries {
+  series : Series
+  means : Array[Double]
+  standard_deviations : Array[Double]
+  constant_features : Array[Bool]
 }
 
 pub(all) struct WarpError {
