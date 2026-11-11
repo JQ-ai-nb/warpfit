@@ -17,6 +17,7 @@
       <button class="scenario" data-example="align" aria-pressed="false"><span class="num">04</span><strong>约束 DTW 对齐</strong><span>限制路径 → 硬对齐与代价</span></button>
       <button class="scenario" data-example="dba" aria-pressed="false"><span class="num">05</span><strong>DBA 模板学习</strong><span>硬对齐路径 → 迭代求均值</span></button>
       <button class="scenario" data-example="clusters" aria-pressed="false"><span class="num">06</span><strong>时序聚类</strong><span>未标记序列 → 分组与中心</span></button>
+      <button class="scenario" data-example="pipeline" aria-pressed="false"><span class="num">07</span><strong>从原始序列到聚类</strong><span>按采样点重采样、逐维标准化，再使用 DTW / DBA 聚类</span></button>
     </section>
     <div class="workspace">
       <section class="panel editor-panel"><div class="panel-head"><h2>输入请求</h2><label class="file-label">导入 JSON<input id="file" type="file" accept=".json,application/json"></label></div><p class="hint" id="scenario-hint">修改示例或导入自己的数值序列。参数和预算均在 options 中。</p><label class="sr" for="request">版本化 JSON 请求</label><textarea id="request" spellcheck="false" aria-describedby="scenario-hint"></textarea><div class="actions"><button id="run" class="primary">运行计算 <span>↗</span></button><button id="cancel" disabled>取消</button><button id="reset">重置示例</button></div><p class="limits">1–512 个采样点 · 1–16 个特征 · 1–32 条示例 / 候选<br>可设置矩阵、评估次数与逻辑工作量上限。</p></section>

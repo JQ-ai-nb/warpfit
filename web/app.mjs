@@ -6,7 +6,8 @@ const descriptions = {
   retrieval: '离线序列应用开发者：对完整候选集评分，再输出前 k 项。分数不表示类别概率。',
   align: '生产数据开发者：限制时间错位的范围，返回两条序列的硬对齐路径与代价；可修改 window 比较路径。',
   dba: '传感器应用开发者：输入多条不同长度样本和初始模板，沿硬 DTW 路径做迭代平均，得到 DBA 模板。',
-  clusters: '时序分析开发者：输入未标记序列及初始中心，通过 DTW 分配和 DBA 更新得到簇编号与中心。'
+  clusters: '时序分析开发者：输入未标记序列及初始中心，通过 DTW 分配和 DBA 更新得到簇编号与中心。',
+  pipeline: '不同设备的序列可能长度、量纲不同。先按采样点重采样并逐维标准化，再按指定样本初始化聚类中心。'
 };
 function status(text, label = '', kind = '') { $('status').textContent = text; $('badge').textContent = label; $('badge').className = `badge ${kind}`; }
 function busy(value) {
@@ -34,6 +35,7 @@ for (const b of document.querySelectorAll('.scenario')) b.addEventListener('clic
 $('reset').onclick = () => load(current);
 $('file').onchange = async event => {
   const file = event.target.files[0]; if (!file) return;
+  ++loadNumber;
   try { if (file.size > 2_000_000) throw new Error('输入文件超过 2,000,000 字节。');
     $('request').value = new TextDecoder('utf-8', { fatal: true }).decode(await file.arrayBuffer());
     clearResult();
@@ -42,6 +44,7 @@ $('file').onchange = async event => {
   event.target.value = '';
 };
 $('request').addEventListener('input', () => {
+  ++loadNumber;
   clearResult(); status('输入已更改，请重新运行以获得对应结果。', '等待运行');
 });
 const ns = 'http://www.w3.org/2000/svg';
@@ -83,9 +86,10 @@ function render(result, source, elapsed) {
     const hint = result.error.code === 'empty_cluster' ? '；请更换初始中心或减少簇数' : '';
     status(`${result.error.code}: ${result.error.message}${hint}`, '输入 / 预算错误', 'bad'); return;
   }
-  const request = JSON.parse(source); const budget = ['work_budget', 'evaluation_budget'].includes(result.stop);
-  const caution = ['numerical_stall', 'line_search_stalled', 'max_steps', 'max_iterations'].includes(result.stop);
-  const description = result.stop ? `停止原因：${result.stop}。返回最后一次完整评估的结果。` : '计算完成。';
+  const request = JSON.parse(source); const stop = result.stop ?? result.clustering?.stop;
+  const budget = ['work_budget', 'evaluation_budget'].includes(stop);
+  const caution = ['numerical_stall', 'line_search_stalled', 'max_steps', 'max_iterations'].includes(stop);
+  const description = stop ? `停止原因：${stop}。返回最后一次完整评估的结果。` : '计算完成。';
   status(`${description} 本机耗时 ${elapsed.toFixed(1)} ms。`, budget ? '预算耗尽' : caution ? '检查停止原因' : '已完成', budget || caution ? 'warn' : 'good');
   if (result.operation === 'fit' || result.operation === 'dba') {
     metric('初始目标', fmt(result.history[0])); metric('最终目标', fmt(result.history.at(-1))); metric('接受步数 / 评估数', `${result.accepted_steps} / ${result.evaluations}`);
@@ -103,18 +107,31 @@ function render(result, source, elapsed) {
     const occupancy = Array.from({ length: rows }, () => Array(columns).fill(0));
     for (const [i,j] of result.path) occupancy[i][j] = 1;
     heatmap(occupancy, '硬 DTW 路径 · 深色为选中格点，行 = x，列 = y');
-  } else if (result.operation === 'cluster') {
-    metric('输入序列', String(result.labels.length)); metric('簇数', String(result.centers.length)); metric('平均平方 DTW 代价', fmt(result.inertia));
+  } else if (result.operation === 'preprocess') {
+    const prepared=result.prepared;
+    metric('原始采样点', String(series(request.series).length)); metric('输出采样点', String(prepared.series.length));
+    metric('逐维标准化', prepared.normalized ? '是' : '否');
+    plot('预处理前后 · 横轴按各自长度归一', [...channels('原始',request.series),...channels('输出',prepared.series)]);
+    if (prepared.normalized) status(`${description} 常量特征数：${prepared.constant_features.filter(Boolean).length}。本机耗时 ${elapsed.toFixed(1)} ms。`, '已完成', 'good');
+  } else if (result.operation === 'cluster' || result.operation === 'pipeline') {
+    const group=result.operation === 'pipeline' ? result.clustering : result;
+    metric('输入序列', String(group.labels.length)); metric('簇数', String(group.centers.length)); metric('平均平方 DTW 代价', fmt(group.inertia));
+    if (result.operation === 'pipeline') {
+      const normalized=result.prepared.filter(p=>p.normalized).length;
+      const constants=result.prepared.reduce((sum,p)=>sum+p.constant_features.filter(Boolean).length,0);
+      metric('已标准化 / 常量特征数', `${normalized} / ${constants}`);
+      plot('预处理序列 · 最多显示前 4 条的前 3 个特征',result.prepared.slice(0,4).flatMap((p,i)=>channels(`序列 ${i}`,p.series).slice(0,3)));
+    }
     const table=el('table', undefined, 'rank'), head=el('tr');
     ['簇编号', '样本数', '输入下标（从 0 开始）'].forEach(t=>head.append(el('th',t))); table.append(head);
-    result.centers.forEach((center,k) => {
-      const members=result.labels.flatMap((label,index)=>label===k?[index]:[]);
+    group.centers.forEach((center,k) => {
+      const members=group.labels.flatMap((label,index)=>label===k?[index]:[]);
       const row=el('tr'); [k,members.length,members.join('、')].forEach(t=>row.append(el('td',String(t)))); table.append(row);
     }); $('visuals').append(table);
-    const datasets=result.centers.slice(0,4).flatMap((center,k)=>channels(`簇 ${k}`,center).slice(0,3));
+    const datasets=group.centers.slice(0,4).flatMap((center,k)=>channels(`簇 ${k}`,center).slice(0,3));
     plot('聚类中心 · 最多显示 4 簇、每簇前 3 个特征；横轴按各自长度归一', datasets);
-    plot('聚类目标轨迹 · 横轴为完整接受的迭代', [{label:'平均平方 DTW 代价',values:result.history}]);
-    metric('完整迭代 / 工作量', `${result.iterations} / ${result.work_units}`);
+    plot('聚类目标轨迹 · 横轴为完整接受的迭代', [{label:'平均平方 DTW 代价',values:group.history}]);
+    metric('完整迭代 / 工作量', `${group.iterations} / ${group.work_units}`);
   } else {
     metric('完整评估候选', String(result.candidates_evaluated)); metric('返回数量', String(result.matches.length)); metric('逻辑工作量', String(result.work_units));
     const table = el('table', undefined, 'rank'), head = el('tr'); ['顺序', '候选 ID', '校正值 ↓'].forEach(t => head.append(el('th', t))); table.append(head);

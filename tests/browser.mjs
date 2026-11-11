@@ -31,18 +31,25 @@ try {
   const downloadPromise = page.waitForEvent('download'); await page.locator('#download').click();
   const download = await downloadPromise; assert.equal(download.suggestedFilename(), 'warpfit-rank.json');
   report.checks.push('result JSON download');
-  for (const [name, operation] of [['align','dtw'],['dba','dba'],['clusters','cluster']]) {
+  for (const [name, operation] of [['align','dtw'],['dba','dba'],['clusters','cluster'],['pipeline','pipeline']]) {
     await page.locator(`[data-example=${name}]`).click();
     await page.waitForFunction(n => JSON.parse(document.getElementById('request').value).operation === n, operation);
     result = await execute(); assert.equal(result.ok, true); assert.equal(result.operation, operation);
     if (operation === 'dtw') { assert.equal(result.distance,0); assert.equal(await page.locator('canvas.heat').count(),1); }
     if (operation === 'dba') assert.ok(result.history.at(-1)<result.history[0]);
     if (operation === 'cluster') { assert.deepEqual(result.labels,[0,0,0,1,1,1]); assert.equal(await page.locator('table.rank').count(),1); }
+    if (operation === 'pipeline') { assert.deepEqual(result.clustering.labels,[0,0,1,1]); assert.equal(await page.locator('table.rank').count(),1); }
     report.checks.push(`${name} workflow and visualization`);
   }
   await page.locator('#file').setInputFiles({name:'sample.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({schema:'warpfit.request/1',operation:'dtw',x:[2],y:[5]}))});
   await page.waitForFunction(() => document.getElementById('request').value.includes('"x":[2]'));
   result=await execute(); assert.equal(result.distance,3); report.checks.push('local JSON import computes user input');
+  await page.locator('#request').fill(JSON.stringify({schema:'warpfit.request/1',operation:'preprocess',series:[1,2,3],options:{target_count:5}}));
+  result=await execute();assert.equal(result.ok,true);assert.equal(result.prepared.series.length,5);
+  assert.equal(await page.locator('.plot svg').count(),1);report.checks.push('preprocessing visualization works for custom input');
+  await page.locator('#request').fill(JSON.stringify({schema:'warpfit.request/1',operation:'pipeline',data:[[0],[2],[9],[11]],seed_indices:[0,2],options:{normalize:false,max_work_units:8}}));
+  result=await execute();assert.equal(result.clustering.stop,'work_budget');
+  assert.equal(await page.locator('#badge').textContent(),'预算耗尽');report.checks.push('pipeline nested budget stop is visible');
   await page.locator('#request').fill('{"schema":"warpfit.request/1","operation":"loss","operation":"fit"}');
   assert.equal(await page.locator('#download').isDisabled(), true);
   assert.equal(await page.locator('.metric').count(), 0);
