@@ -1,12 +1,12 @@
 {
   "name": "warpfit-local-tools",
   "private": true,
-  "version": "0.1.2",
+  "version": "0.2.0",
   "type": "module",
   "engines": { "node": ">=22" },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "node --test tests/cli.test.mjs",
+    "test": "node --test tests/cli.test.mjs tests/numerical.test.mjs tests/extended.test.mjs tests/exhaustive_hard.test.mjs tests/properties_hard.test.mjs",
     "start": "node scripts/serve.mjs"
   }
 }

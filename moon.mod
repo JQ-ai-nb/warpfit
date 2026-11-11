@@ -1,13 +1,13 @@
 name = "JQ-ai-nb/warpfit"
 
-version = "0.1.2"
+version = "0.2.0"
 
 license = "Apache-2.0"
 
 readme = "README.md"
 
-description = "Differentiable temporal alignment and reference-prototype fitting in pure MoonBit."
+description = "Time-series alignment, DBA prototypes and bounded clustering in pure MoonBit."
 
 repository = "https://github.com/JQ-ai-nb/warpfit"
 
-keywords = [ "time-series", "soft-dtw", "gradient", "prototype", "numerical" ]
+keywords = [ "time-series", "dtw", "soft-dtw", "barycenter", "clustering" ]

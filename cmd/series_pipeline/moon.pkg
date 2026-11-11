@@ -1,0 +1,5 @@
+import {
+  "JQ-ai-nb/warpfit/core" @warpfit,
+}
+
+pkgtype(kind: "executable")
