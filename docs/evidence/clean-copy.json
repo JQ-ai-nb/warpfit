@@ -1,0 +1,77 @@
+{
+  "recorded_at_utc": "2026-11-11T08:02:27.791726+00:00",
+  "snapshot": "f3d5222b01dbcdfb878ca3fd6e715153fbe9b047",
+  "method": "git archive extracted to a fresh directory; host toolchain reused",
+  "not_checked": [
+    "git metadata or remote",
+    "native runtime",
+    "online CI"
+  ],
+  "results": [
+    {
+      "command": [
+        "moon",
+        "check",
+        "--target",
+        "all",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout_tail": [],
+      "stderr_tail": [
+        "Finished. moon: ran 57 tasks, now up to date"
+      ]
+    },
+    {
+      "command": [
+        "moon",
+        "test",
+        "--target",
+        "js",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout_tail": [
+        "Total tests: 59, passed: 59, failed: 0."
+      ],
+      "stderr_tail": []
+    },
+    {
+      "command": [
+        "node",
+        "scripts/build.mjs"
+      ],
+      "returncode": 0,
+      "stdout_tail": [
+        "Built the MoonBit JSON engine for Node and the browser; included license notices."
+      ],
+      "stderr_tail": [
+        "Finished. moon: ran 3 tasks, now up to date"
+      ]
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "tests/cli.test.mjs",
+        "tests/numerical.test.mjs",
+        "tests/extended.test.mjs",
+        "tests/exhaustive_hard.test.mjs",
+        "tests/properties_hard.test.mjs"
+      ],
+      "returncode": 0,
+      "stdout_tail": [
+        "ℹ tests 23",
+        "ℹ suites 0",
+        "ℹ pass 23",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 1164.9416"
+      ],
+      "stderr_tail": []
+    }
+  ],
+  "status": "passed"
+}

@@ -3,6 +3,7 @@
 ## 0.2.0 本地扩展（2026-11-11，未推送 / 未发布）
 
 - 本地 Windows 的 `moon check --target all --deny-warn`、格式与生成接口检查通过；Wasm、Wasm-GC、JS 目标各执行 59 项 MoonBit 测试并构建通过。本机缺少 MSVC，native 运行和新版远程多系统 CI **尚未验证**。
+- 从提交 `f3d5222` 用 `git archive` 导出源码到新目录，复用本机工具链重新检查全部目标、构建 JS 并运行 JS 的 59 项 MoonBit 测试及 23 项 Node 测试，均通过；[记录](evidence/clean-copy.json)。这验证的是导出源码，不代表远程检出或其他机器上的结果。
 - Node CLI / 数值测试共23项通过；本地 Chrome 覆盖7个页面场景、导入、计算、预算提示、取消、下载及390px布局，无页面错误和外部请求。浏览器证据见 [browser-nov.json](evidence/browser-nov.json)。
 - `tests/exhaustive_hard.test.mjs` 逐一枚举 240 组长度1..4的硬 DTW 合法完整路径，覆盖全部16种长度组合、一维/二维、无窗口及不同窗口，检查最小代价、实际路径和边界。80组 DBA 与30组聚类性质用例另复算目标、逐点最近中心和预算停止状态。
 - `tests/reference_hard.py` 使用 tslearn 0.6.4 / NumPy 2.2.6 对照160组带权硬 DTW、80组单步带权 DBA（含不等长和窗口）、9组聚类、100组预处理及1组完整流程。非例外比较的最大绝对差约2.57e-15，断言容差 rtol=atol=1e-8；结果见 [hard-reference.json](evidence/hard-reference.json)。DBA 是单步对照，不能据此声称任意初始化和收敛行为完全一致。
