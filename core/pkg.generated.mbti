@@ -4,6 +4,8 @@ package "JQ-ai-nb/warpfit/core"
 // Values
 pub fn alignment_options(Double) -> AlignOptions
 
+pub fn cluster_options() -> ClusterOptions
+
 pub fn dba_fit(Series, Array[Series], DbaOptions) -> Result[DbaFit, WarpError]
 
 pub fn dba_options() -> DbaOptions
@@ -11,6 +13,8 @@ pub fn dba_options() -> DbaOptions
 pub fn divergence(Series, Series, Double) -> Result[Divergence, WarpError]
 
 pub fn divergence_with(Series, Series, AlignOptions) -> Result[Divergence, WarpError]
+
+pub fn dtw_kmeans(Array[Series], Array[Series], ClusterOptions) -> Result[ClusterFit, WarpError]
 
 pub fn dtw_options() -> DtwOptions
 
@@ -42,6 +46,24 @@ pub(all) struct AlignOptions {
 pub(all) struct Candidate {
   id : String
   series : Series
+}
+
+pub(all) struct ClusterFit {
+  centers : Array[Series]
+  labels : Array[Int32]
+  inertia : Double
+  history : Array[Double]
+  iterations : Int32
+  stop : String
+  work_units : Int32
+}
+
+pub(all) struct ClusterOptions {
+  alignment : DtwOptions
+  max_iterations : Int32
+  max_dba_steps : Int32
+  tolerance : Double
+  max_work_units : Int32
 }
 
 pub(all) struct DbaFit {
