@@ -156,3 +156,66 @@ test "ranking checks nested candidate fields and returns ranked ids" {
     "unknown_field",
   )
 }
+
+///|
+test "hard DTW JSON returns path and respects a zero-width band" {
+  let out = response(
+    "{\"schema\":\"warpfit.request/1\",\"operation\":\"dtw\",\"x\":[0,0,1,2],\"y\":[0,1,2,2],\"options\":{\"window\":0}}",
+  )
+  let distance : Double = @json.from_json(out.get("distance").unwrap())
+  let path : Array[Array[Int32]] = @json.from_json(out.get("path").unwrap())
+  assert_true((distance - 2.0.sqrt()).abs() < 1.0e-10)
+  assert_eq(path.length(), 4)
+  assert_eq(path[3], [3, 3])
+}
+
+///|
+test "DBA JSON returns weighted prototype and explicit budget stop" {
+  let out = response(
+    "{\"schema\":\"warpfit.request/1\",\"operation\":\"dba\",\"seed\":[10],\"examples\":[[0],[4]],\"options\":{\"example_weights\":[3,1]}}",
+  )
+  let prototype : Array[Array[Double]] = @json.from_json(
+    out.get("prototype").unwrap(),
+  )
+  assert_true((prototype[0][0] - 1.0).abs() < 1.0e-10)
+  let limited = response(
+    "{\"schema\":\"warpfit.request/1\",\"operation\":\"dba\",\"seed\":[2],\"examples\":[[0]],\"options\":{\"max_work_units\":1}}",
+  )
+  let stop : String = @json.from_json(limited.get("stop").unwrap())
+  assert_eq(stop, "work_budget")
+}
+
+///|
+test "clustering JSON exposes real labels, centroids and empty-cluster error" {
+  let out = response(
+    "{\"schema\":\"warpfit.request/1\",\"operation\":\"cluster\",\"data\":[[0],[2],[9],[11]],\"centers\":[[0],[10]]}",
+  )
+  let labels : Array[Int32] = @json.from_json(out.get("labels").unwrap())
+  let centers : Array[Array[Array[Double]]] = @json.from_json(
+    out.get("centers").unwrap(),
+  )
+  assert_eq(labels, [0, 0, 1, 1])
+  assert_true((centers[0][0][0] - 1.0).abs() < 1.0e-10)
+  assert_eq(
+    error_code(
+      "{\"schema\":\"warpfit.request/1\",\"operation\":\"cluster\",\"data\":[[0],[0]],\"centers\":[[0],[0]]}",
+    ),
+    "empty_cluster",
+  )
+}
+
+///|
+test "new operations reject unrelated options and non-integer windows" {
+  assert_eq(
+    error_code(
+      "{\"schema\":\"warpfit.request/1\",\"operation\":\"dtw\",\"x\":[0],\"y\":[0],\"options\":{\"window\":1.5}}",
+    ),
+    "integer",
+  )
+  assert_eq(
+    error_code(
+      "{\"schema\":\"warpfit.request/1\",\"operation\":\"cluster\",\"data\":[[0]],\"centers\":[[0]],\"options\":{\"gamma\":0.5}}",
+    ),
+    "unknown_field",
+  )
+}

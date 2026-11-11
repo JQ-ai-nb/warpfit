@@ -1,0 +1,14 @@
+{
+  "schema": "warpfit.request/1",
+  "operation": "cluster",
+  "data": [
+    [0, 1, 2, 1, 0],
+    [0, 0, 1, 2, 1, 0],
+    [0, 0.9, 2, 1, 0],
+    [3, 2, 1, 2, 3],
+    [3, 3, 2, 1, 2, 3],
+    [3, 2, 1.1, 2, 3]
+  ],
+  "centers": [[0, 1, 2, 1, 0], [3, 2, 1, 2, 3]],
+  "options": { "window": 1, "max_iterations": 10, "max_dba_steps": 20, "max_work_units": 2000000 }
+}

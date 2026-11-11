@@ -1,0 +1,7 @@
+{
+  "schema": "warpfit.request/1",
+  "operation": "dtw",
+  "x": [0, 0, 1, 2],
+  "y": [0, 1, 2, 2],
+  "options": { "window": 1, "max_cells": 100 }
+}

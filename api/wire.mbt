@@ -217,6 +217,20 @@ fn alignment(
 }
 
 ///|
+fn hard_alignment(
+  fields : Map[String, Json],
+) -> @warpfit.DtwOptions raise WireError {
+  {
+    window: integer_option(fields, "window", -1),
+    feature_weights: match fields.get("feature_weights") {
+      Some(v) => number_array(v, "options.feature_weights", 16)
+      None => []
+    },
+    max_cells: integer_option(fields, "max_cells", 262144),
+  }
+}
+
+///|
 fn matrix(values : Array[Double], rows : Int32, columns : Int32) -> Json {
   let out : Array[Json] = []
   for i = 0; i < rows; i = i + 1 {
@@ -368,6 +382,115 @@ fn ranking(
 }
 
 ///|
+fn hard_dtw(
+  fields : Map[String, Json],
+  options : Map[String, Json],
+) -> Json raise WireError {
+  let x = series(required(fields, "x"), "x")
+  let y = series(required(fields, "y"), "y")
+  let result = from_result(@warpfit.dtw_path(x, y, hard_alignment(options)))
+  let path : Array[Json] = []
+  for point in result.path {
+    path.push(
+      Json::array([
+        Json::number(point.x_index.to_double()),
+        Json::number(point.y_index.to_double()),
+      ]),
+    )
+  }
+  {
+    "schema": "warpfit.response/1",
+    "ok": true,
+    "operation": "dtw",
+    "distance": Json::number(result.distance),
+    "squared_cost": Json::number(result.squared_cost),
+    "path": Json::array(path),
+    "visited_cells": Json::number(result.visited_cells.to_double()),
+  }
+}
+
+///|
+fn hard_dba(
+  fields : Map[String, Json],
+  options : Map[String, Json],
+) -> Json raise WireError {
+  let seed = series(required(fields, "seed"), "seed")
+  let examples : Array[@warpfit.Series] = []
+  for v in array(required(fields, "examples"), "examples", 32) {
+    examples.push(series(v, "examples[]"))
+  }
+  let params : @warpfit.DbaOptions = {
+    alignment: hard_alignment(options),
+    max_steps: integer_option(options, "max_steps", 30),
+    tolerance: numeric_option(options, "tolerance", 1.0e-8),
+    max_work_units: integer_option(options, "max_work_units", 20000000),
+    example_weights: match options.get("example_weights") {
+      Some(v) => number_array(v, "options.example_weights", 32)
+      None => []
+    },
+  }
+  let result = from_result(@warpfit.dba_fit(seed, examples, params))
+  {
+    "schema": "warpfit.response/1",
+    "ok": true,
+    "operation": "dba",
+    "prototype": matrix(
+      result.prototype.values,
+      result.prototype.count,
+      result.prototype.dimensions,
+    ),
+    "history": numbers(result.objective),
+    "accepted_steps": Json::number(result.accepted_steps.to_double()),
+    "stop": Json::string(result.stop),
+    "evaluations": Json::number(result.evaluations.to_double()),
+    "work_units": Json::number(result.work_units.to_double()),
+  }
+}
+
+///|
+fn hard_cluster(
+  fields : Map[String, Json],
+  options : Map[String, Json],
+) -> Json raise WireError {
+  let data : Array[@warpfit.Series] = []
+  for v in array(required(fields, "data"), "data", 32) {
+    data.push(series(v, "data[]"))
+  }
+  let seeds : Array[@warpfit.Series] = []
+  for v in array(required(fields, "centers"), "centers", 16) {
+    seeds.push(series(v, "centers[]"))
+  }
+  let params : @warpfit.ClusterOptions = {
+    alignment: hard_alignment(options),
+    max_iterations: integer_option(options, "max_iterations", 20),
+    max_dba_steps: integer_option(options, "max_dba_steps", 20),
+    tolerance: numeric_option(options, "tolerance", 1.0e-8),
+    max_work_units: integer_option(options, "max_work_units", 20000000),
+  }
+  let result = from_result(@warpfit.dtw_kmeans(data, seeds, params))
+  let centers : Array[Json] = []
+  for center in result.centers {
+    centers.push(matrix(center.values, center.count, center.dimensions))
+  }
+  let labels : Array[Json] = []
+  for label in result.labels {
+    labels.push(Json::number(label.to_double()))
+  }
+  {
+    "schema": "warpfit.response/1",
+    "ok": true,
+    "operation": "cluster",
+    "centers": Json::array(centers),
+    "labels": Json::array(labels),
+    "inertia": Json::number(result.inertia),
+    "history": numbers(result.history),
+    "iterations": Json::number(result.iterations.to_double()),
+    "stop": Json::string(result.stop),
+    "work_units": Json::number(result.work_units.to_double()),
+  }
+}
+
+///|
 fn dispatch(source : String) -> Json raise WireError {
   if source.length() > 2000000 {
     invalid("input_limit", "request exceeds 2000000 UTF-16 units")
@@ -398,8 +521,13 @@ fn dispatch(source : String) -> Json raise WireError {
     "loss" => ["schema", "operation", "objective", "x", "y", "options"]
     "fit" => ["schema", "operation", "seed", "examples", "options"]
     "rank" => ["schema", "operation", "query", "candidates", "top_k", "options"]
+    "dtw" => ["schema", "operation", "x", "y", "options"]
+    "dba" => ["schema", "operation", "seed", "examples", "options"]
+    "cluster" => ["schema", "operation", "data", "centers", "options"]
     _ => {
-      invalid("operation", "operation must be loss, fit or rank")
+      invalid(
+        "operation", "operation must be loss, fit, rank, dtw, dba or cluster",
+      )
       abort("unreachable")
     }
   }
@@ -412,6 +540,17 @@ fn dispatch(source : String) -> Json raise WireError {
         "improvement_tolerance", "max_evaluations", "max_work_units", "example_weights",
       ]
     "rank" => ["gamma", "feature_weights", "max_cells", "max_work_units"]
+    "dtw" => ["window", "feature_weights", "max_cells"]
+    "dba" =>
+      [
+        "window", "feature_weights", "max_cells", "max_steps", "tolerance", "max_work_units",
+        "example_weights",
+      ]
+    "cluster" =>
+      [
+        "window", "feature_weights", "max_cells", "max_iterations", "max_dba_steps",
+        "tolerance", "max_work_units",
+      ]
     _ => common
   }
   let options = match fields.get("options") {
@@ -421,7 +560,10 @@ fn dispatch(source : String) -> Json raise WireError {
   match operation {
     "loss" => loss(fields, alignment(options))
     "fit" => fitting(fields, options)
-    _ => ranking(fields, options)
+    "rank" => ranking(fields, options)
+    "dtw" => hard_dtw(fields, options)
+    "dba" => hard_dba(fields, options)
+    _ => hard_cluster(fields, options)
   }
 }
 

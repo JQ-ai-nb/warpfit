@@ -1,0 +1,7 @@
+{
+  "schema": "warpfit.request/1",
+  "operation": "dba",
+  "seed": [0, 1, 2, 0],
+  "examples": [[0, 1, 2, 0], [0, 0.5, 1.5, 0, 0], [0, 1, 1, 2, 0]],
+  "options": { "window": 2, "max_steps": 30, "max_work_units": 2000000 }
+}
