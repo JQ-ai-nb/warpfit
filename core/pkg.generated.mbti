@@ -8,6 +8,10 @@ pub fn divergence(Series, Series, Double) -> Result[Divergence, WarpError]
 
 pub fn divergence_with(Series, Series, AlignOptions) -> Result[Divergence, WarpError]
 
+pub fn dtw_options() -> DtwOptions
+
+pub fn dtw_path(Series, Series, DtwOptions) -> Result[DtwPath, WarpError]
+
 pub fn fit(Series, Array[Series], Double, Int32) -> Result[Fit, WarpError]
 
 pub fn fit_with(Series, Array[Series], FitOptions) -> Result[Fit, WarpError]
@@ -44,6 +48,24 @@ pub(all) struct Divergence {
   raw_self_x : Double
   raw_self_y : Double
   alignment : Array[Double]
+}
+
+pub(all) struct DtwOptions {
+  window : Int32
+  feature_weights : Array[Double]
+  max_cells : Int32
+}
+
+pub(all) struct DtwPath {
+  distance : Double
+  squared_cost : Double
+  path : Array[DtwPoint]
+  visited_cells : Int32
+}
+
+pub(all) struct DtwPoint {
+  x_index : Int32
+  y_index : Int32
 }
 
 pub(all) struct Evaluation {
