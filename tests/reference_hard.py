@@ -53,6 +53,21 @@ for trial in range(40):
     submit(dict(schema=schema,operation='dba',seed=seed.tolist(),examples=[x.tolist() for x in examples],
         options=dict(max_steps=1,example_weights=weights.tolist())),expected.tolist(),'dba')
 
+for trial in range(40):
+    n=rng.randint(2,7); d=rng.randint(1,2); count=rng.randint(2,4)
+    seed=sequence(n,d); examples=[sequence(rng.randint(2,8),d) for _ in range(count)]
+    example_weights=np.array([rng.choice([.5,1.,2.]) for _ in range(count)])
+    feature_weights=np.array([rng.choice([.2,1.,2.]) for _ in range(d)])
+    window=[None,0,1,2][trial%4]
+    metric={} if window is None else dict(global_constraint='sakoe_chiba',sakoe_chiba_radius=window)
+    scale=np.sqrt(feature_weights)
+    # Scaling features converts weighted squared cost to standard Euclidean cost.
+    expected=dtw_barycenter_averaging(to_time_series_dataset([x*scale for x in examples]),
+        barycenter_size=n,init_barycenter=seed*scale,max_iter=1,weights=example_weights,metric_params=metric)/scale
+    options=dict(max_steps=1,example_weights=example_weights.tolist(),feature_weights=feature_weights.tolist())
+    if window is not None:options['window']=window
+    submit(dict(schema=schema,operation='dba',seed=seed.tolist(),examples=[x.tolist() for x in examples],options=options),expected.tolist(),'dba')
+
 series=[[0,1,2,1,0],[0,0,1,2,1,0],[0,.9,2,1,0],[3,2,1,2,3],[3,3,2,1,2,3],[3,2,1.1,2,3]]
 centers=[[0,1,2,1,0],[3,2,1,2,3]]
 model=TimeSeriesKMeans(n_clusters=2,metric='dtw',init=np.array(centers)[:,:,None],n_init=1,
@@ -62,6 +77,21 @@ model.fit(to_time_series_dataset(series))
 submit(dict(schema=schema,operation='cluster',data=series,centers=centers,
     options=dict(window=1,max_iterations=10,max_dba_steps=20,tolerance=1e-8)),
     dict(labels=model.labels_.tolist(),centers=model.cluster_centers_.tolist(),inertia=float(model.inertia_)),'cluster')
+
+for trial in range(8):
+    series=[]
+    for group in range(2):
+        for sample in range(3):
+            n=5+((sample+trial)%2)
+            series.append([group*10+np.sin(i/(n-1)*3.14)+rng.uniform(-.03,.03) for i in range(n)])
+    centers=[series[0][:5],series[3][:5]]
+    model=TimeSeriesKMeans(n_clusters=2,metric='dtw',init=np.array(centers)[:,:,None],n_init=1,
+        max_iter=10,max_iter_barycenter=20,tol=1e-8,random_state=0,
+        metric_params=dict(global_constraint='sakoe_chiba',sakoe_chiba_radius=1))
+    model.fit(to_time_series_dataset(series))
+    submit(dict(schema=schema,operation='cluster',data=series,centers=centers,
+        options=dict(window=1,max_iterations=10,max_dba_steps=20,tolerance=1e-8)),
+        dict(labels=model.labels_.tolist(),centers=model.cluster_centers_.tolist(),inertia=float(model.inertia_)),'cluster')
 
 process=subprocess.run(['node','scripts/reference.mjs'],input='\n'.join(requests)+'\n',cwd=root,
     capture_output=True,text=True,timeout=180,check=True)
@@ -82,7 +112,7 @@ for out,(kind,reference) in zip(actual,checks):
         check(out['inertia'],reference['inertia'],kind)
 report=dict(recorded_at_utc=datetime.now(timezone.utc).isoformat(),reference='tslearn',
     reference_version=tslearn.__version__,numpy_version=np.__version__,
-    cases=dict(weighted_dtw=160,weighted_one_step_dba=40,cluster_workflow=1),
+    cases=dict(weighted_dtw=160,weighted_one_step_dba=80,cluster_workflow=9),
     max_absolute_error=max_errors,tolerance='rtol=atol=1e-8',status='passed')
 (root/'artifacts').mkdir(exist_ok=True)
 (root/'artifacts/hard-reference.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
