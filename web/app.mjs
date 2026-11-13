@@ -58,6 +58,8 @@ $('model-file').onchange = async event => {
     if (file.size > 1_900_000) throw new Error('模型文件过大。');
     const model = new TextDecoder('utf-8', { fatal: true }).decode(await file.arrayBuffer());
     if (ownLoad !== loadNumber) return;
+    try { JSON.parse(model); }
+    catch { throw new Error('模型文件必须是一个独立、完整的 JSON 值；不能在后面附加其他字段或文档。'); }
     $('request').value = `{"schema":"warpfit.request/1","operation":"predict","model":${model},"data":[[0]]}`;
     clearResult();
     for (const b of document.querySelectorAll('.scenario')) { b.classList.remove('selected'); b.setAttribute('aria-pressed', 'false'); }

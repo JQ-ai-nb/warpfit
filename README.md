@@ -43,6 +43,8 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 示例新数据的预测标签为 `[0,1,0]`。模型同时保存预处理和对齐参数；新数据可以只落在其中一个簇。簇编号只是到已学习中心的最近分配，没有监督分类或概率含义。模型 CLI 拒绝覆盖已有文件；训练预算耗尽时不写模型，返回退出码3及停止状态。
 
+另有训练与验证分开的公开传感器数据流程：`node scripts/evaluate_holdout.mjs`。16段较早记录用于训练，另16段不重叠的后续记录用于文件模型加载后的预测；脚本输出训练状态、测试距离及训练初始中心的基线，完整方法见 [真实数据说明](docs/REAL_DATA.md)。单次固定划分只证明对应输入的结果，不能解读为分类准确率或生产效果。
+
 库包导入：`"JQ-ai-nb/warpfit/core" @warpfit`。此前发布并验证的 0.1.2 **没有本地新增的 0.2.0 接口**；[Mooncakes 包页面](https://mooncakes.io/docs/JQ-ai-nb/warpfit)当前状态尚需复核，不能用 `moon add` 假称已安装本地修订版。类型化示例见 [cmd/series_pipeline](cmd/series_pipeline/main.mbt)，签名见 [pkg.generated.mbti](core/pkg.generated.mbti)，JSON 与 CLI 契约见 [API.md](docs/API.md)。
 
 ## 三个完整工作流
@@ -102,6 +104,8 @@ node scripts/benchmark_hard.mjs
 子序列定位另有256组独立路径枚举与120组 tslearn 参考对照；仅求距离的实现与完整路径实现对比1200组输入，并覆盖长度比例极端的窗口边界。没有据此宣称性能领先；结果见验证文档。
 
 UCI 的六段真实环境传感器序列也已执行预处理与聚类，并用 tslearn 复算最终样本到中心的 12 个距离。数据按 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) 引用，抽取方式与局限见 [REAL_DATA.md](docs/REAL_DATA.md)；它不是人数预测或实际产品采用证明。
+
+新增16段训练 / 16段验证的模型文件流程，参考验证覆盖独立插值 / 标准化后的4608个数值、64个 DTW 距离和最终最近中心标签；详见 [固定划分实验](docs/REAL_DATA.md#训练后预测不重叠的后续数据)。该基线比较不代表与其他工具的性能或准确率比较。
 
 ## 与已有工作的关系
 

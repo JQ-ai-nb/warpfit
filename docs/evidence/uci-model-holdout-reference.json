@@ -1,0 +1,17 @@
+{
+  "recorded_at_utc": "2026-11-13T13:25:05.342191+00:00",
+  "reference": "tslearn / NumPy",
+  "tslearn_version": "0.6.4",
+  "numpy_version": "2.2.6",
+  "training_samples": 16,
+  "heldout_samples": 16,
+  "preprocessing_values_checked": 4608,
+  "distance_comparisons": 64,
+  "max_preprocess_absolute_error": 2.327027459614328e-13,
+  "max_distance_absolute_error": 4.796163466380676e-14,
+  "reference_learned_mean_squared_dtw": 83.92996921565094,
+  "reference_initial_mean_squared_dtw": 135.35338789650763,
+  "checked": "Independent interpolation/standardization, all center distances, nearest labels and reported holdout means; centers learned by WarpFit",
+  "limitations": "Single dataset and fixed split, no ground-truth accuracy or complete optimizer equivalence",
+  "status": "passed"
+}

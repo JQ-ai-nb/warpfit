@@ -71,6 +71,12 @@ try {
   result=await execute(); assert.equal(result.error.code,'json');
   assert.equal(await page.locator('#save-model').isDisabled(),true);
   report.checks.push('model import preserves duplicate keys for engine rejection');
+  const beforeMalformedImport=await page.locator('#request').inputValue();
+  await page.locator('#model-file').setInputFiles({name:'compound-model.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(savedModel)+',"options":{"max_work_units":1}')});
+  await page.waitForFunction(()=>document.getElementById('badge').textContent==='导入失败');
+  assert.equal(await page.locator('#request').inputValue(),beforeMalformedImport);
+  assert.match(await page.locator('#status').textContent(),/独立、完整/);
+  report.checks.push('compound model file is rejected before request assembly');
   await page.evaluate(()=>{
     const original=File.prototype.arrayBuffer;
     File.prototype.arrayBuffer=function(){

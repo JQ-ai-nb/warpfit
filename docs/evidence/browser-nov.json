@@ -13,6 +13,7 @@
     "subsequence workflow and visualization",
     "model train, download, reimport and prediction",
     "model import preserves duplicate keys for engine rejection",
+    "compound model file is rejected before request assembly",
     "late file import does not overwrite a newer selected request",
     "local JSON import computes user input",
     "preprocessing visualization works for custom input",

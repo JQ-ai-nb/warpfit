@@ -30,7 +30,7 @@ commands += [
      'tests/extended.test.mjs', 'tests/exhaustive_hard.test.mjs', 'tests/properties_hard.test.mjs',
      'tests/uci_room.test.mjs', 'tests/long_input.test.mjs', 'tests/model.test.mjs',
      'tests/model_cli.test.mjs', 'tests/subsequence.test.mjs', 'tests/distance_only.test.mjs',
-     'tests/auto_model.test.mjs'],
+     'tests/auto_model.test.mjs', 'tests/uci_holdout.test.mjs'],
     [sys.executable, 'scripts/package_check.py'],
 ]
 results = []

@@ -82,7 +82,7 @@ node bin/warpfit-model.mjs train examples/model_train.json work/cluster-model.js
 node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predict_data.json
 ```
 
-训练请求使用 `train_model` 或 `auto_train_model`。预测数据文件只包含样本数组，例如 `[[5,10,15],[30,20,10]]`。可加 `--out work/prediction.json` 保存预测响应；输出目录应已存在。模型 CLI 保留输入原始 JSON 以检测重复键，验证 UTF-8，分别和合并请求均有2MB上限；所有输出使用创建新文件模式，拒绝覆盖已存在文件。输入和输出路径不能相同。训练因预算中断时**不写模型**，退出码3并保留完整停止响应；其余输入或文件错误退出码2。达到迭代上限或数值停滞可能仍写出模型，需查看 `stop` 判断质量。底层 JSON 训练响应中的中断状态仍可包含最后完整中心，不能将 `ok:true` 单独解释为训练完成。
+训练请求使用 `train_model` 或 `auto_train_model`。预测数据文件只包含样本数组，例如 `[[5,10,15],[30,20,10]]`。可加 `--out work/prediction.json` 保存预测响应；输出目录应已存在。模型 CLI 首先校验模型和数据文件分别是独立、完整的 JSON 文档，然后使用原文组装请求，保留 MoonBit 的重复键和数值字面量校验；文件尾部附加字段或另一个文档返回 `json` 错误，不能作为预测参数。文件须为 UTF-8，分别和合并请求均有2MB上限；所有输出使用创建新文件模式，拒绝覆盖已存在文件。输入和输出路径不能相同。训练因预算中断时**不写模型**，退出码3并保留完整停止响应；其余输入或文件错误退出码2。达到迭代上限或数值停滞可能仍写出模型，需查看 `stop` 判断质量。底层 JSON 训练响应中的中断状态仍可包含最后完整中心，不能将 `ok:true` 单独解释为训练完成。
 
 实际输入和完整配置例子：[align.json](../examples/align.json)、[dba.json](../examples/dba.json)、[clusters.json](../examples/clusters.json)、[pipeline.json](../examples/pipeline.json)、[真实传感器数据](REAL_DATA.md)，以及原有的 [prototype.json](../examples/prototype.json)、[training.json](../examples/training.json)、[retrieval.json](../examples/retrieval.json)。数值范围和工作量语义见 [SEMANTICS.md](SEMANTICS.md)。所有错误码由核心和 wire 层稳定字符串给出；判断应使用 code 而非自然语言 message。
 
@@ -100,4 +100,4 @@ CLI 退出码：0=本次计算正常结束（不代表优化收敛或业务正�
 
 `node scripts/serve.mjs` 后打开 <http://127.0.0.1:4194>。静态服务器仅监听本机；无后端数据接口。示例和引擎从同源加载，计算在 Worker 内完成；取消会终止 Worker 并丢弃未完成结果。页面绘图横轴按各自长度归一，不能据此认定序列在真实时钟上同步。部署静态页时须随引擎保留 `MOONBIT_CORE_LICENSE` / `MOONBIT_CORE_NOTICE` / `WARPFIT_LICENSE`。
 
-“训练并保存模型”示例运行后，可主动下载独立模型或用模型生成预测请求；生成的请求先填入一条训练样本以便演示，应在运行前换成待分析的新数据。“导入模型”会将模型原文写入预测请求并保留重复键检测；默认占位数据 `[[0]]` 须按实际特征数和业务替换。编辑或更换请求会清除旧结果和模型下载状态；预算中断时不启用模型下载按钮。
+“训练并保存模型”示例运行后，可主动下载独立模型或用模型生成预测请求；生成的请求先填入一条训练样本以便演示，应在运行前换成待分析的新数据。“导入模型”先确认文件是独立 JSON，再将原文写入预测请求并保留重复键检测；文件校验失败不会改写当前请求。默认占位数据 `[[0]]` 须按实际特征数和业务替换。编辑或更换请求会清除旧结果和模型下载状态；预算中断时不启用模型下载按钮。

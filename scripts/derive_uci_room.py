@@ -19,7 +19,7 @@ COLUMNS = ("S1_Temp", "S1_Light", "S5_CO2")
 LENGTH = 60
 
 
-def derive(path: Path) -> dict:
+def read_source(path: Path) -> list[dict]:
     if hashlib.sha256(path.read_bytes()).hexdigest() != SOURCE_SHA256:
         raise ValueError("Source ZIP checksum differs; inspect the dataset revision before deriving")
     with ZipFile(path) as archive:
@@ -27,6 +27,11 @@ def derive(path: Path) -> dict:
             rows = list(csv.DictReader(io.TextIOWrapper(file, encoding="utf-8-sig")))
     if len(rows) != 10129:
         raise ValueError("Unexpected source row count")
+    return rows
+
+
+def derive(path: Path) -> dict:
+    rows = read_source(path)
     data = []
     for offset in OFFSETS:
         window = rows[offset : offset + LENGTH]

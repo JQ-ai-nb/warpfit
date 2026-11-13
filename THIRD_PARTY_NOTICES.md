@@ -30,4 +30,4 @@
 
 ## 公开数据示例
 
-`examples/uci-room.json` 取自 Singh、Chaudhari 的 [Room Occupancy Estimation](https://doi.org/10.24432/C5P605) 数据集，并经过列选择和固定区间抽取。数据集及其衍生示例采用 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)，原始来源、修改方法和使用限制见 [docs/REAL_DATA.md](docs/REAL_DATA.md)；该数据与本项目 Apache-2.0 代码分开标注。
+`examples/uci-room.json`、`examples/uci-model-train.json`、`examples/uci-model-test-data.json` 取自 Singh、Chaudhari 的 [Room Occupancy Estimation](https://doi.org/10.24432/C5P605) 数据集，并经过列选择和固定区间抽取；`uci-model-split.json` 记录后两者的划分与来源。数据集及其衍生示例采用 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)，原始来源、修改方法和使用限制见 [docs/REAL_DATA.md](docs/REAL_DATA.md)；该数据与本项目 Apache-2.0 代码分开标注。

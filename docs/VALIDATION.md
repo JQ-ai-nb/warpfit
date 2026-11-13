@@ -2,11 +2,13 @@
 
 ## 0.2.0 本次维护（2026-11-13，未推送 / 未发布）
 
-- `python verify.py` 实际通过：Windows 本地的 `moon check --target all --deny-warn`、格式与生成接口检查；Wasm、Wasm-GC、JS 各71项 MoonBit 测试及构建；三个类型示例；构建共用 JSON 引擎；35项 Node 测试和实际 Mooncakes 打包内容检查。命令及输出见 [validation-current.json](evidence/validation-current.json)。这是测试函数数量，下面列出的批量样本数量另算，没有混称为独立测试函数。
+- `python verify.py` 实际通过：Windows 本地的 `moon check --target all --deny-warn`、格式与生成接口检查；Wasm、Wasm-GC、JS 各71项 MoonBit 测试及构建；三个类型示例；构建共用 JSON 引擎；38项 Node 测试和实际 Mooncakes 打包内容检查。命令及输出见 [validation-current.json](evidence/validation-current.json)。这是测试函数数量，下面列出的批量样本数量另算，没有混称为独立测试函数。
+- 本轮先复现再修复模型 / 数据文档边界问题：原来独立无效的文件 `模型JSON + ,"options":{...}` 可被拼成合法请求并影响预测参数。现在每个文件先验证为单个完整 JSON，保留原文供 MoonBit 进一步检测重复键。回归测试覆盖模型和数据文件各自附加字段、连续文档；原始重复键拒绝及文件往返测试继续通过，网页导入也拒绝并保留当前请求。
+- 新增16段训练 / 16段不重叠后续输入的公开数据实验，训练后经过实际模型文件保存、读取及CLI预测，结果与直接调用一致。基线与学习中心均仅来自训练输入；后续平均平方DTW代价由135.3533878965变为83.9299692157。独立NumPy / tslearn复核4608个预处理数值、64个距离及标签，最大距离绝对差约4.80e-14。原始ZIP校验及衍生数据逐项比较通过，来源、划分、限制和证据见 [REAL_DATA.md](REAL_DATA.md#训练后预测不重叠的后续数据)。该实验没有业务标签或准确率含义，也不能保证换数据仍改善。
 - `tests/subsequence.test.mjs` 独立枚举256组完整查询 / 开放目标路径，检查最小代价、返回路径和最早结束；另验证2000点目标的匹配位置、窗口拒绝和矩阵预算。`tests/subsequence_reference.py` 与 tslearn 0.6.4 对照120组带权多变量输入，距离最大绝对差 `8.881784197001252e-16`、终点一致；不要求并列回溯路径相同：[subsequence-reference.json](evidence/subsequence-reference.json)。
 - 距离专用两行 DP 与完整路径实现比较1200组不同长度、维数、权重和窗口的输入，并额外比较1/512等极端长度比例；相同的路径代价、距离和访问格点计数均通过。它是内部不同实现的一致性验证，不能取代独立路径枚举及外部参考，也不是性能优于其他项目的证据。
 - 模型相关测试实际执行自动 / 手动初始化比较、文件保存及重新读取、全新批次预测、全部新样本同簇、初始化与训练共享预算、预算中断不写模型、错误版本与重复键、拒绝文件覆盖。长输入测试验证2880点显式重采样到100点，以及600点数据的分析流程；超过8192点拒绝，原有普通 DTW 的512点限制仍有效。
-- 本地 Chromium 148.0.7778.96 实际完成21项浏览器检查，包含10个内置场景、模型下载和重新导入、重复键、延迟导入与切换请求、8192点×16特征的预处理与绘图、预算提示、Worker取消及390px布局。无 pageerror 或外部数据请求。见 [browser-nov.json](evidence/browser-nov.json) 和 [模型界面](screenshots/model.png) / [子序列界面](screenshots/subsequence.png)。
+- 本地 Chromium 148.0.7778.96 实际完成22项浏览器检查，包含10个内置场景、模型下载和重新导入、重复键、拒绝多文档模型、延迟导入与切换请求、8192点×16特征的预处理与绘图、预算提示、Worker取消及390px布局。无 pageerror 或外部数据请求。见 [browser-nov.json](evidence/browser-nov.json) 和 [模型界面](screenshots/model.png) / [子序列界面](screenshots/subsequence.png)。
 - 从本地提交 `ccb83ce` 用 `git archive` 重新导出到空目录，不复制构建缓存；全部目标检查、格式、JS的71项 MoonBit测试、35项 Node测试、80组 Soft-DTW 夹具独立重算和打包内容检查通过：[clean-current.json](evidence/clean-current.json)。初次打包为空：导出目录位于父仓库忽略的 work 下，继承了父 Git 根目录。构建和测试均在无 .git 状态执行；打包前为导出目录建立独立 Git 索引并暂存源文件后通过，没有制造提交或修改源码。记录保留初次失败及处理方式。这仍是同机工具链验证，不是远程检出或跨系统结果。
 - 本机缺少 MSVC，native 运行和新版远程多系统 CI **尚未验证**；本次仍未推送 / 发布，所以也没有新增接口的注册表安装结果。完整检查的原始输出保存在忽略目录 `artifacts/validation.json`；公开证据仅将本机 Python 可执行文件的绝对路径改成可移植的 `python`，其余命令参数与结果不变。
 

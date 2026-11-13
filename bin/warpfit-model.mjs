@@ -11,6 +11,13 @@ if (args.length === 1 && ['--help', '-h'].includes(args[0])) {
   process.stdout.write(usage); process.exit(0);
 }
 const error = (code, message) => ({ schema: 'warpfit.response/1', ok: false, error: { code, message } });
+class InputJsonError extends Error {}
+function requireJsonDocument(source, label) {
+  try { JSON.parse(source); }
+  catch { throw new InputJsonError(`${label} must contain exactly one complete JSON value.`); }
+  // Keep the original text for MoonBit's duplicate-key and numeric validation.
+  return source;
+}
 async function readText(path) {
   if ((await stat(path)).size > 2_000_000) throw new Error('Input exceeds 2,000,000 bytes.');
   const data = await readFile(path);
@@ -39,8 +46,8 @@ try {
         ...(response.seed_indices ? { seed_indices: response.seed_indices, seed_work_units: response.seed_work_units } : {}) };
     }
   } else if (args[0] === 'predict' && (args.length === 3 || (args.length === 5 && args[3] === '--out'))) {
-    const model = await readText(args[1]);
-    const data = await readText(args[2]);
+    const model = requireJsonDocument(await readText(args[1]), 'Model file');
+    const data = requireJsonDocument(await readText(args[2]), 'Data file');
     const source = `{"schema":"warpfit.request/1","operation":"predict","model":${model},"data":${data}}`;
     if (Buffer.byteLength(source, 'utf8') > 2_000_000) throw new Error('Combined request exceeds 2,000,000 bytes.');
     response = JSON.parse(run(source));
@@ -53,7 +60,7 @@ try {
     response = error('usage', usage.trim());
   }
 } catch (cause) {
-  response = error('io', cause.message);
+  response = error(cause instanceof InputJsonError ? 'json' : 'io', cause.message);
 }
 if (!response.ok && !code) code = ['work_budget', 'cell_limit'].includes(response.error?.code) ? 3 : 2;
 if (!outputHandled) process.stdout.write(JSON.stringify(response, null, 2) + '\n');

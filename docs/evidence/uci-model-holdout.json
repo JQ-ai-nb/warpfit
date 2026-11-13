@@ -1,0 +1,136 @@
+{
+  "recorded_at_utc": "2026-11-13T13:24:09.403Z",
+  "dataset": "UCI Room Occupancy Estimation, fixed disjoint windows",
+  "source": "https://doi.org/10.24432/C5P605",
+  "source_zip_sha256": "a0db79ee96ea297c22458ac77a28fba20d41246e75d24b2655ca3ab624cc08fd",
+  "data_license": "CC-BY-4.0",
+  "input_sha256": {
+    "training": "b2aa9fb155a341ca7a8c7be4ab3d6e4e2af2a8a30eb7478a7c7aadde7903597d",
+    "testing": "1234704c6a10015fabb073423453ca0ad3ddddcb2ee8d92d1f419ab285d3012d",
+    "manifest": "aadb8d695adb2244a62c86a0a1d6bac55ac76908591d85eacf493771090ae0c3"
+  },
+  "split": {
+    "train_offsets": [
+      0,
+      300,
+      600,
+      900,
+      1200,
+      1500,
+      1800,
+      2100,
+      2400,
+      2700,
+      3000,
+      3300,
+      3600,
+      3900,
+      4200,
+      4500
+    ],
+    "test_offsets": [
+      5000,
+      5300,
+      5600,
+      5900,
+      6200,
+      6500,
+      6800,
+      7100,
+      7400,
+      7700,
+      8000,
+      8300,
+      8600,
+      8900,
+      9200,
+      9500
+    ],
+    "raw_points": 60,
+    "features": [
+      "S1_Temp",
+      "S1_Light",
+      "S5_CO2"
+    ],
+    "prepared_points": 48
+  },
+  "training": {
+    "samples": 16,
+    "seed_indices": [
+      0,
+      13
+    ],
+    "cluster_sizes": [
+      8,
+      8
+    ],
+    "initial_mean_squared_dtw": 115.32055890876958,
+    "final_mean_squared_dtw": 70.17865178732958,
+    "history": [
+      115.32055890876958,
+      70.18748026390128,
+      70.17865178732958,
+      70.17865178732958
+    ],
+    "stop": "improvement_tolerance",
+    "total_work_units": 2149632
+  },
+  "heldout": {
+    "samples": 16,
+    "labels": [
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1
+    ],
+    "cluster_sizes": [
+      5,
+      11
+    ],
+    "learned_center_mean_squared_dtw": 83.929969215651,
+    "initial_center_mean_squared_dtw": 135.35338789650774,
+    "change_from_initial": -51.42341868085674,
+    "distances": [
+      9.161688115876142,
+      12.44644902002673,
+      10.069561181480207,
+      10.028993847941022,
+      10.446217416391107,
+      10.190410538923876,
+      7.460654277848778,
+      8.056282164998184,
+      8.906623356395592,
+      6.2451467681961645,
+      10.214703839376378,
+      10.628250853548748,
+      6.357541263217024,
+      8.298891554461504,
+      7.796351645287385,
+      7.925680781976466
+    ]
+  },
+  "model": {
+    "schema": "warpfit.cluster-model/1",
+    "file_sha256": "da102d4067bf07e07f1d1e25a748bf8e5c544e02dff4ec1e4bace6f56a342106",
+    "file_roundtrip_predict_matches_direct": true
+  },
+  "status": "passed",
+  "interpretation": "Distance to centers on later disjoint windows, not classification accuracy. Initial and learned centers are both derived from training only. A lower training objective does not guarantee a lower held-out cost.",
+  "limitations": [
+    "One controlled experiment and fixed split; no cross-building or user validation",
+    "Per-series normalization removes absolute sensor levels; no occupancy labels are used",
+    "No forecasting, anomaly threshold or production quality claim"
+  ]
+}
