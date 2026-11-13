@@ -1,0 +1,91 @@
+{
+  "recorded_at_utc": "2026-11-13T04:54:05.044999+00:00",
+  "snapshot": "0360c4be0c5f0885b18a789c560aa3deb41b827d",
+  "method": "git archive extracted to a fresh directory; host toolchain and separately downloaded UCI ZIP reused",
+  "not_checked": [
+    "git metadata or remote",
+    "native runtime",
+    "online CI"
+  ],
+  "results": [
+    {
+      "command": [
+        "moon",
+        "check",
+        "--target",
+        "all",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout_tail": [],
+      "stderr_tail": [
+        "Finished. moon: ran 57 tasks, now up to date"
+      ]
+    },
+    {
+      "command": [
+        "moon",
+        "test",
+        "--target",
+        "js",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout_tail": [
+        "Total tests: 59, passed: 59, failed: 0."
+      ],
+      "stderr_tail": []
+    },
+    {
+      "command": [
+        "node",
+        "scripts/build.mjs"
+      ],
+      "returncode": 0,
+      "stdout_tail": [
+        "Built the MoonBit JSON engine for Node and the browser; included license notices."
+      ],
+      "stderr_tail": [
+        "Finished. moon: ran 3 tasks, now up to date"
+      ]
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "tests/cli.test.mjs",
+        "tests/numerical.test.mjs",
+        "tests/extended.test.mjs",
+        "tests/exhaustive_hard.test.mjs",
+        "tests/properties_hard.test.mjs",
+        "tests/uci_room.test.mjs"
+      ],
+      "returncode": 0,
+      "stdout_tail": [
+        "ℹ tests 24",
+        "ℹ suites 0",
+        "ℹ pass 24",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 790.0943"
+      ],
+      "stderr_tail": []
+    },
+    {
+      "command": [
+        "<python>",
+        "scripts/derive_uci_room.py",
+        "<downloaded-uci-zip>",
+        "--check"
+      ],
+      "returncode": 0,
+      "stdout_tail": [
+        "Verified 6 fixed windows x 60 points x 3 sensor features from the cited source."
+      ],
+      "stderr_tail": []
+    }
+  ],
+  "status": "passed"
+}
