@@ -23,6 +23,7 @@ node bin/warpfit.mjs examples/align.json
 node bin/warpfit.mjs examples/dba.json
 node bin/warpfit.mjs examples/clusters.json
 node bin/warpfit.mjs examples/pipeline.json
+node bin/warpfit.mjs examples/uci-room.json
 node bin/warpfit.mjs examples/prototype.json
 node bin/warpfit.mjs examples/training.json --out result.json
 node bin/warpfit.mjs examples/retrieval.json
@@ -51,7 +52,7 @@ node scripts/serve.mjs
 | 时序模型开发者：需要能更新预测参数的损失 | 二维预测 / 目标运行 `examples/training.json`；`cmd/calibrate` 展示梯度接入独立增益 / 偏置模型 | 返回双方同形梯度与占用矩阵；校准示例目标从 1.1964749 降至 0.4136583，链式梯度有有限差分检查 |
 | 离线数值应用开发者：要比较查询周期和候选形状 | 查询、三个候选、统一 gamma；运行 `examples/retrieval.json` | 全候选评分后返回排序，相同序列第一；不将分数当作分类概率 |
 
-详见 [场景输入、输出及验证方法](docs/SCENARIOS.md)。所有随附场景使用可复现的**合成数值输入**；尚无真实设备采用、用户访谈或业务准确率证据。
+详见 [场景输入、输出及验证方法](docs/SCENARIOS.md)。上述三个场景使用可复现的合成数值；另有 [UCI 房间传感器真实数据节选](docs/REAL_DATA.md) 可运行完整分组流程。真实数据示例不代表设备采用、用户访谈或业务准确率证据。
 
 ## 实现范围
 
@@ -73,15 +74,17 @@ node scripts/serve.mjs
 ```text
 python verify.py
 python exhaustive_oracle.py --check
-node --test tests/cli.test.mjs tests/numerical.test.mjs tests/extended.test.mjs tests/exhaustive_hard.test.mjs tests/properties_hard.test.mjs
+node --test tests/cli.test.mjs tests/numerical.test.mjs tests/extended.test.mjs tests/exhaustive_hard.test.mjs tests/properties_hard.test.mjs tests/uci_room.test.mjs
 node scripts/benchmark_hard.mjs
 ```
 
-本地 Wasm / Wasm-GC / JS 各通过 59 项 MoonBit 测试，Node 23 项测试通过；Chrome 自动化覆盖 7 个场景、文件导入、预算提醒及手机布局。本机缺 MSVC，**新版 native 运行和三系统远程 CI 尚未验证**。`verify.py --native` 需要先配置 C 编译工具。旧版的 [远程 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/41191496193) 不代表本地新代码已通过远程检查。
+本地 Wasm / Wasm-GC / JS 各通过 59 项 MoonBit 测试，Node 24 项测试通过；Chrome 自动化覆盖 8 个场景、文件导入、预算提醒及手机布局。本机缺 MSVC，**新版 native 运行和三系统远程 CI 尚未验证**。`verify.py --native` 需要先配置 C 编译工具。旧版的 [远程 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/41191496193) 不代表本地新代码已通过远程检查。
 
 此前 0.1.2 的注册表独立消费测试和线上演示已经验证；本地 0.2.0 尚未发布，不得声称新增功能已完成注册表安装测试。待授权推送并发布后，再用 `python scripts/registry_consumer.py` 验证发布版。
 
 新增硬 DTW 有 240 组小样例通过全路径穷举；另对照 tslearn 0.6.4 验证 160 组硬 DTW、80 组单步 DBA、9 组聚类、100 组预处理及一个完整流程。常量特征采用本库明确的阈值归零语义，与参考库的浮点边界行为有差异，单独披露于 [VALIDATION.md](docs/VALIDATION.md)。数值一致性不证明业务效果。
+
+UCI 的六段真实环境传感器序列也已执行预处理与聚类，并用 tslearn 复算最终样本到中心的 12 个距离。数据按 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) 引用，抽取方式与局限见 [REAL_DATA.md](docs/REAL_DATA.md)；它不是人数预测或实际产品采用证明。
 
 ## 与已有工作的关系
 

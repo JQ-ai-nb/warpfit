@@ -1,0 +1,22 @@
+{
+  "recorded_at_utc": "2026-11-13T04:52:27.661684+00:00",
+  "dataset": "UCI Room Occupancy Estimation (fixed six-window derivative)",
+  "tslearn_version": "0.6.4",
+  "numpy_version": "2.2.6",
+  "sample_count": 6,
+  "centers": 2,
+  "distance_evaluations": 12,
+  "reference_labels": [
+    0,
+    1,
+    0,
+    1,
+    1,
+    1
+  ],
+  "reference_inertia": 47.727081692907944,
+  "warpfit_inertia": 47.72708169290795,
+  "inertia_absolute_difference": 7.105427357601002e-15,
+  "method": "tslearn recomputes distances to WarpFit's returned centers and prepared series; no ground-truth classification claim",
+  "status": "passed"
+}

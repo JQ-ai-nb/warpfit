@@ -48,7 +48,7 @@ match @warpfit.divergence(prediction, target, 0.4) {
 
 `preprocess` / `pipeline`：`target_count=0` 表示保持长度，1..512 表示按样本下标重采样；`normalize=true` 表示对每条序列独立逐特征标准化，`epsilon=1e-12`。先重采样后标准化。`pipeline.seed_indices` 是原始输入数组中不重复的零基下标，对应预处理后的初始中心。常量特征的标准化输出为0；`normalize=false` 时均值、标准差和常量标记数组为空。JSON 禁止 `window:-1`；省略 `window` 才表示不约束（MoonBit 类型接口用 -1）。
 
-实际输入和完整配置例子：[align.json](../examples/align.json)、[dba.json](../examples/dba.json)、[clusters.json](../examples/clusters.json)、[pipeline.json](../examples/pipeline.json)，以及原有的 [prototype.json](../examples/prototype.json)、[training.json](../examples/training.json)、[retrieval.json](../examples/retrieval.json)。数值范围和工作量语义见 [SEMANTICS.md](SEMANTICS.md)。所有错误码由核心和 wire 层稳定字符串给出；判断应使用 code 而非自然语言 message。
+实际输入和完整配置例子：[align.json](../examples/align.json)、[dba.json](../examples/dba.json)、[clusters.json](../examples/clusters.json)、[pipeline.json](../examples/pipeline.json)、[真实传感器数据](REAL_DATA.md)，以及原有的 [prototype.json](../examples/prototype.json)、[training.json](../examples/training.json)、[retrieval.json](../examples/retrieval.json)。数值范围和工作量语义见 [SEMANTICS.md](SEMANTICS.md)。所有错误码由核心和 wire 层稳定字符串给出；判断应使用 code 而非自然语言 message。
 
 ```text
 node bin/warpfit.mjs examples/prototype.json

@@ -7,7 +7,8 @@ const descriptions = {
   align: '生产数据开发者：限制时间错位的范围，返回两条序列的硬对齐路径与代价；可修改 window 比较路径。',
   dba: '传感器应用开发者：输入多条不同长度样本和初始模板，沿硬 DTW 路径做迭代平均，得到 DBA 模板。',
   clusters: '时序分析开发者：输入未标记序列及初始中心，通过 DTW 分配和 DBA 更新得到簇编号与中心。',
-  pipeline: '不同设备的序列可能长度、量纲不同。先按采样点重采样并逐维标准化，再按指定样本初始化聚类中心。'
+  pipeline: '不同设备的序列可能长度、量纲不同。先按采样点重采样并逐维标准化，再按指定样本初始化聚类中心。',
+  'uci-room': 'UCI Room Occupancy Estimation 公共数据节选（CC BY 4.0）：六段温度、光照、CO₂ 序列按形状分组。这里不预测房间人数。'
 };
 function status(text, label = '', kind = '') { $('status').textContent = text; $('badge').textContent = label; $('badge').className = `badge ${kind}`; }
 function busy(value) {

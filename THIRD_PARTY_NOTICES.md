@@ -21,4 +21,8 @@
 - `LING71671/MoonSTRtree`：Apache-2.0。
 - `walkzzz/moon-geometry`：MIT；其二维轨迹模块已有普通和窗口约束 DTW，与本项目存在功能重合。
 
-上述项目的功能与许可证通过公开资料核对。没有将其源码或测试夹具复制到本实验中；后续如发生移植、代码复用或数据引用，应逐项更新来源和许可说明。
+上述项目的功能与许可证通过公开资料核对。没有将其源码或测试夹具复制到本实验中；后续如发生移植或代码复用，应逐项更新来源和许可说明。公开数据的引用单独列于下文。
+
+## 公开数据示例
+
+`examples/uci-room.json` 取自 Singh、Chaudhari 的 [Room Occupancy Estimation](https://doi.org/10.24432/C5P605) 数据集，并经过列选择和固定区间抽取。数据集及其衍生示例采用 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)，原始来源、修改方法和使用限制见 [docs/REAL_DATA.md](docs/REAL_DATA.md)；该数据与本项目 Apache-2.0 代码分开标注。

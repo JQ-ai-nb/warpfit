@@ -27,7 +27,8 @@ commands += [
     ['moon', 'run', 'cmd/series_pipeline', '--target', 'js'],
     ['node', 'scripts/build.mjs'],
     ['node', '--test', 'tests/cli.test.mjs', 'tests/numerical.test.mjs',
-     'tests/extended.test.mjs', 'tests/exhaustive_hard.test.mjs', 'tests/properties_hard.test.mjs'],
+     'tests/extended.test.mjs', 'tests/exhaustive_hard.test.mjs', 'tests/properties_hard.test.mjs',
+     'tests/uci_room.test.mjs'],
     [sys.executable, 'scripts/package_check.py'],
 ]
 results = []

@@ -10,5 +10,6 @@ web/engine.mjs
 web/MOONBIT_CORE_LICENSE
 web/MOONBIT_CORE_NOTICE
 web/WARPFIT_LICENSE
+web/UCI_ROOM_DATA_NOTICE.md
 web/examples/
 node_modules/

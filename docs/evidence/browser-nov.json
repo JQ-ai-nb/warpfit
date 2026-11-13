@@ -1,5 +1,5 @@
 {
-  "browser": "157.0.8103.50",
+  "browser": "157.0.8103.78",
   "checks": [
     "prototype fitting and optimization charts",
     "training workflow and visualization",
@@ -9,6 +9,7 @@
     "dba workflow and visualization",
     "clusters workflow and visualization",
     "pipeline workflow and visualization",
+    "uci-room workflow and visualization",
     "local JSON import computes user input",
     "preprocessing visualization works for custom input",
     "pipeline nested budget stop is visible",
