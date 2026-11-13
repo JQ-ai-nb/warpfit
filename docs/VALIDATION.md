@@ -1,5 +1,7 @@
 # 已运行的验证与结果
 
+> 以下首先记录推送前的本地验证。历史记录中“未推送 / 未发布”描述当次检查时的状态，不应据此推断当前默认分支或注册表版本；后续远程结果需要对应具体提交单独记录。
+
 ## 0.2.0 本次维护（2026-11-13，未推送 / 未发布）
 
 - `python verify.py` 实际通过：Windows 本地的 `moon check --target all --deny-warn`、格式与生成接口检查；Wasm、Wasm-GC、JS 各71项 MoonBit 测试及构建；三个类型示例；构建共用 JSON 引擎；38项 Node 测试和实际 Mooncakes 打包内容检查。命令及输出见 [validation-current.json](evidence/validation-current.json)。这是测试函数数量，下面列出的批量样本数量另算，没有混称为独立测试函数。

@@ -1,6 +1,6 @@
 # WarpFit — 时序对齐、模板学习与聚类
 
-> **本地开发候选版 0.2.0，本次修改尚未推送或发布。** 它在 2026 年 10 月已公开的 WarpFit 0.1.2 基础上扩展；最后一次留存的公开版本记录是 0.1.2，当前远程最新状态尚需复核。新增功能的测试证据以本地记录为准，不把旧版远程 CI 或 Mooncakes 状态当作新版验收。
+> **当前源码为 0.2.0 修订版，Mooncakes 0.2.0 尚未发布。** 本项目在 2026 年 10 月已公开的 WarpFit 0.1.2 基础上扩展。2026-11-13 核对的注册表最新版本仍为 0.1.2；新增接口需构建本仓库源码。下文验证记录明确区分本地检查、历史远程 CI 和注册表安装结果。
 
 为不同长度、节奏和量纲的数值序列提供一套**有界的时序分析流程**：按采样点重采样、逐维标准化、硬 DTW 约束对齐、DBA 模板与 DTW 聚类，训练后保存模型供新序列使用，并在较长输入中定位完整查询的最佳匹配区间；保留原有 Soft-DTW 损失、两侧梯度、可微分模板拟合和示例检索。
 
@@ -45,7 +45,7 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 另有训练与验证分开的公开传感器数据流程：`node scripts/evaluate_holdout.mjs`。16段较早记录用于训练，另16段不重叠的后续记录用于文件模型加载后的预测；脚本输出训练状态、测试距离及训练初始中心的基线，完整方法见 [真实数据说明](docs/REAL_DATA.md)。单次固定划分只证明对应输入的结果，不能解读为分类准确率或生产效果。
 
-库包导入：`"JQ-ai-nb/warpfit/core" @warpfit`。此前发布并验证的 0.1.2 **没有本地新增的 0.2.0 接口**；[Mooncakes 包页面](https://mooncakes.io/docs/JQ-ai-nb/warpfit)当前状态尚需复核，不能用 `moon add` 假称已安装本地修订版。类型化示例见 [cmd/series_pipeline](cmd/series_pipeline/main.mbt)，签名见 [pkg.generated.mbti](core/pkg.generated.mbti)，JSON 与 CLI 契约见 [API.md](docs/API.md)。
+库包导入：`"JQ-ai-nb/warpfit/core" @warpfit`。此前发布并验证的 0.1.2 **没有本次新增的 0.2.0 接口**；[Mooncakes 包页面](https://mooncakes.io/docs/JQ-ai-nb/warpfit)的发布版本与仓库源码版本应分别核对。类型化示例见 [cmd/series_pipeline](cmd/series_pipeline/main.mbt)，签名见 [pkg.generated.mbti](core/pkg.generated.mbti)，JSON 与 CLI 契约见 [API.md](docs/API.md)。
 
 ## 三个完整工作流
 
@@ -97,7 +97,7 @@ node scripts/benchmark_hard.mjs
 
 本地执行结果与真实命令见 [VALIDATION.md](docs/VALIDATION.md)，包含 Wasm / Wasm-GC / JS、文件 CLI 和浏览器检查。本机缺 MSVC，**新版 native 运行和三系统远程 CI 尚未验证**。`verify.py --native` 需要先配置 C 编译工具。旧版的 [远程 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/41191496193) 不代表本地新代码已通过远程检查。
 
-此前 0.1.2 的注册表独立消费测试和线上演示已经验证；本地 0.2.0 尚未发布，不得声称新增功能已完成注册表安装测试。待授权推送并发布后，再用 `python scripts/registry_consumer.py` 验证发布版。
+此前 0.1.2 的注册表独立消费测试和线上演示已有验证记录；0.2.0 尚未发布到注册表，新增功能没有完成注册表安装测试。发布后需用 `python scripts/registry_consumer.py` 独立验证。
 
 新增硬 DTW 有 240 组小样例通过全路径穷举；另对照 tslearn 0.6.4 验证 160 组硬 DTW、80 组单步 DBA、9 组聚类、100 组预处理及一个完整流程。常量特征采用本库明确的阈值归零语义，与参考库的浮点边界行为有差异，单独披露于 [VALIDATION.md](docs/VALIDATION.md)。数值一致性不证明业务效果。
 
