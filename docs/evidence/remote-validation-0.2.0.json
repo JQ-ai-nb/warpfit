@@ -1,0 +1,61 @@
+{
+  "verified_at_utc": "2026-11-13T15:14:53.186689+00:00",
+  "head": "bb8c309b286eb7d5ebfa25b268426db7b6a4ddc5",
+  "run_url": "https://github.com/JQ-ai-nb/warpfit/actions/runs/43449875490",
+  "platforms": [
+    {
+      "artifact": "validation-windows-latest",
+      "targets": [
+        "wasm",
+        "wasm-gc",
+        "js",
+        "native"
+      ],
+      "test_counts": {
+        "wasm": 71,
+        "wasm-gc": 71,
+        "js": 71,
+        "native": 71,
+        "node": 38
+      },
+      "status": "passed"
+    },
+    {
+      "artifact": "validation-macos-latest",
+      "targets": [
+        "wasm",
+        "wasm-gc",
+        "js",
+        "native"
+      ],
+      "test_counts": {
+        "wasm": 71,
+        "wasm-gc": 71,
+        "js": 71,
+        "native": 71,
+        "node": 38
+      },
+      "status": "passed"
+    },
+    {
+      "artifact": "validation-ubuntu-latest",
+      "targets": [
+        "wasm",
+        "wasm-gc",
+        "js",
+        "native"
+      ],
+      "test_counts": {
+        "wasm": 71,
+        "wasm-gc": 71,
+        "js": 71,
+        "native": 71,
+        "node": 38
+      },
+      "status": "passed",
+      "browser_checks": 22,
+      "browser_errors": []
+    }
+  ],
+  "status": "passed"
+}

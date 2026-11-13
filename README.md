@@ -95,7 +95,7 @@ node --test tests/model.test.mjs tests/model_cli.test.mjs tests/auto_model.test.
 node scripts/benchmark_hard.mjs
 ```
 
-本地执行结果与真实命令见 [VALIDATION.md](docs/VALIDATION.md)，包含 Wasm / Wasm-GC / JS、文件 CLI 和浏览器检查。本机缺 MSVC，**新版 native 运行和三系统远程 CI 尚未验证**。`verify.py --native` 需要先配置 C 编译工具。旧版的 [远程 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/41191496193) 不代表本地新代码已通过远程检查。
+本地执行结果与真实命令见 [VALIDATION.md](docs/VALIDATION.md)。源码修订 `bb8c309` 已在 [此次远程 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/43449875490) 通过 Linux / macOS / Windows × Wasm / Wasm-GC / JS / native 检查、构建和测试：每个系统、每个后端各71项 MoonBit 测试，另各38项 Node 测试；Linux 浏览器检查22项通过。已下载 CI 原始产物复核这些数量，[汇总记录](docs/evidence/remote-validation-0.2.0.json) 对应上述提交。本机仍缺 MSVC，本机 native 未运行；远程 native 已通过。已部署的 [在线工作台](https://jq-ai-nb.github.io/warpfit/) 也实际通过22项浏览器检查。
 
 此前 0.1.2 的注册表独立消费测试和线上演示已有验证记录；0.2.0 尚未发布到注册表，新增功能没有完成注册表安装测试。发布后需用 `python scripts/registry_consumer.py` 独立验证。
 

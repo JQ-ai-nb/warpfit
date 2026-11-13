@@ -1,0 +1,32 @@
+{
+  "browser": "148.0.7778.96",
+  "checks": [
+    "prototype fitting and optimization charts",
+    "training workflow and visualization",
+    "retrieval workflow and visualization",
+    "result JSON download",
+    "align workflow and visualization",
+    "dba workflow and visualization",
+    "clusters workflow and visualization",
+    "pipeline workflow and visualization",
+    "uci-room workflow and visualization",
+    "subsequence workflow and visualization",
+    "model train, download, reimport and prediction",
+    "model import preserves duplicate keys for engine rejection",
+    "compound model file is rejected before request assembly",
+    "late file import does not overwrite a newer selected request",
+    "local JSON import computes user input",
+    "preprocessing visualization works for custom input",
+    "8192-point 16-feature raw input computes and renders without argument overflow",
+    "pipeline nested budget stop is visible",
+    "changed input invalidates earlier displayed result",
+    "duplicate JSON keys rejected without page error",
+    "worker cancellation discards incomplete result",
+    "390px mobile layout and working compute"
+  ],
+  "pageErrors": [],
+  "externalRequests": [],
+  "status": "passed",
+  "base_url": "https://jq-ai-nb.github.io/warpfit/",
+  "deployed_commit": "bb8c309b286eb7d5ebfa25b268426db7b6a4ddc5"
+}
