@@ -44,6 +44,8 @@ pub fn soft_dtw_with(Series, Series, AlignOptions) -> Result[Evaluation, WarpErr
 
 pub fn standardize(Series, Double) -> Result[StandardizedSeries, WarpError]
 
+pub fn validate_raw_series(Series) -> Result[Unit, WarpError]
+
 pub fn validate_series(Series) -> Result[Unit, WarpError]
 
 // Errors

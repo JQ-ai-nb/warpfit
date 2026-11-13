@@ -27,6 +27,34 @@ test "resampling defines one-point and invalid inputs explicitly" {
 }
 
 ///|
+test "bounded raw inputs can be downsampled without relaxing DTW limits" {
+  let values : Array[Double] = []
+  for i = 0; i < 2880; i = i + 1 {
+    values.push(i.to_double())
+  }
+  let raw = univariate(values)
+  assert_true(failed(validate_series(raw)))
+  assert_true(!failed(validate_raw_series(raw)))
+  let sampled = resample_linear(raw, 100).unwrap()
+  assert_eq(sampled.count, 100)
+  near(sampled.values[0], 0.0)
+  near(sampled.values[99], 2879.0)
+  assert_true(failed(prepare_series(raw, preprocess_options())))
+  let prepared = prepare_series(raw, {
+    ..preprocess_options(),
+    target_count: 100,
+    normalize: false,
+  }).unwrap()
+  near(prepared.series.values[99], 2879.0)
+  let oversized : Series = {
+    count: 8193,
+    dimensions: 1,
+    values: Array::make(8193, 0.0),
+  }
+  assert_true(failed(resample_linear(oversized, 100)))
+}
+
+///|
 test "z-normalization returns per-feature population statistics" {
   let input : Series = {
     count: 3,

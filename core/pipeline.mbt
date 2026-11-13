@@ -39,6 +39,13 @@ pub fn prepare_series(
       failure("epsilon", "epsilon must be finite and within [0, 10000]"),
     )
   }
+  if options.target_count == 0 && series.count > 512 {
+    return Err(
+      failure(
+        "target_count", "raw series over 512 samples requires target_count within 1..512",
+      ),
+    )
+  }
   let count = if options.target_count == 0 {
     series.count
   } else {

@@ -25,10 +25,23 @@ pub fn alignment_options(gamma : Double) -> AlignOptions {
 }
 
 ///|
-pub fn validate_series(s : Series) -> Result[Unit, WarpError] {
-  if s.count < 1 || s.count > 512 || s.dimensions < 1 || s.dimensions > 16 {
+fn validate_series_limit(
+  s : Series,
+  max_samples : Int32,
+) -> Result[Unit, WarpError] {
+  if s.count < 1 ||
+    s.count > max_samples ||
+    s.dimensions < 1 ||
+    s.dimensions > 16 {
     return Err(
-      failure("series_shape", "expected 1..512 samples and 1..16 features"),
+      failure(
+        "series_shape",
+        if max_samples == 512 {
+          "expected 1..512 samples and 1..16 features"
+        } else {
+          "expected 1..8192 raw samples and 1..16 features"
+        },
+      ),
     )
   }
   if s.values.length() != s.count * s.dimensions {
@@ -46,6 +59,19 @@ pub fn validate_series(s : Series) -> Result[Unit, WarpError] {
     }
   }
   Ok(())
+}
+
+///|
+/// Validate an input that is ready for DTW, Soft-DTW or clustering.
+pub fn validate_series(s : Series) -> Result[Unit, WarpError] {
+  validate_series_limit(s, 512)
+}
+
+///|
+/// Validate a bounded raw input for resampling; this does not make the raw
+/// input directly valid for DTW or for results that preserve its length.
+pub fn validate_raw_series(s : Series) -> Result[Unit, WarpError] {
+  validate_series_limit(s, 8192)
 }
 
 ///|

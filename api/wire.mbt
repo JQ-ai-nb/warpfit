@@ -130,8 +130,12 @@ fn number_array(
 }
 
 ///|
-fn series(value : Json, path : String) -> @warpfit.Series raise WireError {
-  let rows = array(value, path, 512)
+fn series_with_limit(
+  value : Json,
+  path : String,
+  limit : Int32,
+) -> @warpfit.Series raise WireError {
+  let rows = array(value, path, limit)
   if rows.is_empty() {
     invalid("series_shape", path + " must not be empty")
   }
@@ -163,8 +167,22 @@ fn series(value : Json, path : String) -> @warpfit.Series raise WireError {
     dimensions,
     values: data,
   }
-  from_result(@warpfit.validate_series(result))
+  if limit == 512 {
+    from_result(@warpfit.validate_series(result))
+  } else {
+    from_result(@warpfit.validate_raw_series(result))
+  }
   result
+}
+
+///|
+fn series(value : Json, path : String) -> @warpfit.Series raise WireError {
+  series_with_limit(value, path, 512)
+}
+
+///|
+fn raw_series(value : Json, path : String) -> @warpfit.Series raise WireError {
+  series_with_limit(value, path, 8192)
 }
 
 ///|

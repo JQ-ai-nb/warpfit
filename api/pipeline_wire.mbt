@@ -50,7 +50,7 @@ fn preprocess_one(
   fields : Map[String, Json],
   options : Map[String, Json],
 ) -> Json raise WireError {
-  let input = series(required(fields, "series"), "series")
+  let input = raw_series(required(fields, "series"), "series")
   let result = from_result(
     @warpfit.prepare_series(input, preprocessing(options)),
   )
@@ -69,7 +69,7 @@ fn pipeline_cluster(
 ) -> Json raise WireError {
   let data : Array[@warpfit.Series] = []
   for value in array(required(fields, "data"), "data", 32) {
-    data.push(series(value, "data[]"))
+    data.push(raw_series(value, "data[]"))
   }
   let seeds : Array[Int32] = []
   for value in array(required(fields, "seed_indices"), "seed_indices", 16) {

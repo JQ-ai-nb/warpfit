@@ -12,11 +12,12 @@ pub(all) struct StandardizedSeries {
 /// Resample on an equally spaced normalized sample-index axis using linear
 /// interpolation. This does not interpret or preserve real timestamps.
 /// A one-point output takes the first observation; a one-point input repeats.
+/// Raw inputs may contain up to 8192 samples; output remains within 1..512.
 pub fn resample_linear(
   series : Series,
   target_count : Int32,
 ) -> Result[Series, WarpError] {
-  match validate_series(series) {
+  match validate_raw_series(series) {
     Ok(_) => ()
     Err(e) => return Err(e)
   }
