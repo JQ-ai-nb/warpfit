@@ -1,0 +1,117 @@
+{
+  "recorded_at_utc": "2026-11-13T13:30:52.283294+00:00",
+  "source_snapshot": "9a6cee277bd1993045103b5c110c6f189a5ab80a",
+  "method": "git archive to a fresh local directory, no copied build cache; build/test without .git, then initialize and stage an isolated Git index for packaging",
+  "status": "passed",
+  "results": [
+    {
+      "command": [
+        "moon",
+        "check",
+        "--target",
+        "all",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "Finished. moon: ran 57 tasks, now up to date\n"
+    },
+    {
+      "command": [
+        "moon",
+        "fmt",
+        "--check"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "Finished. moon: ran 41 tasks, now up to date\n"
+    },
+    {
+      "command": [
+        "moon",
+        "test",
+        "--target",
+        "js",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout": "Total tests: 71, passed: 71, failed: 0.\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "node",
+        "scripts/build.mjs"
+      ],
+      "returncode": 0,
+      "stdout": "Built the MoonBit JSON engine for Node and the browser; included license notices.\n",
+      "stderr": "Finished. moon: ran 3 tasks, now up to date\n"
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "tests/cli.test.mjs",
+        "tests/numerical.test.mjs",
+        "tests/extended.test.mjs",
+        "tests/exhaustive_hard.test.mjs",
+        "tests/properties_hard.test.mjs",
+        "tests/uci_room.test.mjs",
+        "tests/long_input.test.mjs",
+        "tests/model.test.mjs",
+        "tests/model_cli.test.mjs",
+        "tests/subsequence.test.mjs",
+        "tests/distance_only.test.mjs",
+        "tests/auto_model.test.mjs",
+        "tests/uci_holdout.test.mjs"
+      ],
+      "returncode": 0,
+      "stdout": "✔ farthest-first initialization, training and prediction preserve reproducible centers and budgets (14.6013ms)\n✔ automatic initialization rejects indistinguishable samples and checks the whole shared budget (1.455ms)\n✔ model CLI never writes a model from budget-interrupted training (102.7433ms)\n✔ file workflow fits a template with strictly descending accepted objectives (110.0137ms)\n✔ stdin workflow returns analytically known one-point value and both derivatives (78.55ms)\n✔ multivariate training gradient agrees with independent central differences (8.2367ms)\n✔ retrieval evaluates the whole candidate set and ranks exact match first (67.1972ms)\n✔ raw Soft-DTW can be negative; corrected equal sequences are zero (0.6597ms)\n✔ duplicate keys, lexical integer errors, invalid UTF-8 and missing files fail explicitly (245.588ms)\n✔ budget stop returns the last evaluated iterate and uses exit 3 (60.7762ms)\n✔ output file contains the same schema and stdout stays empty (58.0612ms)\n✔ help and version are available (107.782ms)\n✔ rolling-row distance matches the full path across 1200 weighted cases (163.9998ms)\n✔ narrow-band rolling rows agree with full paths at extreme length ratios (53.8714ms)\n✔ 240 hard DTW cases equal the global minimum over every admissible path (38.4084ms)\n✔ bounded DTW file produces a valid zero-cost path; the diagonal-only path costs more (97.2182ms)\n✔ DBA file yields a learned template and a nonincreasing objective (80.0245ms)\n✔ DTW k-means file assigns different shapes and learns both group centers (69.5599ms)\n✔ new input errors identify duplicate centers and strict option names (1.0629ms)\n✔ pipeline resamples, normalizes per series and groups by shape despite scale (65.0611ms)\n✔ DBA and clustering CLI expose budget exhaustion without partial output (184.0073ms)\n✔ raw daily sample can be resampled before the bounded analysis stage (27.7194ms)\n✔ pipeline accepts bounded raw inputs and clusters their resampled outputs (5.6874ms)\n✔ trained model survives a JSON file roundtrip and predicts a new batch (23.1016ms)\n✔ model CLI saves once, reloads for prediction and preserves strict JSON validation (370.9994ms)\n✔ model and data files must each contain a standalone JSON document (233.4395ms)\n✔ all 80 exhaustive path fixtures also pass through the published JSON engine (34.4102ms)\n✔ boundary gamma, zero-weight axes and extreme supported values remain finite (0.854ms)\n✔ weighted singleton prototype reaches the analytic weighted mean (1.8646ms)\n✔ translation leaves objective invariant and all input derivatives sum to zero per feature (0.5904ms)\n✔ 80 DBA runs return consistent objective, valid prototypes and honest budget stops (62.2932ms)\n✔ 30 clustered datasets retain nearest labels, nonempty groups and measured inertia (40.6162ms)\n✔ shared budget never publishes centers paired with stale assignments (6.194ms)\n✔ 256 small subsequence cases agree with independent path enumeration (29.9184ms)\n✔ subsequence locates an embedded event in a bounded long target (7.1852ms)\n✔ real-data split has disjoint ordered source windows and excludes occupancy labels (3.9503ms)\n✔ saved real-data model predicts later disjoint windows and reports a signed baseline comparison (240.3566ms)\n✔ six attributed real-sensor windows run through preprocessing and clustering (118.136ms)\nℹ tests 38\nℹ suites 0\nℹ pass 38\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 835.6273\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "exhaustive_oracle.py",
+        "--check"
+      ],
+      "returncode": 0,
+      "stdout": "Checked 80 independently recomputed path fixtures; maximum absolute difference 0. Cross-platform libm rounding is tolerated, numerical mismatches are not.\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "init",
+        "--quiet",
+        "--initial-branch=clean-verification"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "add",
+        "."
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "scripts/package_check.py"
+      ],
+      "returncode": 0,
+      "stdout": "Package checked: 127 files, private work and contact fields excluded.\n",
+      "stderr": ""
+    }
+  ],
+  "limitations": [
+    "Same computer and installed SDK; not a remote checkout or multi-OS run",
+    "Native toolchain unavailable; clean-copy runtime tested only for JS"
+  ]
+}
