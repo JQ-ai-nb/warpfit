@@ -1,0 +1,43 @@
+{
+  "review_date_local": "2026-11-14",
+  "timezone": "Asia/Shanghai",
+  "applicant": "蒋琦",
+  "account": "JQ-ai-nb",
+  "status": "local_checks_passed_release_pending",
+  "previously_published_source": "8695d8a30e1896782a7019970ccde518f34fe77c",
+  "test_counts": {
+    "moon_wasm": 71,
+    "moon_wasm-gc": 71,
+    "moon_js": 71,
+    "node": 38,
+    "consumer_boundary_tests": 3
+  },
+  "archive_consumer": {
+    "status": "passed",
+    "targets": [
+      "wasm",
+      "wasm-gc",
+      "js"
+    ],
+    "feature_groups": [
+      "dtw",
+      "distance_only",
+      "dba",
+      "cluster_model",
+      "subsequence",
+      "long_preprocess",
+      "soft_gradient",
+      "fit_rank"
+    ],
+    "registry_install_verified": false
+  },
+  "workflow_yaml_parse": "passed",
+  "new_remote_workflow_executed": false,
+  "this_round_github_push": false,
+  "this_round_mooncakes_publish": false,
+  "pending": [
+    "Mooncakes 0.2.0 release and independent registry install",
+    "Push and CI for this local maintenance, only when requested",
+    "Participant registration, eligibility, current deadline and personal understanding remain participant/organizer checks"
+  ]
+}

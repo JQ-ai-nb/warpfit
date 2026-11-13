@@ -1,0 +1,50 @@
+name: Verify published package
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Already-published Mooncakes version to verify
+        required: true
+        default: '0.2.0'
+        type: string
+permissions:
+  contents: read
+jobs:
+  consumer:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install MoonBit on Unix
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+      - name: Install MoonBit on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest https://cli.moonbitlang.com/install/powershell.ps1 -OutFile "$env:RUNNER_TEMP/install-moon.ps1"
+          & "$env:RUNNER_TEMP/install-moon.ps1"
+          "$env:USERPROFILE/.moon/bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+      - uses: ilammy/msvc-dev-cmd@v1
+        if: runner.os == 'Windows'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install exact registry version and run public interfaces
+        env:
+          WARPFIT_RELEASE_VERSION: ${{ inputs.version }}
+        run: python scripts/registry_consumer.py --native
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: registry-consumer-${{ matrix.os }}
+          path: artifacts/consumer-registry.json

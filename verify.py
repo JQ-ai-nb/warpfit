@@ -25,6 +25,7 @@ commands += [
     ['moon', 'run', 'cmd/demo', '--target', 'js'],
     ['moon', 'run', 'cmd/calibrate', '--target', 'js'],
     ['moon', 'run', 'cmd/series_pipeline', '--target', 'js'],
+    ['moon', 'run', 'cmd/consumer', '--target', 'js'],
     ['node', 'scripts/build.mjs'],
     ['node', '--test', 'tests/cli.test.mjs', 'tests/numerical.test.mjs',
      'tests/extended.test.mjs', 'tests/exhaustive_hard.test.mjs', 'tests/properties_hard.test.mjs',
@@ -32,6 +33,8 @@ commands += [
      'tests/model_cli.test.mjs', 'tests/subsequence.test.mjs', 'tests/distance_only.test.mjs',
      'tests/auto_model.test.mjs', 'tests/uci_holdout.test.mjs'],
     [sys.executable, 'scripts/package_check.py'],
+    [sys.executable, 'tests/consumer_validation.py'],
+    [sys.executable, 'scripts/registry_consumer.py', '--packaged'] + (['--native'] if args.native else []),
 ]
 results = []
 for command in commands:

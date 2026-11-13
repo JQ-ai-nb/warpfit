@@ -1,0 +1,94 @@
+{
+  "recorded_at_utc": "2026-11-13T16:43:37.398553+00:00",
+  "module": "JQ-ai-nb/warpfit",
+  "version": "0.2.0",
+  "mode": "package_archive",
+  "path_dependency": true,
+  "archive_sha256": "7813ff62fe5ef2830596f892d5ae62f70f9088017e463c0064a95de2644ea39c",
+  "runtime_targets": [
+    "wasm",
+    "wasm-gc",
+    "js"
+  ],
+  "registry_install_verified": false,
+  "source_checkout_dependency": false,
+  "checks": [
+    "dtw",
+    "distance_only",
+    "dba",
+    "cluster_model",
+    "subsequence",
+    "long_preprocess",
+    "soft_gradient",
+    "fit_rank"
+  ],
+  "results": [
+    {
+      "command": [
+        "moon",
+        "version",
+        "--all"
+      ],
+      "returncode": 0,
+      "stdout": "moon 0.1.20261021 (a4f8933 2026-10-21) ~\\.moon\\bin\\moon.exe\nmoonc v0.10.17+093cb8f9c (2026-10-21) \\\\?\\C:\\Users\\11619\\.moon\\bin\\moonc.exe\nmoonrun 0.1.20261021 (a4f8933 2026-10-21) \\\\?\\C:\\Users\\11619\\.moon\\bin\\moonrun.exe\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "moon",
+        "check",
+        "--target",
+        "all",
+        "--deny-warn",
+        "--frozen"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "Finished. moon: ran 75 tasks, now up to date\n"
+    },
+    {
+      "command": [
+        "moon",
+        "run",
+        ".",
+        "--target",
+        "wasm",
+        "--deny-warn",
+        "--frozen"
+      ],
+      "returncode": 0,
+      "stdout": "warpfit_consumer_ok: dtw, distance_only, dba, cluster_model, subsequence, long_preprocess, soft_gradient, fit_rank\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "moon",
+        "run",
+        ".",
+        "--target",
+        "wasm-gc",
+        "--deny-warn",
+        "--frozen"
+      ],
+      "returncode": 0,
+      "stdout": "warpfit_consumer_ok: dtw, distance_only, dba, cluster_model, subsequence, long_preprocess, soft_gradient, fit_rank\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "moon",
+        "run",
+        ".",
+        "--target",
+        "js",
+        "--deny-warn",
+        "--frozen"
+      ],
+      "returncode": 0,
+      "stdout": "warpfit_consumer_ok: dtw, distance_only, dba, cluster_model, subsequence, long_preprocess, soft_gradient, fit_rank\n",
+      "stderr": ""
+    }
+  ],
+  "dependency_sync": "frozen_local_workspace",
+  "status": "passed"
+}

@@ -96,7 +96,17 @@ node bin/warpfit.mjs -
 
 CLI 退出码：0=本次计算正常结束（不代表优化收敛或业务正确），2=输入 / schema / 文件错误，3=矩阵或逻辑预算不足，或 fit / dba / cluster / pipeline / 模型训练在预算耗尽时停止。预算耗尽时可能返回 `ok:true` 的最后一个完整状态；调用者必须检查 stop，pipeline 和模型训练的 stop 位于 `clustering.stop`。`max_steps`、`max_iterations`、`line_search_stalled`、`numerical_stall` 均不保证收敛。聚类如果出现空簇返回 `empty_cluster`，可更换初始中心或减少簇数。
 
-## 浏览器
+## 独立消费与发布准备
+
+`cmd/consumer` 是只调用公开接口的MoonBit示例，可用 `moon run cmd/consumer --target js --deny-warn` 运行。`scripts/registry_consumer.py` 将相同的main和包配置放入独立consumer工程，检查8组功能，涵盖新增接口及旧接口兼容。
+
+发布前先 `python scripts/package_check.py`，再 `python scripts/registry_consumer.py --packaged`。归档模式校对实际ZIP的模块名、版本和摘要，解出包后用当前SDK支持的 `moon.work` 将consumer与归档包连接，使用 `--frozen` 执行检查和Wasm / Wasm-GC / JS运行；没有引用源码工作区。结果在 `artifacts/consumer-package_archive.json`，明确标记注册表安装未验证。
+
+发布后执行 `python scripts/registry_consumer.py --version 0.2.0`，默认版本来自moon.mod。该模式的隔离workspace只包含consumer，不提供WarpFit本地模块或path覆盖，避免继承上级工程的本地替换；更新注册表并安装指定版本。支持 `--native`，需要C工具链。结果在 `artifacts/consumer-registry.json`，网络或工具失败也会记录失败结果。版本输入会先校验，避免被写成任意manifest片段。
+
+仅在发布已完成后，才使用手动工作流 `Verify published package` 从三系统复核安装；该工作流没有发布步骤。具体执行状态以相应记录为准。
+
+## 浏览器操作
 
 `node scripts/serve.mjs` 后打开 <http://127.0.0.1:4194>。静态服务器仅监听本机；无后端数据接口。示例和引擎从同源加载，计算在 Worker 内完成；取消会终止 Worker 并丢弃未完成结果。页面绘图横轴按各自长度归一，不能据此认定序列在真实时钟上同步。部署静态页时须随引擎保留 `MOONBIT_CORE_LICENSE` / `MOONBIT_CORE_NOTICE` / `WARPFIT_LICENSE`。
 

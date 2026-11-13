@@ -2,6 +2,8 @@
 
 > **当前源码为 0.2.0 修订版，Mooncakes 0.2.0 尚未发布。** 本项目在 2026 年 10 月已公开的 WarpFit 0.1.2 基础上扩展。2026-11-13 核对的注册表最新版本仍为 0.1.2；新增接口需构建本仓库源码。下文验证记录明确区分本地检查、历史远程 CI 和注册表安装结果。
 
+2026-11-14的本地验收维护新增了独立包消费验证；依用户要求暂未推送或发布。已公开的`8695d8a`与本轮本地新增检查分开记录，详见 [验收自查](docs/ACCEPTANCE.md) 和 [机制与演示](docs/WALKTHROUGH.md)。
+
 为不同长度、节奏和量纲的数值序列提供一套**有界的时序分析流程**：按采样点重采样、逐维标准化、硬 DTW 约束对齐、DBA 模板与 DTW 聚类，训练后保存模型供新序列使用，并在较长输入中定位完整查询的最佳匹配区间；保留原有 Soft-DTW 损失、两侧梯度、可微分模板拟合和示例检索。
 
 目标用户是 MoonBit 时序模型、传感器周期与离线数值应用开发者。逐点误差和直接平均要求采样位置一致；调用者可以根据问题选择硬路径对齐、带梯度的软目标，或对未标记序列做分组。核心使用 MoonBit 标准库，不依赖 Python 运行时或外部学习服务；浏览器演示在本地 Worker 计算用户数据。
@@ -18,6 +20,7 @@ moon test --target wasm-gc --deny-warn
 moon run cmd/demo --target js
 moon run cmd/calibrate --target js
 moon run cmd/series_pipeline --target js
+moon run cmd/consumer --target js
 node scripts/build.mjs
 node bin/warpfit.mjs examples/align.json
 node bin/warpfit.mjs examples/dba.json
@@ -98,6 +101,8 @@ node scripts/benchmark_hard.mjs
 本地执行结果与真实命令见 [VALIDATION.md](docs/VALIDATION.md)。源码修订 `bb8c309` 已在 [此次远程 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/43449875490) 通过 Linux / macOS / Windows × Wasm / Wasm-GC / JS / native 检查、构建和测试：每个系统、每个后端各71项 MoonBit 测试，另各38项 Node 测试；Linux 浏览器检查22项通过。已下载 CI 原始产物复核这些数量，[汇总记录](docs/evidence/remote-validation-0.2.0.json) 对应上述提交。本机仍缺 MSVC，本机 native 未运行；远程 native 已通过。已部署的 [在线工作台](https://jq-ai-nb.github.io/warpfit/) 也实际通过22项浏览器检查。
 
 此前 0.1.2 的注册表独立消费测试和线上演示已有验证记录；0.2.0 尚未发布到注册表，新增功能没有完成注册表安装测试。发布后需用 `python scripts/registry_consumer.py` 独立验证。
+
+发布前可运行 `python scripts/package_check.py` 和 `python scripts/registry_consumer.py --packaged`：它在独立工程中只使用实际归档包，以冻结本地workspace检查并运行8组公共能力。默认不带`--packaged`才从注册表安装。归档验证不能写成Mooncakes安装已通过，详情见 [消费验证说明](docs/API.md#独立消费与发布准备)。
 
 新增硬 DTW 有 240 组小样例通过全路径穷举；另对照 tslearn 0.6.4 验证 160 组硬 DTW、80 组单步 DBA、9 组聚类、100 组预处理及一个完整流程。常量特征采用本库明确的阈值归零语义，与参考库的浮点边界行为有差异，单独披露于 [VALIDATION.md](docs/VALIDATION.md)。数值一致性不证明业务效果。
 
