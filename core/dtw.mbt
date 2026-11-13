@@ -26,8 +26,92 @@ pub(all) struct DtwPath {
 }
 
 ///|
+/// Distance-only result; no alignment path is allocated or returned.
+pub(all) struct DtwDistance {
+  distance : Double
+  squared_cost : Double
+  visited_cells : Int32
+}
+
+///|
 pub fn dtw_options() -> DtwOptions {
   { window: -1, feature_weights: [], max_cells: 262144, }
+}
+
+///|
+/// Compute the same weighted DTW distance as `dtw_path` using two DP rows.
+/// With a window only permitted cells are iterated. `max_cells` continues to
+/// validate the full n*m problem size for compatibility with existing calls.
+pub fn dtw_distance(
+  x : Series,
+  y : Series,
+  options : DtwOptions,
+) -> Result[DtwDistance, WarpError] {
+  match validate_dtw_pair(x, y, options) {
+    Ok(_) => ()
+    Err(error) => return Err(error)
+  }
+  let n = x.count
+  let m = y.count
+  let dimensions = x.dimensions
+  let weights = dtw_alignment_options(options)
+  let mut previous = Array::make(m + 1, @double.infinity)
+  let mut current = Array::make(m + 1, @double.infinity)
+  previous[0] = 0.0
+  let mut visited = 0
+  for i = 1; i <= n; i = i + 1 {
+    let row = i - 1
+    let mut lower = 0
+    let mut upper = m - 1
+    if options.window >= 0 {
+      if n <= m {
+        lower = (row - options.window).max(0)
+        upper = (row + (m - n) + options.window).min(m - 1)
+      } else {
+        lower = (row - (n - m) - options.window).max(0)
+        upper = (row + options.window).min(m - 1)
+      }
+    }
+    let first = lower + 1
+    let last = upper + 1
+    // Band boundaries move by at most one column per row. Set the neighboring
+    // sentinels before reusing each row so stale values cannot enter the band.
+    current[0] = @double.infinity
+    if first > 1 {
+      current[first - 1] = @double.infinity
+    }
+    if last < m {
+      current[last + 1] = @double.infinity
+    }
+    for j = first; j <= last; j = j + 1 {
+      let mut point_cost = 0.0
+      for k = 0; k < dimensions; k = k + 1 {
+        let delta = x.values[(i - 1) * dimensions + k] -
+          y.values[(j - 1) * dimensions + k]
+        point_cost += feature_weight(weights, k) * delta * delta
+      }
+      let diagonal = previous[j - 1]
+      let up = previous[j]
+      let left = current[j - 1]
+      let mut best = diagonal
+      if up < best {
+        best = up
+      }
+      if left < best {
+        best = left
+      }
+      current[j] = point_cost + best
+      visited += 1
+    }
+    let old = previous
+    previous = current
+    current = old
+  }
+  let cost = previous[m]
+  if cost == @double.infinity {
+    return Err(failure("dtw_no_path", "no valid alignment path exists"))
+  }
+  Ok({ distance: cost.sqrt(), squared_cost: cost, visited_cells: visited, })
 }
 
 ///|

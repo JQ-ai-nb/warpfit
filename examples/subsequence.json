@@ -1,0 +1,7 @@
+{
+  "schema": "warpfit.request/1",
+  "operation": "subsequence",
+  "query": [0, 1, 0],
+  "target": [9, 9, 0, 1, 0, 9, 9],
+  "options": { "max_cells": 262144 }
+}

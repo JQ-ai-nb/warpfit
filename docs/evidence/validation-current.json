@@ -1,0 +1,215 @@
+{
+  "recorded_at_utc": "2026-11-13T08:29:36.166541+00:00",
+  "status": "passed",
+  "runtime_targets": [
+    "wasm",
+    "wasm-gc",
+    "js"
+  ],
+  "not_checked": [
+    "native runtime: C toolchain required; use --native"
+  ],
+  "results": [
+    {
+      "command": [
+        "moon",
+        "version",
+        "--all"
+      ],
+      "returncode": 0,
+      "stdout": "moon 0.1.20261021 (a4f8933 2026-10-21) ~\\.moon\\bin\\moon.exe\nmoonc v0.10.17+093cb8f9c (2026-10-21) \\\\?\\C:\\Users\\11619\\.moon\\bin\\moonc.exe\nmoonrun 0.1.20261021 (a4f8933 2026-10-21) \\\\?\\C:\\Users\\11619\\.moon\\bin\\moonrun.exe\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "moon",
+        "check",
+        "--target",
+        "all",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "Finished. moon: ran 52 tasks, now up to date\n"
+    },
+    {
+      "command": [
+        "moon",
+        "fmt",
+        "--check"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "Finished. moon: ran 41 tasks, now up to date\n"
+    },
+    {
+      "command": [
+        "moon",
+        "info"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "Finished. moon: ran 5 tasks, now up to date\n"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "--",
+        "*.mbti"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "moon",
+        "test",
+        "--target",
+        "wasm",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout": "Total tests: 71, passed: 71, failed: 0.\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "moon",
+        "build",
+        "--target",
+        "wasm",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "Finished. moon: ran 9 tasks, now up to date\n"
+    },
+    {
+      "command": [
+        "moon",
+        "test",
+        "--target",
+        "wasm-gc",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout": "Total tests: 71, passed: 71, failed: 0.\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "moon",
+        "build",
+        "--target",
+        "wasm-gc",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "Finished. moon: ran 9 tasks, now up to date\n"
+    },
+    {
+      "command": [
+        "moon",
+        "test",
+        "--target",
+        "js",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout": "Total tests: 71, passed: 71, failed: 0.\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "moon",
+        "build",
+        "--target",
+        "js",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "Finished. moon: ran 9 tasks, now up to date\n"
+    },
+    {
+      "command": [
+        "moon",
+        "run",
+        "cmd/demo",
+        "--target",
+        "js"
+      ],
+      "returncode": 0,
+      "stdout": "identical_raw=-0.5514447139320511\nidentical_corrected=0\nprototype_initial=6.724196713736497\nprototype_final=0.0878791772965414\naccepted_steps=30\ntraining_loss=0.7998364090182977\ntraining_gradient_first=-0.11180129274548832\nquery_same=0\nquery_stretched=0.1813520905973129\nquery_changed=1.7031942663182167\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "moon",
+        "run",
+        "cmd/calibrate",
+        "--target",
+        "js"
+      ],
+      "returncode": 0,
+      "stdout": "calibration_initial=1.196474865077101\ncalibration_final=0.4136583287675755\ngain=1.2516615832072744\noffset=-0.05458947803902448\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "moon",
+        "run",
+        "cmd/series_pipeline",
+        "--target",
+        "js"
+      ],
+      "returncode": 0,
+      "stdout": "sample 0: cluster 0\nsample 1: cluster 0\nsample 2: cluster 1\nsample 3: cluster 1\ninertia: 0\nstop: improvement_tolerance\nmatrix work units: 600\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "node",
+        "scripts/build.mjs"
+      ],
+      "returncode": 0,
+      "stdout": "Built the MoonBit JSON engine for Node and the browser; included license notices.\n",
+      "stderr": "Finished. moon: ran 3 tasks, now up to date\n"
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "tests/cli.test.mjs",
+        "tests/numerical.test.mjs",
+        "tests/extended.test.mjs",
+        "tests/exhaustive_hard.test.mjs",
+        "tests/properties_hard.test.mjs",
+        "tests/uci_room.test.mjs",
+        "tests/long_input.test.mjs",
+        "tests/model.test.mjs",
+        "tests/model_cli.test.mjs",
+        "tests/subsequence.test.mjs",
+        "tests/distance_only.test.mjs",
+        "tests/auto_model.test.mjs"
+      ],
+      "returncode": 0,
+      "stdout": "✔ farthest-first initialization, training and prediction preserve reproducible centers and budgets (66.8368ms)\n✔ automatic initialization rejects indistinguishable samples and checks the whole shared budget (3.1595ms)\n✔ model CLI never writes a model from budget-interrupted training (476.5668ms)\n✔ file workflow fits a template with strictly descending accepted objectives (394.7811ms)\n✔ stdin workflow returns analytically known one-point value and both derivatives (400.6696ms)\n✔ multivariate training gradient agrees with independent central differences (21.2717ms)\n✔ retrieval evaluates the whole candidate set and ranks exact match first (354.2088ms)\n✔ raw Soft-DTW can be negative; corrected equal sequences are zero (1.9282ms)\n✔ duplicate keys, lexical integer errors, invalid UTF-8 and missing files fail explicitly (1072.7377ms)\n✔ budget stop returns the last evaluated iterate and uses exit 3 (182.2892ms)\n✔ output file contains the same schema and stdout stays empty (346.9188ms)\n✔ help and version are available (282.9589ms)\n✔ rolling-row distance matches the full path across 1200 weighted cases (461.1475ms)\n✔ narrow-band rolling rows agree with full paths at extreme length ratios (154.1303ms)\n✔ 240 hard DTW cases equal the global minimum over every admissible path (136.6164ms)\n✔ bounded DTW file produces a valid zero-cost path; the diagonal-only path costs more (369.6755ms)\n✔ DBA file yields a learned template and a nonincreasing objective (424.3947ms)\n✔ DTW k-means file assigns different shapes and learns both group centers (323.8466ms)\n✔ new input errors identify duplicate centers and strict option names (2.8427ms)\n✔ pipeline resamples, normalizes per series and groups by shape despite scale (259.799ms)\n✔ DBA and clustering CLI expose budget exhaustion without partial output (789.7873ms)\n✔ raw daily sample can be resampled before the bounded analysis stage (77.0178ms)\n✔ pipeline accepts bounded raw inputs and clusters their resampled outputs (10.3692ms)\n✔ trained model survives a JSON file roundtrip and predicts a new batch (146.7685ms)\n✔ model CLI saves once, reloads for prediction and preserves strict JSON validation (1664.9573ms)\n✔ all 80 exhaustive path fixtures also pass through the published JSON engine (98.7306ms)\n✔ boundary gamma, zero-weight axes and extreme supported values remain finite (2.1261ms)\n✔ weighted singleton prototype reaches the analytic weighted mean (3.2427ms)\n✔ translation leaves objective invariant and all input derivatives sum to zero per feature (1.0094ms)\n✔ 80 DBA runs return consistent objective, valid prototypes and honest budget stops (226.586ms)\n✔ 30 clustered datasets retain nearest labels, nonempty groups and measured inertia (115.4397ms)\n✔ shared budget never publishes centers paired with stale assignments (13.5744ms)\n✔ 256 small subsequence cases agree with independent path enumeration (76.2388ms)\n✔ subsequence locates an embedded event in a bounded long target (12.0167ms)\n✔ six attributed real-sensor windows run through preprocessing and clustering (341.064ms)\nℹ tests 35\nℹ suites 0\nℹ pass 35\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 3311.0051\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "scripts/package_check.py"
+      ],
+      "returncode": 0,
+      "stdout": "Package checked: 113 files, private work and contact fields excluded.\n",
+      "stderr": ""
+    }
+  ],
+  "evidence_note": "Local Python executable path displayed as python; original captured output remains in ignored artifacts/validation.json."
+}

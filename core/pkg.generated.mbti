@@ -14,6 +14,8 @@ pub fn divergence(Series, Series, Double) -> Result[Divergence, WarpError]
 
 pub fn divergence_with(Series, Series, AlignOptions) -> Result[Divergence, WarpError]
 
+pub fn dtw_distance(Series, Series, DtwOptions) -> Result[DtwDistance, WarpError]
+
 pub fn dtw_kmeans(Array[Series], Array[Series], ClusterOptions) -> Result[ClusterFit, WarpError]
 
 pub fn dtw_options() -> DtwOptions
@@ -28,6 +30,8 @@ pub fn fitting_options(Double, Int32) -> FitOptions
 
 pub fn pipeline_options() -> PipelineOptions
 
+pub fn predict_clusters(ClusterModel, Array[Series], Int32) -> Result[ClusterPrediction, WarpError]
+
 pub fn prepare_and_cluster(Array[Series], Array[Int32], PipelineOptions) -> Result[PipelineFit, WarpError]
 
 pub fn prepare_series(Series, PreprocessOptions) -> Result[PreparedSeries, WarpError]
@@ -38,11 +42,19 @@ pub fn rank_candidates(Series, Array[Candidate], AlignOptions, Int32, Int32) -> 
 
 pub fn resample_linear(Series, Int32) -> Result[Series, WarpError]
 
+pub fn select_farthest_seeds(Array[Series], Int32, Int32, DtwOptions, Int32) -> Result[SeedSelection, WarpError]
+
 pub fn soft_dtw(Series, Series, Double) -> Result[Evaluation, WarpError]
 
 pub fn soft_dtw_with(Series, Series, AlignOptions) -> Result[Evaluation, WarpError]
 
 pub fn standardize(Series, Double) -> Result[StandardizedSeries, WarpError]
+
+pub fn subsequence_dtw(Series, Series, DtwOptions) -> Result[SubsequenceMatch, WarpError]
+
+pub fn train_cluster_model(Array[Series], Array[Int32], PipelineOptions) -> Result[ClusterModelFit, WarpError]
+
+pub fn train_cluster_model_auto(Array[Series], Int32, Int32, PipelineOptions) -> Result[AutoClusterModelFit, WarpError]
 
 pub fn validate_raw_series(Series) -> Result[Unit, WarpError]
 
@@ -55,6 +67,13 @@ pub(all) struct AlignOptions {
   gamma : Double
   feature_weights : Array[Double]
   max_cells : Int32
+}
+
+pub(all) struct AutoClusterModelFit {
+  fitted : ClusterModelFit
+  seed_indices : Array[Int32]
+  seed_work_units : Int32
+  total_work_units : Int32
 }
 
 pub(all) struct Candidate {
@@ -72,12 +91,32 @@ pub(all) struct ClusterFit {
   work_units : Int32
 }
 
+pub(all) struct ClusterModel {
+  version : Int32
+  centers : Array[Series]
+  preprocessing : PreprocessOptions
+  alignment : DtwOptions
+}
+
+pub(all) struct ClusterModelFit {
+  model : ClusterModel
+  training : PipelineFit
+}
+
 pub(all) struct ClusterOptions {
   alignment : DtwOptions
   max_iterations : Int32
   max_dba_steps : Int32
   tolerance : Double
   max_work_units : Int32
+}
+
+pub(all) struct ClusterPrediction {
+  prepared : Array[PreparedSeries]
+  labels : Array[Int32]
+  distances : Array[Double]
+  distances_to_centers : Array[Array[Double]]
+  work_units : Int32
 }
 
 pub(all) struct DbaFit {
@@ -105,6 +144,12 @@ pub(all) struct Divergence {
   raw_self_x : Double
   raw_self_y : Double
   alignment : Array[Double]
+}
+
+pub(all) struct DtwDistance {
+  distance : Double
+  squared_cost : Double
+  visited_cells : Int32
 }
 
 pub(all) struct DtwOptions {
@@ -192,6 +237,11 @@ pub(all) struct Ranking {
   candidates_evaluated : Int32
 }
 
+pub(all) struct SeedSelection {
+  indices : Array[Int32]
+  work_units : Int32
+}
+
 pub(all) struct Series {
   count : Int32
   dimensions : Int32
@@ -203,6 +253,15 @@ pub(all) struct StandardizedSeries {
   means : Array[Double]
   standard_deviations : Array[Double]
   constant_features : Array[Bool]
+}
+
+pub(all) struct SubsequenceMatch {
+  start : Int32
+  end : Int32
+  distance : Double
+  squared_cost : Double
+  path : Array[DtwPoint]
+  visited_cells : Int32
 }
 
 pub(all) struct WarpError {

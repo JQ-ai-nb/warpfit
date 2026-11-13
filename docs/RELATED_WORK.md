@@ -12,7 +12,7 @@
 | [mblondel/soft-dtw](https://github.com/mblondel/soft-dtw) | Soft-DTW、梯度、时序平均；BSD-2-Clause | 已有成熟的算法实现，不声称算法创新；未复制源代码 |
 | [Google soft-dtw-divergences](https://github.com/google-research/soft-dtw-divergences) | 校正值及梯度；Apache-2.0，仓库归档 | 校正算法参考来源，不把自项校正冒称新发明；独立实现并验证 |
 | [tslearn](https://github.com/tslearn-team/tslearn) / [DBA 接口](https://tslearn.readthedocs.io/en/stable/gen_modules/barycenters/tslearn.barycenters.dtw_barycenter_averaging.html) | BSD-2-Clause；成熟 Python 工具，覆盖预处理、窗口 DTW、Soft-DTW、DBA 和聚类 | 多项能力与本项目直接重合，tslearn 的覆盖范围更广。本项目用0.6.4版本做数值交叉验证；不声称功能更全、速度更快或算法原创 |
-| [DTAIDistance](https://dtaidistance.readthedocs.io/en/latest/usage/dtw.html) | Apache-2.0；提供 DTW 距离、距离矩阵、提前停止与[子序列匹配](https://dtaidistance.readthedocs.io/en/latest/usage/subsequence.html) | 子序列检索和距离专用计算是本项目目前缺少的功能；本项目尚未提供相同能力或与它进行公平性能对比 |
+| [DTAIDistance](https://dtaidistance.readthedocs.io/en/latest/usage/dtw.html) | Apache-2.0；提供 DTW 距离、距离矩阵、提前停止与[子序列匹配](https://dtaidistance.readthedocs.io/en/latest/usage/subsequence.html) | 本地修订已补单个最佳子序列定位及两行距离专用计算，与其存在实际重合；未实现其完整搜索和提前停止能力，也未做公平性能对比 |
 | [Augurs](https://github.com/grafana/augurs/blob/main/js/testpkg/clustering.test.ts) | Apache-2.0 或 MIT；Rust 工具集，已有 DTW 和 DBSCAN 的 JavaScript / WebAssembly 接口 | 浏览器 / WASM 中使用 DTW 和聚类并非本项目独有；核对的 [DTW JS 接口](https://github.com/grafana/augurs/blob/main/js/augurs-dtw-js/src/lib.rs)接收一维序列，本项目还提供多变量路径、软对齐梯度和 DBA。未完整审计 Augurs 所有模块 |
 | [aeon](https://www.aeon-toolkit.org/en/stable/examples/distances/distances.html) | BSD-3-Clause；提供多种弹性距离、聚类与时序机器学习 | 其算法覆盖面更广；本项目不声称支持全部相同距离，也不将增加若干方法等同于原创 |
 | [dtw-python](https://dynamictimewarping.github.io/py-api/html/api/dtw.dtw.html) | GPL-3.0；支持开放端点、不同步进模式与窗口约束 | 是可参考的端点与步进语义；本项目未复制其代码，若将来移植或复用源码须先核对许可证兼容与来源 |
@@ -21,7 +21,7 @@
 
 ## 本次实际交付的贡献
 
-1. 可直接供 MoonBit 程序使用的本地数值内核：硬 / 软对齐、两侧求导、硬路径 DBA、用户指定中心的聚类与简单预处理，依赖仅标准库。
+1. 可直接供 MoonBit 程序使用的本地数值内核：硬 / 软对齐、两侧求导、硬路径 DBA、聚类、可保存模型和预处理，依赖仅标准库。本次补充确定性最远点初始化、保存后预测、单个最佳子序列及两行距离专用计算；这些在成熟时序工具中已有对应能力，不称为原创算法。
 2. 可核对的输入与资源契约：矩阵和总逻辑工作量、空簇错误、固定并列顺序、停止状态；预算耗尽保留最后完整优化点。预算不是精确时间预测。
 3. 同一核心驱动类型接口、版本化 JSON、文件 / stdin CLI 和浏览器 Worker；实际串联预处理与聚类，并使用穷举及外部参考进行交叉验证。
 

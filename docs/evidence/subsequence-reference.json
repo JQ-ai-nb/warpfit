@@ -1,0 +1,9 @@
+{
+  "recorded_at_utc": "2026-11-13T08:30:15.746791+00:00",
+  "reference": "tslearn",
+  "reference_version": "0.6.4",
+  "cases": 120,
+  "max_absolute_distance_error": 8.881784197001252e-16,
+  "checked": "distance and earliest end; tied predecessor paths may differ",
+  "status": "passed"
+}

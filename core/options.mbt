@@ -68,8 +68,8 @@ pub fn validate_series(s : Series) -> Result[Unit, WarpError] {
 }
 
 ///|
-/// Validate a bounded raw input for resampling; this does not make the raw
-/// input directly valid for DTW or for results that preserve its length.
+/// Validate bounded raw input for preprocessing or a subsequence target.
+/// Ordinary DTW, Soft-DTW and clustering still require validate_series.
 pub fn validate_raw_series(s : Series) -> Result[Unit, WarpError] {
   validate_series_limit(s, 8192)
 }
@@ -88,6 +88,15 @@ fn validate_pair(
     Err(e) => return Err(e)
     Ok(_) => ()
   }
+  validate_pair_options(x, y, options)
+}
+
+///|
+fn validate_pair_options(
+  x : Series,
+  y : Series,
+  options : AlignOptions,
+) -> Result[Unit, WarpError] {
   if x.dimensions != y.dimensions {
     return Err(
       failure(

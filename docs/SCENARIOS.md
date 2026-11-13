@@ -1,4 +1,4 @@
-# 三个可运行场景
+# 可运行场景与验证
 
 ## 0.2.0 本地新增场景
 
@@ -10,6 +10,48 @@
 4. **无需标准化直接聚类。** `node bin/warpfit.mjs examples/clusters.json` 输入六条已准备好的不同长度序列和两个初始中心，返回 `[0,0,0,1,1,1]`；目标从约0.003333降至0.002222。调用方需根据业务决定是否消除量纲和绝对水平。
 
 5. **公开传感器数据的形状分组。** 研究者运行 `node bin/warpfit.mjs examples/uci-room.json`，输入来自 UCI 受控实验的温度、光照与 CO₂ 六个固定时段窗口，按样本下标重采样、逐维标准化并以固定种子进行聚类。该次本机返回 `[0,1,0,1,1,1]`，最终平均平方代价约47.7271；tslearn 对最终中心的独立距离复算一致。来源、CC BY 4.0、样本选择与限制见 [REAL_DATA.md](REAL_DATA.md)。这不是人数预测、真实部署或业务效果验证。
+
+## 本次补齐的工作流（2026-11-13，本地未发布）
+
+### 训练一次、保存模型、对新批次分组
+
+**使用者与问题**：离线时序应用开发者已经对一批数据建立形状分组，需要让后续单条或少量新序列使用相同中心，避免每批重新聚类或因某簇没有新样本而报错。
+
+**输入**：[model_train.json](../examples/model_train.json)：四条不等长升 / 降序列，target_count=5、normalize=true、window=0、cluster_count=2、first_index=0；另有 [model_predict_data.json](../examples/model_predict_data.json) 的三条新序列。均为合成输入。
+
+**操作**（先构建引擎，输出文件须尚不存在）：
+
+```text
+node -e "require('node:fs').mkdirSync('work',{recursive:true})"
+node bin/warpfit-model.mjs train examples/model_train.json work/cluster-model.json
+node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predict_data.json
+```
+
+**预期输出与验证**：训练保存 `warpfit.cluster-model/1` 文件，其中保留中心、重采样 / 标准化策略和对齐参数。再次读取后新批次标签为 `[0,1,0]`，返回各输入到各中心的距离。`tests/model.test.mjs` 检查真实文件往返、两个新样本都进入同一簇，以及600点原始输入在预测前重采样；`tests/model_cli.test.mjs` 验证文件流程、拒绝覆盖与重复键；`tests/auto_model.test.mjs` 检查确定性初始化、预算计费及预算中断时不写模型。网页也可下载、重新导入模型并替换 data 为新输入。
+
+**限制**：簇数和首个样本仍由使用者给定；初始化采用确定性最远点策略，非随机 k-means++。常量或经对齐不可区分的输入可能不足以产生所需中心；训练可报 `seed_distinct` / `empty_cluster`。分组不等同监督分类、置信度或业务判定。
+
+### 在长记录中定位完整查询片段
+
+**使用者与问题**：离线传感器片段分析开发者要找一条短查询出现在哪个位置；整条记录首尾都对齐会把无关的前后背景计入代价。
+
+**输入**：[subsequence.json](../examples/subsequence.json)：query=`[0,1,0]`，target=`[9,9,0,1,0,9,9]`，默认等权。目标端点开放，要求完整查询参与匹配。
+
+**操作**：`node bin/warpfit.mjs examples/subsequence.json`，或在浏览器选择“查找相似片段”并运行。可在 target 前后增加数据，检查返回下标变化。
+
+**预期输出与验证**：start=2、end=4（零基且两端都包含）、distance=0，路径 `[[0,2],[1,3],[2,4]]`。256组独立完整路径枚举检查最小代价、完整查询和最早结束的并列规则；120组带权多变量输入对照 tslearn 的距离及终点。另有2000点目标定位测试，验证超过512点目标并不被旧分析入口提前拒绝。
+
+**限制**：query≤512、target≤8192且两者长度乘积≤262144，只返回一个最佳区间；当前不支持窗口或多结果索引。非空合法输入总有最佳区间，是否足够相似仍需调用者设置业务标准；没有真实事件检出率证据。
+
+### 较长原始采样先压缩再分析
+
+**使用者与问题**：数据开发者每条记录有数千采样点，需要明确降采样后进入有界分析，而原有接口会在处理前拒绝超过512点的输入。
+
+**输入**：`tests/long_input.test.mjs` 中生成2880点递增记录，设置 target_count=100、normalize=false；另有600点输入的预处理到聚类流程。
+
+**操作与验证**：运行 `node --test tests/long_input.test.mjs`。断言2880点输入生成100点、保留首尾0和2879，所有输出有效；600点输入可以显式压缩后分组。把 target_count 删除会返回明确错误，8193点原始输入及直接向普通 DTW 传513点也被拒绝。
+
+**限制**：线性插值沿采样下标进行，不读取实际时间戳或执行抗混叠；高频信息可能丢失，需要调用方依据数据选择目标长度。该测试验证输入处理与边界，不构成信号保真率或业务性能证明。
 
 ## 0.1.x 原有场景
 

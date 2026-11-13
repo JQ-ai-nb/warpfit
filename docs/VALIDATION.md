@@ -1,10 +1,17 @@
 # 已运行的验证与结果
 
-## 0.2.0 本地扩展（2026-11-13 复核，未推送 / 未发布）
+## 0.2.0 本次维护（2026-11-13，未推送 / 未发布）
 
-- 本地 Windows 的 `moon check --target all --deny-warn`、格式与生成接口检查通过；Wasm、Wasm-GC、JS 目标各执行 59 项 MoonBit 测试并构建通过。本机缺少 MSVC，native 运行和新版远程多系统 CI **尚未验证**。
-- 从提交 `0360c4b` 用 `git archive` 导出源码到新目录，复用本机工具链重新检查全部目标、构建 JS 并运行 JS 的 59 项 MoonBit 测试及 24 项 Node 测试；另对照单独下载的 UCI 原始数据校验衍生样本，均通过。[记录](evidence/clean-copy-real.json)。这验证的是导出源码，不代表远程检出或其他机器上的结果。
-- Node CLI / 数值测试共24项通过；本地 Chrome 覆盖8个页面场景、导入、计算、预算提示、取消、下载及390px布局，无页面错误和外部请求。浏览器证据见 [browser-nov.json](evidence/browser-nov.json)。
+- `python verify.py` 实际通过：Windows 本地的 `moon check --target all --deny-warn`、格式与生成接口检查；Wasm、Wasm-GC、JS 各71项 MoonBit 测试及构建；三个类型示例；构建共用 JSON 引擎；35项 Node 测试和实际 Mooncakes 打包内容检查。命令及输出见 [validation-current.json](evidence/validation-current.json)。这是测试函数数量，下面列出的批量样本数量另算，没有混称为独立测试函数。
+- `tests/subsequence.test.mjs` 独立枚举256组完整查询 / 开放目标路径，检查最小代价、返回路径和最早结束；另验证2000点目标的匹配位置、窗口拒绝和矩阵预算。`tests/subsequence_reference.py` 与 tslearn 0.6.4 对照120组带权多变量输入，距离最大绝对差 `8.881784197001252e-16`、终点一致；不要求并列回溯路径相同：[subsequence-reference.json](evidence/subsequence-reference.json)。
+- 距离专用两行 DP 与完整路径实现比较1200组不同长度、维数、权重和窗口的输入，并额外比较1/512等极端长度比例；相同的路径代价、距离和访问格点计数均通过。它是内部不同实现的一致性验证，不能取代独立路径枚举及外部参考，也不是性能优于其他项目的证据。
+- 模型相关测试实际执行自动 / 手动初始化比较、文件保存及重新读取、全新批次预测、全部新样本同簇、初始化与训练共享预算、预算中断不写模型、错误版本与重复键、拒绝文件覆盖。长输入测试验证2880点显式重采样到100点，以及600点数据的分析流程；超过8192点拒绝，原有普通 DTW 的512点限制仍有效。
+- 本地 Chromium 148.0.7778.96 实际完成21项浏览器检查，包含10个内置场景、模型下载和重新导入、重复键、延迟导入与切换请求、8192点×16特征的预处理与绘图、预算提示、Worker取消及390px布局。无 pageerror 或外部数据请求。见 [browser-nov.json](evidence/browser-nov.json) 和 [模型界面](screenshots/model.png) / [子序列界面](screenshots/subsequence.png)。
+- 本机缺少 MSVC，native 运行和新版远程多系统 CI **尚未验证**；本次仍未推送 / 发布，所以也没有新增接口的注册表安装结果。完整检查的原始输出保存在忽略目录 `artifacts/validation.json`；公开证据仅将本机 Python 可执行文件的绝对路径改成可移植的 `python`，其余命令参数与结果不变。
+
+## 0.2.0 前一阶段的独立数值与数据验证
+
+- 前一阶段从提交 `0360c4b` 用 `git archive` 导出源码到新目录，复用本机工具链重新检查全部目标、构建 JS 并运行 JS 的59项 MoonBit 测试及24项 Node 测试；另对照单独下载的 UCI 原始数据校验衍生样本，均通过。[历史记录](evidence/clean-copy-real.json)。该历史记录尚不包含本次新增接口；当前源码的重新导出验证另行记录。导出源码测试不代表远程检出或其他机器上的结果。
 - `tests/exhaustive_hard.test.mjs` 逐一枚举 240 组长度1..4的硬 DTW 合法完整路径，覆盖全部16种长度组合、一维/二维、无窗口及不同窗口，检查最小代价、实际路径和边界。80组 DBA 与30组聚类性质用例另复算目标、逐点最近中心和预算停止状态。
 - `tests/reference_hard.py` 使用 tslearn 0.6.4 / NumPy 2.2.6 对照160组带权硬 DTW、80组单步带权 DBA（含不等长和窗口）、9组聚类、100组预处理及1组完整流程。非例外比较的最大绝对差约2.57e-15，断言容差 rtol=atol=1e-8；结果见 [hard-reference.json](evidence/hard-reference.json)。DBA 是单步对照，不能据此声称任意初始化和收敛行为完全一致。
 - **常量特征的参考差异：**100组预处理对照中有常量维；本项目按标准差≤1e-12归零。tslearn 0.6.4 对其中7个常量特征因浮点舍入输出非零，本项目依照自身明确语义直接验证为0；这些维度没有被当作“与 tslearn 一致”，最大原始差异约2.236。其他维度按参考值比较，详情见证据文件。

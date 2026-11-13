@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-let current = 'prototype', worker, lastResult, running = false, loadNumber = 0;
+let current = 'prototype', worker, lastResult, trainingRequest, running = false, loadNumber = 0;
 const descriptions = {
   prototype: '设备 / 动作模板开发者：从两条不同节奏的示例学习四点参考模板。可调整 seed、examples 和优化预算。',
   training: '时序模型开发者：计算二维预测序列与目标的校正损失、两侧梯度和软对齐占用。梯度可用于外部模型链式求导。',
@@ -8,17 +8,20 @@ const descriptions = {
   dba: '传感器应用开发者：输入多条不同长度样本和初始模板，沿硬 DTW 路径做迭代平均，得到 DBA 模板。',
   clusters: '时序分析开发者：输入未标记序列及初始中心，通过 DTW 分配和 DBA 更新得到簇编号与中心。',
   pipeline: '不同设备的序列可能长度、量纲不同。先按采样点重采样并逐维标准化，再按指定样本初始化聚类中心。',
-  'uci-room': 'UCI Room Occupancy Estimation 公共数据节选（CC BY 4.0）：六段温度、光照、CO₂ 序列按形状分组。这里不预测房间人数。'
+  'uci-room': 'UCI Room Occupancy Estimation 公共数据节选（CC BY 4.0）：六段温度、光照、CO₂ 序列按形状分组。这里不预测房间人数。',
+  subsequence: '输入短查询与较长目标，返回匹配片段的起止下标、距离与路径；起止下标均包含。',
+  model_train: '学习不同形状的簇中心；运行后可以下载模型，或填入新序列继续预测。簇编号不是分类概率。'
 };
 function status(text, label = '', kind = '') { $('status').textContent = text; $('badge').textContent = label; $('badge').className = `badge ${kind}`; }
 function busy(value) {
   running = value; $('run').disabled = value; $('cancel').disabled = !value;
   $('request').readOnly = value;
   for (const b of document.querySelectorAll('.scenario,#reset')) b.disabled = value;
-  $('file').disabled = value;
+  $('file').disabled = value; $('model-file').disabled = value;
 }
 function clearResult() {
-  lastResult = undefined; $('download').disabled = true;
+  lastResult = undefined; trainingRequest = undefined; $('download').disabled = true;
+  $('save-model').disabled = true; $('use-model').disabled = true;
   $('metrics').replaceChildren(); $('visuals').replaceChildren(); $('output').textContent = '当前输入尚未计算。';
 }
 async function load(name) {
@@ -36,12 +39,31 @@ for (const b of document.querySelectorAll('.scenario')) b.addEventListener('clic
 $('reset').onclick = () => load(current);
 $('file').onchange = async event => {
   const file = event.target.files[0]; if (!file) return;
-  ++loadNumber;
+  const ownLoad = ++loadNumber;
   try { if (file.size > 2_000_000) throw new Error('输入文件超过 2,000,000 字节。');
-    $('request').value = new TextDecoder('utf-8', { fatal: true }).decode(await file.arrayBuffer());
+    const source = new TextDecoder('utf-8', { fatal: true }).decode(await file.arrayBuffer());
+    if (ownLoad !== loadNumber) return;
+    $('request').value = source;
     clearResult();
+    for (const b of document.querySelectorAll('.scenario')) { b.classList.remove('selected'); b.setAttribute('aria-pressed', 'false'); }
+    $('scenario-hint').textContent = '已载入本地请求；运行前请核对输入、参数和预算。';
     status('本地文件已载入，尚未计算。', '等待运行');
-  } catch (e) { status(e.message, '导入失败', 'bad'); }
+  } catch (e) { if (ownLoad === loadNumber) status(e.message, '导入失败', 'bad'); }
+  event.target.value = '';
+};
+$('model-file').onchange = async event => {
+  const file = event.target.files[0]; if (!file) return;
+  const ownLoad = ++loadNumber;
+  try {
+    if (file.size > 1_900_000) throw new Error('模型文件过大。');
+    const model = new TextDecoder('utf-8', { fatal: true }).decode(await file.arrayBuffer());
+    if (ownLoad !== loadNumber) return;
+    $('request').value = `{"schema":"warpfit.request/1","operation":"predict","model":${model},"data":[[0]]}`;
+    clearResult();
+    for (const b of document.querySelectorAll('.scenario')) { b.classList.remove('selected'); b.setAttribute('aria-pressed', 'false'); }
+    $('scenario-hint').textContent = '已载入模型；请把 data 替换为特征维数一致的新序列，再运行计算。';
+    status('模型文本已载入；运行时会校验版本、结构和重复键。', '等待运行');
+  } catch (e) { if (ownLoad === loadNumber) status(e.message, '导入失败', 'bad'); }
   event.target.value = '';
 };
 $('request').addEventListener('input', () => {
@@ -56,7 +78,8 @@ function series(value) { return value.map(row => Array.isArray(row) ? row : [row
 function plot(title, datasets) {
   const box = el('section', undefined, 'plot'); box.append(el('h3', title));
   const svg = document.createElementNS(ns, 'svg'); svg.setAttribute('viewBox', '0 0 600 190'); svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', title);
-  const all = datasets.flatMap(d => d.values); let lo = Math.min(...all), hi = Math.max(...all);
+  let lo = Infinity, hi = -Infinity;
+  for (const dataset of datasets) for (const value of dataset.values) { lo = Math.min(lo, value); hi = Math.max(hi, value); }
   if (hi - lo < 1e-12) { lo -= 1; hi += 1; }
   const y = v => 158 - (v - lo) / (hi - lo) * 132;
   for (const value of [lo, (lo + hi) / 2, hi]) {
@@ -101,23 +124,32 @@ function render(result, source, elapsed) {
     metric('目标值', fmt(result.value)); metric('目标类型', result.objective === 'raw' ? '原始' : '自项校正'); metric('矩阵大小', `${result.alignment.length} × ${result.alignment[0].length}`);
     plot('输入序列 · 横轴按各自长度归一显示', [...channels('x', request.x), ...channels('y', request.y)]);
     plot('对 x 的输入梯度', channels('∂L/∂x', result.gradient_x)); heatmap(result.alignment);
-  } else if (result.operation === 'dtw') {
-    metric('DTW 距离', fmt(result.distance)); metric('平方路径代价', fmt(result.squared_cost)); metric('路径格点数', String(result.path.length));
+  } else if (result.operation === 'dtw' || result.operation === 'dtw_distance') {
+    metric('DTW 距离', fmt(result.distance)); metric('平方路径代价', fmt(result.squared_cost)); metric('计算格点数', String(result.visited_cells));
     plot('输入序列 · 横轴按各自长度归一显示', [...channels('x', request.x), ...channels('y', request.y)]);
-    const rows = series(request.x).length, columns = series(request.y).length;
-    const occupancy = Array.from({ length: rows }, () => Array(columns).fill(0));
-    for (const [i,j] of result.path) occupancy[i][j] = 1;
-    heatmap(occupancy, '硬 DTW 路径 · 深色为选中格点，行 = x，列 = y');
+    if (result.operation === 'dtw') {
+      const rows = series(request.x).length, columns = series(request.y).length;
+      const occupancy = Array.from({ length: rows }, () => Array(columns).fill(0));
+      for (const [i,j] of result.path) occupancy[i][j] = 1;
+      heatmap(occupancy, '硬 DTW 路径 · 深色为选中格点，行 = x，列 = y');
+    }
+  } else if (result.operation === 'subsequence') {
+    metric('匹配起点', String(result.start)); metric('匹配终点（含）', String(result.end)); metric('DTW 距离', fmt(result.distance));
+    const matched = request.target.slice(result.start, result.end + 1);
+    plot('查询与匹配片段 · 横轴按各自长度归一', [...channels('查询',request.query).slice(0,3),...channels('匹配',matched).slice(0,3)]);
+    const occupancy = Array.from({length:series(request.query).length},()=>Array(series(request.target).length).fill(0));
+    for (const [i,j] of result.path) occupancy[i][j]=1;
+    heatmap(occupancy, '子序列对齐路径 · 行 = 查询，列 = 原目标');
   } else if (result.operation === 'preprocess') {
     const prepared=result.prepared;
     metric('原始采样点', String(series(request.series).length)); metric('输出采样点', String(prepared.series.length));
     metric('逐维标准化', prepared.normalized ? '是' : '否');
     plot('预处理前后 · 横轴按各自长度归一', [...channels('原始',request.series),...channels('输出',prepared.series)]);
     if (prepared.normalized) status(`${description} 常量特征数：${prepared.constant_features.filter(Boolean).length}。本机耗时 ${elapsed.toFixed(1)} ms。`, '已完成', 'good');
-  } else if (result.operation === 'cluster' || result.operation === 'pipeline') {
-    const group=result.operation === 'pipeline' ? result.clustering : result;
+  } else if (['cluster', 'pipeline', 'train_model', 'auto_train_model'].includes(result.operation)) {
+    const group=result.operation === 'cluster' ? result : result.clustering;
     metric('输入序列', String(group.labels.length)); metric('簇数', String(group.centers.length)); metric('平均平方 DTW 代价', fmt(group.inertia));
-    if (result.operation === 'pipeline') {
+    if (['pipeline', 'train_model', 'auto_train_model'].includes(result.operation)) {
       const normalized=result.prepared.filter(p=>p.normalized).length;
       const constants=result.prepared.reduce((sum,p)=>sum+p.constant_features.filter(Boolean).length,0);
       metric('已标准化 / 常量特征数', `${normalized} / ${constants}`);
@@ -133,6 +165,18 @@ function render(result, source, elapsed) {
     plot('聚类中心 · 最多显示 4 簇、每簇前 3 个特征；横轴按各自长度归一', datasets);
     plot('聚类目标轨迹 · 横轴为完整接受的迭代', [{label:'平均平方 DTW 代价',values:group.history}]);
     metric('完整迭代 / 工作量', `${group.iterations} / ${group.work_units}`);
+    if (result.operation === 'auto_train_model') {
+      metric('自动初始样本', result.seed_indices.join(', '));
+      metric('含初始化工作量', String(result.total_work_units));
+    }
+    if (['train_model', 'auto_train_model'].includes(result.operation) && !budget) { trainingRequest=request; $('save-model').disabled=false; $('use-model').disabled=false; }
+  } else if (result.operation === 'predict') {
+    metric('新序列数量', String(result.labels.length)); metric('模型簇数', String(request.model.centers.length)); metric('逻辑工作量', String(result.work_units));
+    const table=el('table',undefined,'rank'), head=el('tr');
+    ['输入下标','簇编号','到中心的 DTW 距离'].forEach(t=>head.append(el('th',t))); table.append(head);
+    result.labels.forEach((label,i)=>{const row=el('tr'); [i,label,fmt(result.distances[i])].forEach(v=>row.append(el('td',String(v)))); table.append(row);});
+    $('visuals').append(table);
+    plot('首条预处理输入与其所属中心', [...channels('新序列',result.prepared[0].series).slice(0,3),...channels('中心',request.model.centers[result.labels[0]]).slice(0,3)]);
   } else {
     metric('完整评估候选', String(result.candidates_evaluated)); metric('返回数量', String(result.matches.length)); metric('逻辑工作量', String(result.work_units));
     const table = el('table', undefined, 'rank'), head = el('tr'); ['顺序', '候选 ID', '校正值 ↓'].forEach(t => head.append(el('th', t))); table.append(head);
@@ -143,8 +187,9 @@ function render(result, source, elapsed) {
 }
 $('run').onclick = () => {
   if (running) return; const source = $('request').value;
+  ++loadNumber;
   if (new TextEncoder().encode(source).length > 2_000_000) { status('输入超过 2,000,000 字节。', '输入过大', 'bad'); return; }
-  busy(true); lastResult = undefined; $('download').disabled = true; status('MoonBit 引擎正在独立 Worker 中计算，可随时取消。', '运行中');
+  busy(true); lastResult = undefined; trainingRequest = undefined; $('download').disabled = true; $('save-model').disabled=true; $('use-model').disabled=true; status('MoonBit 引擎正在独立 Worker 中计算，可随时取消。', '运行中');
   const started = performance.now(); worker = new Worker(new URL('./worker.mjs', import.meta.url), { type: 'module' });
   worker.onmessage = ({ data }) => {
     worker.terminate(); busy(false);
@@ -154,9 +199,21 @@ $('run').onclick = () => {
   worker.onerror = () => { worker.terminate(); busy(false); status('无法启动计算引擎，请确认已经运行构建。', '引擎错误', 'bad'); };
   worker.postMessage(source);
 };
-$('cancel').onclick = () => { worker?.terminate(); busy(false); lastResult = undefined; $('download').disabled = true; $('metrics').replaceChildren(); $('visuals').replaceChildren(); $('output').textContent = '本次计算已取消，未返回结果。'; status('计算已取消；此前 Worker 的状态已丢弃。', '已取消', 'warn'); };
+$('cancel').onclick = () => { worker?.terminate(); busy(false); clearResult(); $('output').textContent = '本次计算已取消，未返回结果。'; status('计算已取消；此前 Worker 的状态已丢弃。', '已取消', 'warn'); };
 $('download').onclick = () => {
   if (!lastResult) return; const url = URL.createObjectURL(new Blob([JSON.stringify(lastResult, null, 2)], { type: 'application/json' }));
   const a = el('a'); a.href = url; a.download = `warpfit-${lastResult.operation || 'error'}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+$('save-model').onclick = () => {
+  if (!lastResult?.model) return;
+  const url=URL.createObjectURL(new Blob([JSON.stringify(lastResult.model,null,2)],{type:'application/json'}));
+  const a=el('a'); a.href=url; a.download='warpfit-cluster-model.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+$('use-model').onclick = () => {
+  if (!lastResult?.model || !trainingRequest) return;
+  $('request').value=JSON.stringify({schema:'warpfit.request/1',operation:'predict',model:lastResult.model,data:[trainingRequest.data[0]]},null,2);
+  clearResult();
+  $('scenario-hint').textContent='已载入训练好的模型；示例 data 来自训练集，请替换为新的序列再运行。';
+  status('模型已载入；请编辑 data 为新数据。','等待运行');
 };
 load(current);

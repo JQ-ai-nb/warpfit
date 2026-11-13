@@ -76,7 +76,7 @@ fn cluster_assign(
     let mut best_index = 0
     let mut best_cost = @double.infinity
     for k, center in centers {
-      let result = match dtw_path(center, sample, options) {
+      let result = match dtw_distance(center, sample, options) {
         Ok(v) => v
         Err(e) => return Err(e)
       }

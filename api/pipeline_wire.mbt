@@ -63,6 +63,52 @@ fn preprocess_one(
 }
 
 ///|
+fn pipeline_parameters(
+  options : Map[String, Json],
+) -> @warpfit.PipelineOptions raise WireError {
+  {
+    preprocessing: preprocessing(options),
+    clustering: {
+      alignment: hard_alignment(options),
+      max_iterations: integer_option(options, "max_iterations", 20),
+      max_dba_steps: integer_option(options, "max_dba_steps", 20),
+      tolerance: numeric_option(options, "tolerance", 1.0e-8),
+      max_work_units: integer_option(options, "max_work_units", 20000000),
+    },
+  }
+}
+
+///|
+fn prepared_items_json(items : Array[@warpfit.PreparedSeries]) -> Json {
+  let prepared : Array[Json] = []
+  for item in items {
+    prepared.push(prepared_json(item))
+  }
+  Json::array(prepared)
+}
+
+///|
+fn clustering_json(group : @warpfit.ClusterFit) -> Json {
+  let centers : Array[Json] = []
+  for center in group.centers {
+    centers.push(matrix(center.values, center.count, center.dimensions))
+  }
+  let labels : Array[Json] = []
+  for label in group.labels {
+    labels.push(Json::number(label.to_double()))
+  }
+  {
+    "centers": Json::array(centers),
+    "labels": Json::array(labels),
+    "inertia": Json::number(group.inertia),
+    "history": numbers(group.history),
+    "iterations": Json::number(group.iterations.to_double()),
+    "stop": Json::string(group.stop),
+    "work_units": Json::number(group.work_units.to_double()),
+  }
+}
+
+///|
 fn pipeline_cluster(
   fields : Map[String, Json],
   options : Map[String, Json],
@@ -75,43 +121,14 @@ fn pipeline_cluster(
   for value in array(required(fields, "seed_indices"), "seed_indices", 16) {
     seeds.push(integer(value, "seed_indices[]"))
   }
-  let params : @warpfit.PipelineOptions = {
-    preprocessing: preprocessing(options),
-    clustering: {
-      alignment: hard_alignment(options),
-      max_iterations: integer_option(options, "max_iterations", 20),
-      max_dba_steps: integer_option(options, "max_dba_steps", 20),
-      tolerance: numeric_option(options, "tolerance", 1.0e-8),
-      max_work_units: integer_option(options, "max_work_units", 20000000),
-    },
-  }
-  let result = from_result(@warpfit.prepare_and_cluster(data, seeds, params))
-  let prepared : Array[Json] = []
-  for item in result.prepared {
-    prepared.push(prepared_json(item))
-  }
-  let centers : Array[Json] = []
-  for center in result.clustering.centers {
-    centers.push(matrix(center.values, center.count, center.dimensions))
-  }
-  let labels : Array[Json] = []
-  for label in result.clustering.labels {
-    labels.push(Json::number(label.to_double()))
-  }
-  let clustering : Json = {
-    "centers": Json::array(centers),
-    "labels": Json::array(labels),
-    "inertia": Json::number(result.clustering.inertia),
-    "history": numbers(result.clustering.history),
-    "iterations": Json::number(result.clustering.iterations.to_double()),
-    "stop": Json::string(result.clustering.stop),
-    "work_units": Json::number(result.clustering.work_units.to_double()),
-  }
+  let result = from_result(
+    @warpfit.prepare_and_cluster(data, seeds, pipeline_parameters(options)),
+  )
   {
     "schema": "warpfit.response/1",
     "ok": true,
     "operation": "pipeline",
-    "prepared": Json::array(prepared),
-    "clustering": clustering,
+    "prepared": prepared_items_json(result.prepared),
+    "clustering": clustering_json(result.clustering),
   }
 }

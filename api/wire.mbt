@@ -428,6 +428,56 @@ fn hard_dtw(
 }
 
 ///|
+fn hard_distance(
+  fields : Map[String, Json],
+  options : Map[String, Json],
+) -> Json raise WireError {
+  let x = series(required(fields, "x"), "x")
+  let y = series(required(fields, "y"), "y")
+  let result = from_result(@warpfit.dtw_distance(x, y, hard_alignment(options)))
+  {
+    "schema": "warpfit.response/1",
+    "ok": true,
+    "operation": "dtw_distance",
+    "distance": Json::number(result.distance),
+    "squared_cost": Json::number(result.squared_cost),
+    "visited_cells": Json::number(result.visited_cells.to_double()),
+  }
+}
+
+///|
+fn hard_subsequence(
+  fields : Map[String, Json],
+  options : Map[String, Json],
+) -> Json raise WireError {
+  let query = series(required(fields, "query"), "query")
+  let target = raw_series(required(fields, "target"), "target")
+  let result = from_result(
+    @warpfit.subsequence_dtw(query, target, hard_alignment(options)),
+  )
+  let path : Array[Json] = []
+  for point in result.path {
+    path.push(
+      Json::array([
+        Json::number(point.x_index.to_double()),
+        Json::number(point.y_index.to_double()),
+      ]),
+    )
+  }
+  {
+    "schema": "warpfit.response/1",
+    "ok": true,
+    "operation": "subsequence",
+    "start": Json::number(result.start.to_double()),
+    "end": Json::number(result.end.to_double()),
+    "distance": Json::number(result.distance),
+    "squared_cost": Json::number(result.squared_cost),
+    "path": Json::array(path),
+    "visited_cells": Json::number(result.visited_cells.to_double()),
+  }
+}
+
+///|
 fn hard_dba(
   fields : Map[String, Json],
   options : Map[String, Json],
@@ -540,14 +590,18 @@ fn dispatch(source : String) -> Json raise WireError {
     "fit" => ["schema", "operation", "seed", "examples", "options"]
     "rank" => ["schema", "operation", "query", "candidates", "top_k", "options"]
     "dtw" => ["schema", "operation", "x", "y", "options"]
+    "dtw_distance" => ["schema", "operation", "x", "y", "options"]
+    "subsequence" => ["schema", "operation", "query", "target", "options"]
     "dba" => ["schema", "operation", "seed", "examples", "options"]
     "cluster" => ["schema", "operation", "data", "centers", "options"]
     "preprocess" => ["schema", "operation", "series", "options"]
     "pipeline" => ["schema", "operation", "data", "seed_indices", "options"]
+    "train_model" => ["schema", "operation", "data", "seed_indices", "options"]
+    "auto_train_model" =>
+      ["schema", "operation", "data", "cluster_count", "first_index", "options"]
+    "predict" => ["schema", "operation", "model", "data", "options"]
     _ => {
-      invalid(
-        "operation", "operation must be loss, fit, rank, dtw, dba, cluster, preprocess or pipeline",
-      )
+      invalid("operation", "unsupported operation")
       abort("unreachable")
     }
   }
@@ -560,7 +614,8 @@ fn dispatch(source : String) -> Json raise WireError {
         "improvement_tolerance", "max_evaluations", "max_work_units", "example_weights",
       ]
     "rank" => ["gamma", "feature_weights", "max_cells", "max_work_units"]
-    "dtw" => ["window", "feature_weights", "max_cells"]
+    "dtw" | "dtw_distance" => ["window", "feature_weights", "max_cells"]
+    "subsequence" => ["feature_weights", "max_cells"]
     "dba" =>
       [
         "window", "feature_weights", "max_cells", "max_steps", "tolerance", "max_work_units",
@@ -572,11 +627,12 @@ fn dispatch(source : String) -> Json raise WireError {
         "tolerance", "max_work_units",
       ]
     "preprocess" => ["target_count", "normalize", "epsilon"]
-    "pipeline" =>
+    "pipeline" | "train_model" | "auto_train_model" =>
       [
         "target_count", "normalize", "epsilon", "window", "feature_weights", "max_cells",
         "max_iterations", "max_dba_steps", "tolerance", "max_work_units",
       ]
+    "predict" => ["max_work_units"]
     _ => common
   }
   let options = match fields.get("options") {
@@ -588,9 +644,14 @@ fn dispatch(source : String) -> Json raise WireError {
     "fit" => fitting(fields, options)
     "rank" => ranking(fields, options)
     "dtw" => hard_dtw(fields, options)
+    "dtw_distance" => hard_distance(fields, options)
+    "subsequence" => hard_subsequence(fields, options)
     "dba" => hard_dba(fields, options)
     "cluster" => hard_cluster(fields, options)
     "preprocess" => preprocess_one(fields, options)
+    "train_model" => train_model(fields, options)
+    "auto_train_model" => auto_train_model(fields, options)
+    "predict" => predict_model(fields, options)
     _ => pipeline_cluster(fields, options)
   }
 }
