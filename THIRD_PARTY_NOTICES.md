@@ -20,6 +20,11 @@
 - `tslearn-team/tslearn`：BSD-2-Clause。
 - `LING71671/MoonSTRtree`：Apache-2.0。
 - `walkzzz/moon-geometry`：MIT；其二维轨迹模块已有普通和窗口约束 DTW，与本项目存在功能重合。
+- `grafana/augurs`：Apache-2.0 或 MIT；已提供 DTW 与聚类的 JavaScript / WebAssembly 接口。
+- `wannesm/dtaidistance`：Apache-2.0；提供 DTW、子序列匹配和距离矩阵等能力。
+- `aeon-toolkit/aeon`：BSD-3-Clause；提供多种时序距离与聚类功能。
+- `DynamicTimeWarping/dtw-python`：GPL-3.0；此处仅作功能比较，没有复制其代码。
+- `myc1234567/moon_metric_lab`、`liuminyuan/moon-missingness`：Apache-2.0；提供相关的聚类评价和缺失值处理能力。
 
 上述项目的功能与许可证通过公开资料核对。没有将其源码或测试夹具复制到本实验中；后续如发生移植或代码复用，应逐项更新来源和许可说明。公开数据的引用单独列于下文。
 

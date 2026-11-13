@@ -92,6 +92,8 @@ Soft-DTW 和自项校正来自 [Cuturi / Blondel 2017](https://proceedings.mlr.p
 
 查证的 [MoonSTRtree 轨迹公开接口](https://github.com/LING71671/MoonSTRtree/blob/main/src/extensions/trajectory/pkg.generated.mbti)已有普通 DTW / Fréchet；[moon-geometry 的二维轨迹接口](https://github.com/walkzzz/moon-geometry/blob/main/spatial/dtw/pkg.generated.mbti)已有普通及窗口 DTW。两者与本项目存在实际重合；WarpFit 面向多变量数值序列，提供硬 / 软对齐、模板拟合、预处理到聚类的组合。[tslearn](https://github.com/tslearn-team/tslearn)已覆盖更广的相关算法，本项目不声称比它更完整、更快或更准确，也不把 MoonBit 重写、窗口 DTW 或 DBA 宣称为算法首创。
 
+[Augurs 的 JS / WebAssembly 示例](https://github.com/grafana/augurs/blob/main/js/testpkg/clustering.test.ts)也已经使用 DTW 距离矩阵与聚类，因此不能把在浏览器中运行这些能力说成独有。更多已查明的相关项目和具体接口边界见下文的比较说明。
+
 详细比较、检索限制及与既往工程的关系见 [RELATED_WORK.md](docs/RELATED_WORK.md)。未发现同类不等于生态不存在；没有完整审计全部公开 / 私有工程。本项目从论文公式独立编写数值核心，没有复制上述工程源码或测试夹具。许可与分发说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
 ![本地原型拟合工作台](docs/screenshots/desktop.png)
