@@ -559,6 +559,106 @@ fn hard_cluster(
 }
 
 ///|
+fn hard_knn(
+  fields : Map[String, Json],
+  options : Map[String, Json],
+) -> Json raise WireError {
+  let query = series(required(fields, "query"), "query")
+  let training : Array[@warpfit.LabeledSeries] = []
+  for item in array(required(fields, "training"), "training", 32) {
+    let entry = object(item, "training[]", ["label", "series"])
+    training.push({
+      label: text(required(entry, "label"), "training[].label"),
+      series: series(required(entry, "series"), "training[].series"),
+    })
+  }
+  let params : @warpfit.KnnOptions = {
+    k: integer_option(options, "k", 3),
+    alignment: hard_alignment(options),
+    max_work_units: integer_option(options, "max_work_units", 20000000),
+  }
+  let result = from_result(@warpfit.knn_classify(query, training, params))
+  let neighbors : Array[Json] = []
+  for neighbor in result.neighbors {
+    neighbors.push({
+      "label": Json::string(neighbor.label),
+      "train_index": Json::number(neighbor.train_index.to_double()),
+      "distance": Json::number(neighbor.distance),
+    })
+  }
+  let labels : Array[Json] = []
+  for label in result.labels {
+    labels.push(Json::string(label))
+  }
+  let votes : Array[Json] = []
+  for vote in result.votes {
+    votes.push(Json::number(vote.to_double()))
+  }
+  {
+    "schema": "warpfit.response/1",
+    "ok": true,
+    "operation": "knn",
+    "label": Json::string(result.label),
+    "neighbors": Json::array(neighbors),
+    "labels": Json::array(labels),
+    "votes": Json::array(votes),
+    "work_units": Json::number(result.work_units.to_double()),
+  }
+}
+
+///|
+fn hard_select_k(
+  fields : Map[String, Json],
+  options : Map[String, Json],
+) -> Json raise WireError {
+  let data : Array[@warpfit.Series] = []
+  for value in array(required(fields, "data"), "data", 32) {
+    data.push(series(value, "data[]"))
+  }
+  let candidates : Array[Int32] = []
+  for value in array(required(fields, "candidates"), "candidates", 15) {
+    candidates.push(integer(value, "candidates[]"))
+  }
+  let budget = integer_option(options, "max_work_units", 40000000)
+  let params : @warpfit.AutoKOptions = {
+    alignment: hard_alignment(options),
+    clustering: {
+      alignment: hard_alignment(options),
+      max_iterations: integer_option(options, "max_iterations", 20),
+      max_dba_steps: integer_option(options, "max_dba_steps", 20),
+      tolerance: numeric_option(options, "tolerance", 1.0e-8),
+      max_work_units: budget,
+    },
+    first_index: integer_option(options, "first_index", 0),
+    max_work_units: budget,
+  }
+  let result = from_result(
+    @warpfit.select_cluster_count(data, candidates, params),
+  )
+  let scores : Array[Json] = []
+  for score in result.scores {
+    let labels : Array[Json] = []
+    for label in score.labels {
+      labels.push(Json::number(label.to_double()))
+    }
+    scores.push({
+      "k": Json::number(score.k.to_double()),
+      "silhouette": Json::number(score.silhouette),
+      "inertia": Json::number(score.inertia),
+      "labels": Json::array(labels),
+    })
+  }
+  {
+    "schema": "warpfit.response/1",
+    "ok": true,
+    "operation": "select_k",
+    "best_k": Json::number(result.best_k.to_double()),
+    "scores": Json::array(scores),
+    "work_units": Json::number(result.work_units.to_double()),
+  }
+}
+
+///|
 fn dispatch(source : String) -> Json raise WireError {
   if source.length() > 2000000 {
     invalid("input_limit", "request exceeds 2000000 UTF-16 units")
@@ -600,6 +700,8 @@ fn dispatch(source : String) -> Json raise WireError {
     "auto_train_model" =>
       ["schema", "operation", "data", "cluster_count", "first_index", "options"]
     "predict" => ["schema", "operation", "model", "data", "options"]
+    "knn" => ["schema", "operation", "query", "training", "options"]
+    "select_k" => ["schema", "operation", "data", "candidates", "options"]
     _ => {
       invalid("operation", "unsupported operation")
       abort("unreachable")
@@ -633,6 +735,12 @@ fn dispatch(source : String) -> Json raise WireError {
         "max_iterations", "max_dba_steps", "tolerance", "max_work_units",
       ]
     "predict" => ["max_work_units"]
+    "knn" => ["k", "window", "feature_weights", "max_cells", "max_work_units"]
+    "select_k" =>
+      [
+        "window", "feature_weights", "max_cells", "max_iterations", "max_dba_steps",
+        "tolerance", "max_work_units", "first_index",
+      ]
     _ => common
   }
   let options = match fields.get("options") {
@@ -652,6 +760,8 @@ fn dispatch(source : String) -> Json raise WireError {
     "train_model" => train_model(fields, options)
     "auto_train_model" => auto_train_model(fields, options)
     "predict" => predict_model(fields, options)
+    "knn" => hard_knn(fields, options)
+    "select_k" => hard_select_k(fields, options)
     _ => pipeline_cluster(fields, options)
   }
 }

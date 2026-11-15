@@ -79,3 +79,35 @@ test('help and version are available', () => {
   const metadata = JSON.parse(readFileSync(new URL('../package.json', import.meta.url)));
   assert.equal(cli('--version').stdout.trim(), `WarpFit ${metadata.version}`);
 });
+
+test('knn example votes among aligned neighbours', () => {
+  const r = cli('examples/knn.json'); assert.equal(r.status, 0, r.stderr);
+  const out = JSON.parse(r.stdout); assert.equal(out.ok, true);
+  assert.equal(out.label, 'rise');
+  assert.deepEqual(out.votes, [2, 1]);
+  assert.equal(out.neighbors.length, 3);
+  assert.ok(out.neighbors[0].distance <= out.neighbors[1].distance);
+});
+test('knn rejects an empty label at the wire', () => {
+  const source = {
+    schema: 'warpfit.request/1', operation: 'knn', query: [0],
+    training: [{ label: '', series: [0] }], options: { k: 1 },
+  };
+  const r = input(JSON.stringify(source)); assert.equal(r.status, 2);
+  assert.match(JSON.parse(r.stdout).error.message, /labels must be nonempty/);
+});
+test('select_k example prefers three groups over two', () => {
+  const r = cli('examples/select-k.json'); assert.equal(r.status, 0, r.stderr);
+  const out = JSON.parse(r.stdout); assert.equal(out.ok, true);
+  assert.equal(out.best_k, 3);
+  assert.equal(out.scores.length, 2);
+  assert.ok(out.scores[1].silhouette > out.scores[0].silhouette);
+});
+test('select_k rejects a single candidate cluster count', () => {
+  const source = {
+    schema: 'warpfit.request/1', operation: 'select_k',
+    data: [[0], [1], [9]], candidates: [1],
+  };
+  const r = input(JSON.stringify(source)); assert.equal(r.status, 2);
+  assert.match(JSON.parse(r.stdout).error.message, /strictly increasing/);
+});
