@@ -35,6 +35,7 @@ commands += [
     [sys.executable, 'scripts/package_check.py'],
     [sys.executable, 'tests/consumer_validation.py'],
     [sys.executable, 'scripts/registry_consumer.py', '--packaged'] + (['--native'] if args.native else []),
+    [sys.executable, 'scripts/package_demo.py'],
 ]
 results = []
 for command in commands:
