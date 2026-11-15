@@ -1,6 +1,7 @@
 {
-  "recorded_at_utc": "2026-11-15T13:52:12.965857+00:00",
+  "recorded_at_utc": "2026-11-15T15:01:52.900989+00:00",
   "python": "3.13.14",
+  "engine_commit": "ae84b7d",
   "knn_example": {
     "label": "rise",
     "votes": [
