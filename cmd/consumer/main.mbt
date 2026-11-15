@@ -76,7 +76,35 @@ fn main raise {
     100,
   ).unwrap()
   assert_eq(ranked.matches[0].id, "exact")
+
+  let nearest = @warpfit.knn_classify(
+    series([0.1]),
+    [
+      { label: "a", series: series([0.0]), },
+      { label: "a", series: series([0.2]), },
+      { label: "b", series: series([9.0]), },
+    ],
+    { ..@warpfit.knn_options(), k: 3, },
+  ).unwrap()
+  assert_eq(nearest.label, "a")
+  assert_eq(nearest.neighbors.length(), 3)
+  assert_eq(nearest.votes, [2, 1])
+
+  let selection = @warpfit.select_cluster_count(
+    [
+      series([0.0]),
+      series([0.1]),
+      series([5.0]),
+      series([5.1]),
+      series([10.0]),
+      series([10.1]),
+    ],
+    [2, 3],
+    @warpfit.auto_k_options(),
+  ).unwrap()
+  assert_eq(selection.best_k, 3)
+  assert_eq(selection.scores.length(), 2)
   println(
-    "warpfit_consumer_ok: dtw, distance_only, dba, cluster_model, subsequence, long_preprocess, soft_gradient, fit_rank",
+    "warpfit_consumer_ok: dtw, distance_only, dba, cluster_model, subsequence, long_preprocess, soft_gradient, fit_rank, knn, select_k",
   )
 }

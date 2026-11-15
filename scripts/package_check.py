@@ -14,11 +14,15 @@ with ZipFile(archive) as package:
     names = package.namelist()
     required = {'moon.mod','README.md','LICENSE','THIRD_PARTY_NOTICES.md',
         'core/soft.mbt','core/dtw.mbt','core/dba.mbt','core/cluster.mbt',
-        'core/model.mbt','core/subsequence.mbt','core/pkg.generated.mbti',
+        'core/model.mbt','core/subsequence.mbt','core/classify.mbt','core/autok.mbt',
+        'core/pkg.generated.mbti',
         'cmd/consumer/main.mbt','cmd/consumer/moon.pkg',
         'docs/REAL_DATA.md','examples/uci-model-split.json',
         'examples/uci-model-train.json','examples/uci-model-test-data.json'}
     assert required <= set(names),sorted(required-set(names))
+    interface = package.read('core/pkg.generated.mbti')
+    for exported in (b'pub fn knn_classify',b'pub fn select_cluster_count'):
+        assert exported in interface,exported.decode()
     for name in names:
         parts = Path(name.replace('\\','/')).parts
         assert not set(parts)&{'work','deliverables','artifacts','.git','node_modules'},name

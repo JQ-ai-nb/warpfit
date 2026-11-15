@@ -17,6 +17,10 @@
 
 - 2026-11-15 本机把 `knn` 与 `select_k` 加入 `node scripts/benchmark_hard.mjs` 后，先 `node scripts/build.mjs` 再连续执行两次：两次结果除 `*_ms` 与 `recorded_at_utc` 外完全相同，`label=rise`、`neighbor_indices=[7,4,1]`、两组候选的 `best_k=3`、`work_units`（6291456 / 14241792 / 19021824）及轮廓系数（0.7376476627063869 / 0.9904726456141449 / 0.9684146792639692）逐位一致。数据全为合成输入：32 条 256 点 × 3 维训练序列（`rise` 单调升、`fall` 单调降、`flat` 常数 0.5 带极小抖动、`bump` 单峰，各 8 条，用幅度 0.9 / 1.0 / 1.1 与轻微相位抖动区分，三维为同一形状的缩放加偏移）的单次 k=3 查询，以及 32 条 64 点一维序列在 `[2,3]` / `[2,3,4]` 上的选簇；本机单进程中调用同一 JS 引擎，耗时含 JSON 解析与序列化，一行 `ok:true` 断言失败即抛错，脚本还会在 `dist/engine.mjs` 早于 `core` / `api` 源文件时以退出码 1 提示先构建。两轮中位数分别为 knn 61.00 / 61.24ms、`[2,3]` 129.65 / 137.97ms、`[2,3,4]` 183.43 / 189.30ms（证据文件记录第二轮）。新行追加在 [benchmark-hard.json](evidence/benchmark-hard.json) 末尾，原有 DTW / 流程行与顶层元数据保留。这是本机单次测量记录，不是 SLA，也不跨机器可比、没有与竞品做公平性能比较。同轮 `python verify.py` 的 22 条命令全部通过。
 
+## 2026-11-15 归档包消费扩展（未推送 / 未发布）
+
+- 2026-11-15 `cmd/consumer` 在原有8组之后追加两组公开接口断言：`a:[0.0]`、`a:[0.2]`、`b:[9.0]` 训练、查询 `[0.1]`、`k=3` 断言 `label=="a"`、`neighbors.length()==3`、`votes==[2,1]`（不断言浮点距离）；六条一维序列 `[0.0, 0.1, 5.0, 5.1, 10.0, 10.1]` 在候选 `[2,3]` 上断言 `best_k==3`、`scores.length()==2`。标记行只在尾部追加 `, knn, select_k`，原有名称不变。重新执行 `moon package` 生成归档后：`python scripts/package_check.py` 检查150个文件，并要求归档包含 `core/classify.mbt`、`core/autok.mbt` 且 `core/pkg.generated.mbti` 含 `pub fn knn_classify` 与 `pub fn select_cluster_count`；`python scripts/registry_consumer.py --packaged` 的冻结依赖检查与 Wasm / Wasm-GC / JS 三次运行均返回0，三个后端末行均为 `warpfit_consumer_ok: dtw, distance_only, dba, cluster_model, subsequence, long_preprocess, soft_gradient, fit_rank, knn, select_k`。记录见 [归档消费记录](evidence/consumer-package-20261115.json)，仍是归档包验证（`registry_install_verified: false`），不是Mooncakes安装结果。同一工作树的 `python verify.py` 22 条命令全部通过。本机仍缺MSVC，`--native` 未运行，native 未验证。
+
 ## 0.2.0 公开源码与远程验证（2026-11-13）
 
 - 授权服务端、仓库所有者、提交作者及提交者均核对为 `JQ-ai-nb`；源码修订 `bb8c309b286eb7d5ebfa25b268426db7b6a4ddc5` 已推送公开默认分支 main，窗口DTW、DBA、聚类、模型与子序列等文件均已逐项核对存在。

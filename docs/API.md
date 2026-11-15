@@ -108,7 +108,7 @@ CLI 退出码：0=本次计算正常结束（不代表优化收敛或业务正�
 
 ## 独立消费与发布准备
 
-`cmd/consumer` 是只调用公开接口的MoonBit示例，可用 `moon run cmd/consumer --target js --deny-warn` 运行。`scripts/registry_consumer.py` 将相同的main和包配置放入独立consumer工程，检查8组功能，涵盖新增接口及旧接口兼容。
+`cmd/consumer` 是只调用公开接口的MoonBit示例，可用 `moon run cmd/consumer --target js --deny-warn` 运行。`scripts/registry_consumer.py` 将相同的main和包配置放入独立consumer工程，检查10组功能：原有8组（约束DTW、距离专用计算、DBA、聚类模型、子序列、长输入预处理、软梯度、拟合 / 排序），加上最近邻分类`knn_classify`与簇数选择`select_cluster_count`两组，涵盖新增接口及旧接口兼容。
 
 发布前先 `python scripts/package_check.py`，再 `python scripts/registry_consumer.py --packaged`。归档模式校对实际ZIP的模块名、版本和摘要，解出包后用当前SDK支持的 `moon.work` 将consumer与归档包连接，使用 `--frozen` 执行检查和Wasm / Wasm-GC / JS运行；没有引用源码工作区。结果在 `artifacts/consumer-package_archive.json`，明确标记注册表安装未验证。
 

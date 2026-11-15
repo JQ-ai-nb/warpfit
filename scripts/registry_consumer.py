@@ -20,7 +20,7 @@ from zipfile import ZipFile
 ROOT = Path(__file__).resolve().parent.parent
 MODULE = "JQ-ai-nb/warpfit"
 MARKER = "warpfit_consumer_ok:"
-CHECKS = ["dtw", "distance_only", "dba", "cluster_model", "subsequence", "long_preprocess", "soft_gradient", "fit_rank"]
+CHECKS = ["dtw", "distance_only", "dba", "cluster_model", "subsequence", "long_preprocess", "soft_gradient", "fit_rank", "knn", "select_k"]
 
 
 def main() -> int:
