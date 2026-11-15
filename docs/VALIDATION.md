@@ -2,6 +2,7 @@
 
 > 本页分别记录远程验证和推送前的本地验证。历史记录中“未推送 / 未发布”描述当次检查时的状态，不应据此推断当前默认分支或注册表版本；远程结果均对应下列具体提交。Mooncakes 0.2.0 尚未发布，不能把源码 CI 当成注册表安装验证。
 
+- 2026-11-15 新增 DBA 与逐点平均的对照测试（`tests/auto_model.test.mjs`）：两条错位单峰序列在 DTW 下距离为 0，逐点平均模板峰值为 0.5、目标 0.5；以样例为初值的 DBA 保持峰值 1、目标 0。本机 MoonBit 仍 82 项，Node 测试增至 43 项；相关提交未推送，远程记录仍为 71 / 38 项。
 ## 2026-11-15 参考证据改为显式更新（未推送 / 未发布）
 
 - 2026-11-15 本轮把 `tests/knn_reference.py` 的证据写入改成显式操作，避免每次 `python verify.py` 都改写受版本控制的证据文件。默认模式只写忽略目录 `artifacts/knn-reference.json` 并在末尾打印 `evidence: current` 或 `evidence: STALE`（不改变退出码）；实测连续执行两次后 `git status --short` 只显示本轮改动的 `tests/knn_reference.py`，忽略目录无输出。`--evidence` 才写 `docs/evidence/knn-reference.json`，固定 `newline="\n"`（提交后复核文件为 LF 且以换行结尾），除 `recorded_at_utc` / `python` 外无变化时跳过并打印 `evidence: unchanged`；本轮首次执行打印 `evidence: updated`，`git diff` 只多出 `recorded_at_utc` 与新增的 `engine_commit`，24 组随机 KNN 复算、邻居下标 / 距离、`best_k` 与两组轮廓系数逐位未变。`--check-evidence` 只读比较、忽略 `recorded_at_utc` / `python` / 仅表示来源的 `engine_commit`，提交证据后运行退出码 0 并打印 `evidence: current`；手工把 `randomized_knn_cases` 改为 25、`select_k_example.best_k` 改为 4 后运行，退出码 1、打印 `evidence: STALE` 并列出 `randomized_knn_cases` 与 `select_k_example.best_k` 两个差异键，随后已还原原文件。`engine_commit` 取自 `git rev-parse --short HEAD`（失败记 `unknown`），因为它随提交变化，故不参与一致性判定，只作来源标记。同一工作树的 `python verify.py` 22 条命令全部通过，结束后的 `git status --short` 为空。上述仍是本机本地检查，未推送 / 未发布，不推断远程 CI 或注册表状态。

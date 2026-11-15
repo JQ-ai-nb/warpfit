@@ -21,6 +21,10 @@
 
 tslearn 需要 Python、numpy 与 scipy，无法嵌入 MoonBit 产物。本库提供同源 Wasm / Wasm-GC / JS 内核：浏览器 Worker 内本地计算、不经网络，预算在计算前校验，产物是单文件引擎、无外部运行时依赖。在线工作台即该内核的一个无后端实例：静态页面加载引擎，数据不上传。差异在部署位置，不在算法新颖性；与 tslearn 的数值对照和边界见验证文档。
 
+### 不对齐会怎样
+
+`[0,1,0,0]` 与 `[0,0,1,0]` 在 DTW 下距离为 0；逐点平均得到 `[0,0.5,0.5,0]`，峰值从 1 削到 0.5。以一条样例为初值的 DBA 模板保持 `[0,1,0,0]`、目标 0；以均值为初值则停在 0.5。DBA 是局部优化，初值会影响结果。
+
 ## 快速运行
 
 需要 MoonBit SDK、Node.js ≥22；Python ≥3.10 用于独立验证，不是核心运行依赖。记录的本机工具链：moon 0.1.20261021 / moonc 0.10.17+093cb8f9c。CI 使用官方安装器的当前稳定 SDK，并在日志中记录实际版本。
@@ -123,7 +127,7 @@ node scripts/benchmark_hard.mjs
 
 本地执行结果与真实命令见 [VALIDATION.md](docs/VALIDATION.md)。公开 main `8695d8a` 的 [CI 运行](https://github.com/JQ-ai-nb/warpfit/actions/runs/43451072577) 已通过 Linux / macOS / Windows × Wasm / Wasm-GC / JS / native 检查、构建和测试。此前 `bb8c309` 的原始产物已下载复核：每个系统、每个后端各71项 MoonBit 测试，另各38项 Node 测试，Linux 浏览器检查22项通过；[汇总记录](docs/evidence/remote-validation-0.2.0.json) 对应 `bb8c309`，它与 main 之间只有文档改动。本机仍缺 MSVC，本机 native 未运行；远程 native 已通过。已部署的 [在线工作台](https://jq-ai-nb.github.io/warpfit/) 也实际通过22项浏览器检查。
 
-本地新增最近邻分类与簇数选择后，本机 `moon test` 为 82 项、Node 测试为 42 项；这两个数字是本机结果，相关提交尚未推送，远程 CI 记录仍对应上面的 71 / 38 项。本地验收维护、独立包消费检查与本轮本地新增检查的记录见 [验收自查](docs/ACCEPTANCE.md) 和 [机制与演示](docs/WALKTHROUGH.md)，它们不改变上述远程与注册表结论。
+本地新增最近邻分类与簇数选择后，本机 `moon test` 为 82 项、Node 测试为 43 项；这两个数字是本机结果，相关提交尚未推送，远程 CI 记录仍对应上面的 71 / 38 项。本地验收维护、独立包消费检查与本轮本地新增检查的记录见 [验收自查](docs/ACCEPTANCE.md) 和 [机制与演示](docs/WALKTHROUGH.md)，它们不改变上述远程与注册表结论。
 
 此前 0.1.2 的注册表独立消费测试和线上演示已有验证记录；0.2.0 仍未进入注册表，新增功能没有完成注册表安装测试。发布后需用 `python scripts/registry_consumer.py` 独立验证。
 

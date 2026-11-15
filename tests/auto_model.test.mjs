@@ -62,3 +62,18 @@ test('model CLI never writes a model from budget-interrupted training', async ()
     await rmdir(dir);
   }
 });
+
+test('pointwise averaging destroys a peak that DTW treats as the same shape', () => {
+  const schema = 'warpfit.request/1';
+  const examples = [[0, 1, 0, 0], [0, 0, 1, 0]];
+  const options = { window: 2, max_steps: 30, max_work_units: 2_000_000 };
+  const fromMean = call({ schema, operation: 'dba', seed: [0, 0.5, 0.5, 0], examples, options });
+  const fromExample = call({ schema, operation: 'dba', seed: [0, 1, 0, 0], examples, options });
+
+  assert.equal(fromMean.ok, true);
+  assert.equal(fromExample.ok, true);
+  assert.equal(Math.max(...fromMean.prototype.map(point => point[0])), 0.5);
+  assert.equal(fromMean.history.at(-1), 0.5);
+  assert.equal(Math.max(...fromExample.prototype.map(point => point[0])), 1);
+  assert.equal(fromExample.history.at(-1), 0);
+});
