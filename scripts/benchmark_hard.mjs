@@ -1,6 +1,7 @@
 import { performance } from 'node:perf_hooks';
 import { cpus, platform, arch } from 'node:os';
 import { mkdir, writeFile } from 'node:fs/promises';
+import assert from 'node:assert/strict';
 import { run } from '../dist/engine.mjs';
 
 const engine = request => {
@@ -29,6 +30,42 @@ for(let i=0;i<3;i++) {const start=performance.now();out=engine(input);times.push
 times.sort((a,b)=>a-b);
 results.push({operation:'pipeline',series:16,samples:64,dimensions:1,clusters:2,window:4,repeats:3,
   median_ms:times[1],min_ms:times[0],max_ms:times[2],stop:out.clustering.stop,work_units:out.clustering.work_units});
+const labels=['rise','fall','flat','bump'];
+const training=labels.flatMap((label,index)=>Array.from({length:8},(_,j)=>{
+  const phase=j*.17+index*1.4;
+  return {label,series:Array.from({length:256},(_,i)=>
+    Array.from({length:3},(_,d)=>Math.sin(i*.05+d*.7+phase)+d*.2))};
+}));
+const query=Array.from({length:256},(_,i)=>
+  Array.from({length:3},(_,d)=>Math.sin(i*.05+d*.7+.07)+d*.2));
+const knnRequest={schema:'warpfit.request/1',operation:'knn',query,training,options:{k:3}};
+for(let i=0;i<2;i++)engine(knnRequest);
+{
+  const times=[];let out;
+  for(let i=0;i<7;i++) {const start=performance.now();out=engine(knnRequest);times.push(performance.now()-start);}
+  times.sort((a,b)=>a-b);
+  const neighbor_indices=out.neighbors.map(neighbor=>neighbor.train_index);
+  assert.equal(out.label,'rise');
+  assert.equal(neighbor_indices.length,3);
+  results.push({operation:'knn',training_series:training.length,series:training.length+1,samples:256,dimensions:3,k:3,
+    repeats:7,median_ms:times[3],min_ms:times[0],max_ms:times[6],work_units:out.work_units,
+    label:out.label,neighbor_indices});
+}
+const selectData=Array.from({length:32},(_,j)=>Array.from({length:64},(_,i)=>
+  50*(j%3)+(1+(j%4)*.1)*(j<16?1:-1)*Math.sin(i/63*Math.PI*2)));
+for(const candidates of [[2,3],[2,3,4]]) {
+  const request={schema:'warpfit.request/1',operation:'select_k',data:selectData,candidates,
+    options:{max_iterations:10,max_dba_steps:10}};
+  engine(request);
+  const times=[];let out;
+  for(let i=0;i<3;i++) {const start=performance.now();out=engine(request);times.push(performance.now()-start);}
+  times.sort((a,b)=>a-b);
+  const scores=out.scores.map(score=>({k:score.k,silhouette:score.silhouette}));
+  assert.equal(scores.length,candidates.length);
+  assert.ok(candidates.includes(out.best_k));
+  results.push({operation:'select_k',series:32,samples:64,dimensions:1,candidates,max_iterations:10,max_dba_steps:10,
+    repeats:3,median_ms:times[1],min_ms:times[0],max_ms:times[2],best_k:out.best_k,scores,work_units:out.work_units});
+}
 const report={recorded_at_utc:new Date().toISOString(),node:process.version,platform:platform(),arch:arch(),cpu:cpus()[0].model,
-  description:'Single-process MoonBit JS engine; includes JSON parsing/serialization and output generation. DTW: 2 warmups, 7 calls. Pipeline: 1 warmup, 3 calls. Not a wall-clock guarantee or a comparison with other implementations.',results};
+  description:'Single-process MoonBit JS engine; includes JSON parsing/serialization and output generation. DTW: 2 warmups, 7 calls. Pipeline: 1 warmup, 3 calls. KNN: 2 warmups, 7 calls. select_k: 1 warmup, 3 calls. Not a wall-clock guarantee or a comparison with other implementations.',results};
 await mkdir('artifacts',{recursive:true});await writeFile('artifacts/benchmark-hard.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report));
