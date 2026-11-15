@@ -1,0 +1,14 @@
+{
+  "schema": "warpfit.request/1",
+  "operation": "knn",
+  "query": [0, 1, 2, 2],
+  "training": [
+    { "label": "rise", "series": [0, 1, 2, 3] },
+    { "label": "rise", "series": [0, 0, 1, 3] },
+    { "label": "fall", "series": [3, 2, 1, 0] },
+    { "label": "fall", "series": [3, 3, 2, 0] },
+    { "label": "flat", "series": [1, 1, 1, 1] },
+    { "label": "flat", "series": [2, 2, 2, 2] }
+  ],
+  "options": { "k": 3, "window": 1, "max_work_units": 2000000 }
+}

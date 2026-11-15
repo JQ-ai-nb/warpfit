@@ -1,0 +1,20 @@
+{
+  "schema": "warpfit.request/1",
+  "operation": "select_k",
+  "data": [
+    [0, 1, 0, 0],
+    [0, 0, 1, 0],
+    [5, 6, 5, 5],
+    [5, 5, 6, 5],
+    [9, 9, 9, 9],
+    [9, 9, 9, 8]
+  ],
+  "candidates": [2, 3],
+  "options": {
+    "window": 1,
+    "max_iterations": 10,
+    "max_dba_steps": 20,
+    "max_work_units": 4000000,
+    "first_index": 0
+  }
+}
