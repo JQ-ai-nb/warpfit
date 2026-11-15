@@ -40,6 +40,8 @@ match @warpfit.divergence(prediction, target, 0.4) {
 | `train_model` | `data`, `seed_indices` | `model`、`prepared`、`clustering`；手动指定初始样本 |
 | `auto_train_model` | `data`, `cluster_count` | 同上，另有 `seed_indices`、`seed_work_units`、`total_work_units`；可选 `first_index` 默认0 |
 | `predict` | `model`, `data` | `prepared`, `labels`, `distances`, `distances_to_centers`, `work_units` |
+| `knn` | `query`, `training:[{label,series}]` | `label`, `neighbors`, `labels`, `votes`, `work_units` |
+| `select_k` | `data`, `candidates` | `best_k`, `scores:[{k,silhouette,inertia,labels}]`, `work_units` |
 
 序列可以写成一维数组 `[0,1,0]`，也可以是等长行的二维数组 `[[0,2],[1,3]]`。输出序列和梯度一律为二维行数组。不同序列可有不同采样数，但特征数必须相同。`loss.objective` 默认为 `corrected`，可设 `raw`。raw 的 `components` 为 null；corrected 返回 cross / self_x / self_y。
 
@@ -53,7 +55,15 @@ match @warpfit.divergence(prediction, target, 0.4) {
 
 `preprocess` / `pipeline` / 模型训练：原始输入每条最多8192点；`target_count=0` 表示保持长度，只适用于不超过512点的输入，1..512 表示按样本下标重采样。`normalize=true` 表示对每条序列独立逐特征标准化，`epsilon=1e-12`。先重采样后标准化。`pipeline.seed_indices` / `train_model.seed_indices` 是原始输入数组中不重复的零基下标，对应预处理后的初始中心。常量特征的标准化输出为0；`normalize=false` 时均值、标准差和常量标记数组为空。JSON 操作选项禁止 `window:-1`；省略 `window` 才表示不约束（MoonBit 类型接口用 -1）。请求总大小限制仍有效。
 
+`knn` 的 `k=3`、`max_work_units=20000000`；`select_k` 的 `first_index=0`、`max_work_units=40000000`，聚类参数与 `cluster` 相同。两者都接受 `window`、`feature_weights`、`max_cells`。
+
 `subsequence` 的 `query` 最多512点，`target` 最多8192点；维数一致，`query.length × target.length ≤ max_cells`。仅接受 `feature_weights` 和 `max_cells`，不接受 `window`。输出 `start` / `end` 是目标上的零基闭区间，路径中第一列是查询下标、第二列是目标原始下标。例子 `[0,1,0]` 对 `[9,9,0,1,0,9,9]` 返回区间 `[2,4]`、距离0。合法非空输入总会返回一个最佳区间；业务是否接受该匹配须由调用方判定。
+
+### 分类与簇数选择
+
+`knn` 接收 1..32 条带标签训练序列，标签为 1..80 个 UTF-16 单元的非空文本，允许重复。按硬 DTW 距离升序、同距离按训练下标升序排序，取前 k 条投票。票数并列时比较各自邻居的距离和，仍并列时保留邻居顺序中先出现的标签。输出 `neighbors` 恒为 k 条，`labels` / `votes` 是第一出现顺序的去重标签与票数。这是邻居投票，不是概率或校准置信度。
+
+`select_k` 要求 3..32 条样本、1..15 个严格递增且落在 `2..min(16, 样本数-1)` 的候选簇数。对每个候选：确定性最远点初始化，再执行 DTW k-means；用同一份成对硬 DTW 距离矩阵计算平均轮廓系数，单元素簇按惯例计 0。取轮廓系数最大的候选，并列取较小 k；产生空簇的候选被跳过并可导致 `empty_cluster` 错误。成对矩阵预检预算，任何候选预算不足都整体报错，不返回部分排名。
 
 ### 可保存的聚类模型
 

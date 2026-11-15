@@ -4,7 +4,7 @@
 
 2026-11-14的本地验收维护新增了独立包消费验证；依用户要求暂未推送或发布。已公开的`8695d8a`与本轮本地新增检查分开记录，详见 [验收自查](docs/ACCEPTANCE.md) 和 [机制与演示](docs/WALKTHROUGH.md)。
 
-为不同长度、节奏和量纲的数值序列提供一套**有界的时序分析流程**：按采样点重采样、逐维标准化、硬 DTW 约束对齐、DBA 模板与 DTW 聚类，训练后保存模型供新序列使用，并在较长输入中定位完整查询的最佳匹配区间；保留原有 Soft-DTW 损失、两侧梯度、可微分模板拟合和示例检索。
+为不同长度、节奏和量纲的数值序列提供一套**有界的时序分析流程**：按采样点重采样、逐维标准化、硬 DTW 约束对齐、DBA 模板、DTW 聚类与最近邻分类、按轮廓系数选择簇数，训练后保存模型供新序列使用，并在较长输入中定位完整查询的最佳匹配区间；保留原有 Soft-DTW 损失、两侧梯度、可微分模板拟合和示例检索。
 
 目标用户是 MoonBit 时序模型、传感器周期与离线数值应用开发者。逐点误差和直接平均要求采样位置一致；调用者可以根据问题选择硬路径对齐、带梯度的软目标，或对未标记序列做分组。核心使用 MoonBit 标准库，不依赖 Python 运行时或外部学习服务；浏览器演示在本地 Worker 计算用户数据。
 
@@ -25,6 +25,8 @@ node scripts/build.mjs
 node bin/warpfit.mjs examples/align.json
 node bin/warpfit.mjs examples/dba.json
 node bin/warpfit.mjs examples/clusters.json
+node bin/warpfit.mjs examples/knn.json
+node bin/warpfit.mjs examples/select-k.json
 node bin/warpfit.mjs examples/pipeline.json
 node bin/warpfit.mjs examples/uci-room.json
 node bin/warpfit.mjs examples/subsequence.json
@@ -50,7 +52,7 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 库包导入：`"JQ-ai-nb/warpfit/core" @warpfit`。此前发布并验证的 0.1.2 **没有本次新增的 0.2.0 接口**；[Mooncakes 包页面](https://mooncakes.io/docs/JQ-ai-nb/warpfit)的发布版本与仓库源码版本应分别核对。类型化示例见 [cmd/series_pipeline](cmd/series_pipeline/main.mbt)，签名见 [pkg.generated.mbti](core/pkg.generated.mbti)，JSON 与 CLI 契约见 [API.md](docs/API.md)。
 
-## 三个完整工作流
+## 完整工作流
 
 以下新增示例是本地 0.2.0 的合成数据，执行前先运行 `node scripts/build.mjs`：
 
@@ -59,6 +61,8 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 | 生产信号分析开发者：周期信号存在有限的时间偏移 | `examples/align.json`，两条四点序列和 `window=1` | 返回完整硬 DTW 路径与距离 0；改为 `window=0` 时平方路径代价为 2 |
 | 传感器模板开发者：重复动作长度不一致 | `examples/dba.json`，三条观测和四点初始模板 | 经硬 DTW 路径与 DBA 更新，目标从约 0.166667 降至 0.118056；返回模板、轨迹与终止原因 |
 | 多设备分析开发者：量纲、长度不同且需按形状分组 | `examples/pipeline.json`，四条序列、两个初始样本下标 | 重采样、逐维标准化后分组标签 `[0,0,1,1]`，返回每条预处理统计、中心、目标和预算状态 |
+| 分类应用开发者：已有带标签样本，需给新序列归属 | `examples/knn.json`，六条带标签训练序列、一条查询、`k=3` | 返回标签 `rise`、3 个邻居的标签 / 下标 / 距离及投票 `[2,1]`；平票按距离和与邻居顺序确定性决胜 |
+| 分析开发者：不确定该分几组 | `examples/select-k.json`，六条序列、候选 `[2,3]` | 返回 `best_k=3`，各候选的轮廓系数 `0.7379` / `0.9544`、目标与标签；空簇候选记为缺席 |
 | 离线数据应用开发者：希望训练一次后复用分组规则 | `examples/model_train.json` 自动初始化并保存模型；用 `examples/model_predict_data.json` 预测新批次 | 模型文件重新读取后返回标签 `[0,1,0]` 及到各中心距离；文件流程、预算和同簇预测有测试 |
 | 片段检索开发者：查询信号只占长记录的一小段 | `examples/subsequence.json`，query=`[0,1,0]`，target=`[9,9,0,1,0,9,9]` | 距离0、匹配区间零基闭区间 `[2,4]` 及完整对齐路径；独立枚举与 tslearn 验证 |
 
@@ -77,6 +81,8 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 - 硬 DTW：加权平方局部代价、完整路径、确定性并列顺序及 Sakoe-Chiba 窗口；不等长窗口沿较长轴延伸。距离专用接口只保留两行 DP，并只计算允许的带内格点，供聚类分配与预测使用。
 - 子序列 DTW：消费完整查询，允许目标的起止点开放，返回一个最小代价连续区间和路径；并列时选最早结束位置。支持多变量权重与矩阵预算，当前不支持窗口约束或多结果检索。
 - 加权 DBA：按硬对齐路径迭代更新固定长度模板；明确记录目标、预算和停止原因，支持不同长度及特征权重。
+- 最近邻分类：硬 DTW 距离上的 k 近邻多数投票，返回 k 个邻居、投票分布与每项距离；票数并列时比距离和，仍并列时按邻居顺序决胜。结果是投票而非概率，训练集上限 32 条。
+- 簇数选择：候选 k 各自用确定性最远点初始化训练，按硬 DTW 距离计算平均轮廓系数并取最大；并列取较小 k，产生空簇的候选记为缺席。成对距离矩阵只算一次，与聚类共享预算。
 - DTW k-means：调用方给初始中心，或在模型接口选择确定性最远点初始化；反复执行最近中心分配和 DBA 更新，空簇明确报错。自动初始化的工作量计入同一训练预算；未提供随机 k-means++ 或自动选簇数。
 - 可保存的版本化模型：训练时保留中心、预处理策略和对齐参数，读取后直接预测新批次，输出簇编号及到全部中心的距离。模型文件经过严格 schema 和参数验证。
 - 线性重采样、逐序列逐特征标准化，以及组合为“预处理 → 聚类”的类型接口和 JSON 工作流。
@@ -99,6 +105,8 @@ node scripts/benchmark_hard.mjs
 ```
 
 本地执行结果与真实命令见 [VALIDATION.md](docs/VALIDATION.md)。源码修订 `bb8c309` 已在 [此次远程 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/43449875490) 通过 Linux / macOS / Windows × Wasm / Wasm-GC / JS / native 检查、构建和测试：每个系统、每个后端各71项 MoonBit 测试，另各38项 Node 测试；Linux 浏览器检查22项通过。已下载 CI 原始产物复核这些数量，[汇总记录](docs/evidence/remote-validation-0.2.0.json) 对应上述提交。本机仍缺 MSVC，本机 native 未运行；远程 native 已通过。已部署的 [在线工作台](https://jq-ai-nb.github.io/warpfit/) 也实际通过22项浏览器检查。
+
+本地新增最近邻分类与簇数选择后，本机 `moon test` 为 80 项、Node 测试为 42 项；这两个数字是本机结果，相关提交尚未推送，远程 CI 记录仍对应上面的 71 / 38 项。
 
 此前 0.1.2 的注册表独立消费测试和线上演示已有验证记录；0.2.0 尚未发布到注册表，新增功能没有完成注册表安装测试。发布后需用 `python scripts/registry_consumer.py` 独立验证。
 
