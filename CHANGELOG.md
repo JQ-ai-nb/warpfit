@@ -6,6 +6,7 @@
 - 演示包补齐 12 个网页示例，解压后自检覆盖 10 组检查。
 - 修复 `select_k` 成对距离预算的 Int32 溢出：累计改用 Int64，32 × 512 × 16 的最坏情形（2^32）不再回绕为 0，超限在任何 DTW 计算前即拒绝。
 - 归档消费检查由 8 组扩至 10 组，新增 `knn_classify` 与 `select_cluster_count` 的断言；归档验证仍不等同于 Mooncakes 安装验证。
+- `tests/knn_reference.py` 默认改写忽略目录 `artifacts/knn-reference.json`，`python verify.py` 不再弄脏工作树；证据改为显式更新：`--evidence` 写 `docs/evidence/knn-reference.json`（LF 换行，无实质变化时跳过并打印 `evidence: unchanged`），`--check-evidence` 比较后以 0 / 1 返回 `evidence: current` / `evidence: STALE` 并列出差异键。报告新增只作来源标记的 `engine_commit`，默认运行末尾也会提示证据是否落后。
 - 新增硬 DTW 最近邻分类（`knn`）：k 个邻居、投票分布与距离，票数 / 距离并列时按邻居顺序确定性决胜；属于对齐之外的新任务族，输出明确不是概率。
 - 新增按轮廓系数选择簇数（`select_k`）：候选 k 共享一份成对 DTW 距离矩阵，确定性最远点初始化，空簇候选记为缺席，整体预算不足直接报错。
 - 本地验收维护新增公共接口消费示例、实际归档包的独立workspace检查与三后端运行；默认注册表消费覆盖新增能力，另备发布后的手动验证工作流。2026-11-14本轮未推送、未发布，不能声称新的注册表消费或远程工作流已通过。

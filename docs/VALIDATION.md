@@ -2,6 +2,10 @@
 
 > 本页分别记录远程验证和推送前的本地验证。历史记录中“未推送 / 未发布”描述当次检查时的状态，不应据此推断当前默认分支或注册表版本；远程结果均对应下列具体提交。Mooncakes 0.2.0 尚未发布，不能把源码 CI 当成注册表安装验证。
 
+## 2026-11-15 参考证据改为显式更新（未推送 / 未发布）
+
+- 2026-11-15 本轮把 `tests/knn_reference.py` 的证据写入改成显式操作，避免每次 `python verify.py` 都改写受版本控制的证据文件。默认模式只写忽略目录 `artifacts/knn-reference.json` 并在末尾打印 `evidence: current` 或 `evidence: STALE`（不改变退出码）；实测连续执行两次后 `git status --short` 只显示本轮改动的 `tests/knn_reference.py`，忽略目录无输出。`--evidence` 才写 `docs/evidence/knn-reference.json`，固定 `newline="\n"`（提交后复核文件为 LF 且以换行结尾），除 `recorded_at_utc` / `python` 外无变化时跳过并打印 `evidence: unchanged`；本轮首次执行打印 `evidence: updated`，`git diff` 只多出 `recorded_at_utc` 与新增的 `engine_commit`，24 组随机 KNN 复算、邻居下标 / 距离、`best_k` 与两组轮廓系数逐位未变。`--check-evidence` 只读比较、忽略 `recorded_at_utc` / `python` / 仅表示来源的 `engine_commit`，提交证据后运行退出码 0 并打印 `evidence: current`；手工把 `randomized_knn_cases` 改为 25、`select_k_example.best_k` 改为 4 后运行，退出码 1、打印 `evidence: STALE` 并列出 `randomized_knn_cases` 与 `select_k_example.best_k` 两个差异键，随后已还原原文件。`engine_commit` 取自 `git rev-parse --short HEAD`（失败记 `unknown`），因为它随提交变化，故不参与一致性判定，只作来源标记。同一工作树的 `python verify.py` 22 条命令全部通过，结束后的 `git status --short` 为空。上述仍是本机本地检查，未推送 / 未发布，不推断远程 CI 或注册表状态。
+
 ## 2026-11-14 本地验收维护（未推送 / 未发布）
 
 - 2026-11-15 网页工作台新增“最近邻分类”与“自动选簇数”后，对本地提交 `ba9f16e` 的工作树运行（`8695d8a` 之后共 9 个本地提交，本条对应其中最后两个） `node tests/browser.mjs`：Chromium 148.0.7778.96 实际完成 **12 个场景 / 24 项浏览器检查**，全部通过。新增检查分别断言 `label=rise`、`votes=[2,1]`、`best_k=3`、`scores` 长度 2 且第二个 `silhouette` 更大，并确认邻居表与按 k 表格已渲染；无 pageerror、无外部数据请求。同一工作树的 `moon test --deny-warn`（80 项）、`node --test tests/cli.test.mjs`（13 项）、`node scripts/build.mjs` 与 `python verify.py`（22 条命令）均通过。Playwright 以 `npm i --no-save --no-package-lock` 临时安装，未改 `package.json`；浏览器二进制复用本机缓存并通过 `CHROME_PATH` 指定。原始输出在忽略目录 `artifacts/browser.json`，本条仍为本地运行，未推送 / 未发布。

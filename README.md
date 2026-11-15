@@ -115,6 +115,8 @@ node scripts/benchmark_hard.mjs
 
 `node scripts/benchmark_hard.mjs` 除硬 DTW 与组合流程外，还测量 `knn`（32 条 256 点 × 3 维训练序列的单次 k=3 查询）与 `select_k`（32 条 64 点一维序列，候选 `[2,3]` 和 `[2,3,4]`），每行都断言 `ok:true` 并保留标签 / 邻居下标 / `best_k` / 轮廓系数作为正确性锚点。
 
+`tests/knn_reference.py` 的三种用法：默认只把本次复算写到忽略目录 `artifacts/knn-reference.json`，并在末尾打印证据是否落后（`evidence: current` / `evidence: STALE`，不改变退出码），所以 `python verify.py` 不会弄脏工作树；`--evidence` 同时刷新 `docs/evidence/knn-reference.json`（固定 `newline="\n"`，除 `recorded_at_utc` / `python` 外无变化时跳过并打印 `evidence: unchanged`）；`--check-evidence` 只比较不写入，忽略 `recorded_at_utc`、`python` 与仅表示来源的 `engine_commit`，一致退出 0 打印 `evidence: current`，不一致退出 1 打印 `evidence: STALE` 并逐行列出差异键。
+
 本地执行结果与真实命令见 [VALIDATION.md](docs/VALIDATION.md)。源码修订 `bb8c309` 已在 [此次远程 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/43449875490) 通过 Linux / macOS / Windows × Wasm / Wasm-GC / JS / native 检查、构建和测试：每个系统、每个后端各71项 MoonBit 测试，另各38项 Node 测试；Linux 浏览器检查22项通过。已下载 CI 原始产物复核这些数量，[汇总记录](docs/evidence/remote-validation-0.2.0.json) 对应上述提交。本机仍缺 MSVC，本机 native 未运行；远程 native 已通过。已部署的 [在线工作台](https://jq-ai-nb.github.io/warpfit/) 也实际通过22项浏览器检查。
 
 本地新增最近邻分类与簇数选择后，本机 `moon test` 为 82 项、Node 测试为 42 项；这两个数字是本机结果，相关提交尚未推送，远程 CI 记录仍对应上面的 71 / 38 项。本地验收维护、独立包消费检查与本轮本地新增检查的记录见 [验收自查](docs/ACCEPTANCE.md) 和 [机制与演示](docs/WALKTHROUGH.md)，它们不改变上述远程与注册表结论。

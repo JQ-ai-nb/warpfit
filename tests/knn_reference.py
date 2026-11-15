@@ -4,6 +4,7 @@ Pure Python, no third-party dependency: DTW is a direct dynamic program and the
 silhouette uses the same textbook definition. The engine is only asked for its
 answer; every number compared here is produced again on this side.
 """
+import argparse
 import json
 import math
 import random
@@ -13,6 +14,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+ARTIFACT = ROOT / "artifacts" / "knn-reference.json"
+EVIDENCE = ROOT / "docs" / "evidence" / "knn-reference.json"
+# Provenance only: these describe the run, not the numbers it produced.
+# engine_commit also moves with every commit, including the one that records the evidence,
+# so --check-evidence would go stale by itself if it were compared.
+VOLATILE = ("recorded_at_utc", "python", "engine_commit")
+REFRESH_IGNORED = ("recorded_at_utc", "python")
 
 
 def call(request):
@@ -176,13 +184,67 @@ def check_silhouette():
     return request, response
 
 
-if __name__ == "__main__":
+def engine_commit():
+    try:
+        completed = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=ROOT,
+            text=True,
+            encoding="utf-8",
+            capture_output=True,
+        )
+    except OSError:
+        return "unknown"
+    revision = completed.stdout.strip()
+    return revision if completed.returncode == 0 and revision else "unknown"
+
+
+def write_json(path, payload):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    # newline="\n" keeps the checked-in evidence byte-identical across platforms.
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(payload)
+
+
+def read_evidence():
+    if not EVIDENCE.exists():
+        return None
+    try:
+        return json.loads(EVIDENCE.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def differences(recorded, current, ignored, prefix=""):
+    keys = []
+    if isinstance(recorded, dict) and isinstance(current, dict):
+        for key in sorted(set(recorded) | set(current)):
+            if not prefix and key in ignored:
+                continue
+            if key not in recorded or key not in current:
+                keys.append(prefix + key)
+            else:
+                keys.extend(differences(recorded[key], current[key], ignored, prefix + key + "."))
+    elif recorded != current:
+        keys.append(prefix.rstrip(".") or "<root>")
+    return keys
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(description="Recompute KNN / silhouette reference numbers.")
+    parser.add_argument("--evidence", action="store_true",
+                        help="also refresh docs/evidence/knn-reference.json")
+    parser.add_argument("--check-evidence", action="store_true",
+                        help="compare with docs/evidence/knn-reference.json; exit 1 when stale")
+    args = parser.parse_args(argv)
+
     request, response, expected = check_example()
     cases = randomized()
     selection_request, selection = check_silhouette()
     report = {
         "recorded_at_utc": datetime.now(timezone.utc).isoformat(),
         "python": sys.version.split()[0],
+        "engine_commit": engine_commit(),
         "knn_example": {
             "label": response["label"],
             "votes": response["votes"],
@@ -196,6 +258,35 @@ if __name__ == "__main__":
         },
         "status": "passed",
     }
-    out = ROOT / "docs" / "evidence" / "knn-reference.json"
-    out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"knn-reference: passed; {cases} randomized cases; {out.relative_to(ROOT)}")
+    payload = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
+    recorded = read_evidence()
+    missing = ["docs/evidence/knn-reference.json"]
+    stale = missing if recorded is None else differences(recorded, report, VOLATILE)
+    refresh = missing if recorded is None else differences(recorded, report, REFRESH_IGNORED)
+
+    if args.check_evidence:
+        if not stale:
+            print("evidence: current")
+            return 0
+        print("evidence: STALE")
+        for key in stale:
+            print(f"  {key}")
+        return 1
+
+    write_json(ARTIFACT, payload)
+    print(f"knn-reference: passed; {cases} randomized cases; {ARTIFACT.relative_to(ROOT).as_posix()}")
+
+    if args.evidence:
+        if not refresh:
+            print("evidence: unchanged")
+            return 0
+        write_json(EVIDENCE, payload)
+        print(f"evidence: updated; {EVIDENCE.relative_to(ROOT).as_posix()}")
+        return 0
+
+    print("evidence: current" if not stale else "evidence: STALE; run --check-evidence for keys")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
