@@ -4,6 +4,7 @@
 
 ## 2026-11-14 本地验收维护（未推送 / 未发布）
 
+- 2026-11-15 本地新增最近邻分类（`knn`）与轮廓系数选簇数（`select_k`）后，`python verify.py` 再次完整通过：Wasm / Wasm-GC / JS 各 80 项 MoonBit 测试、42 项 Node 测试、`tests/knn_reference.py` 的 24 组随机 KNN 复算与轮廓系数独立重算。相关提交仍在本地，未推送；远程 CI 记录仍对应 71 / 38 项，两者不可混称。
 - `python verify.py` 完整通过：所有目标静态检查、格式、接口；Wasm / Wasm-GC / JS各71项MoonBit测试和构建；38项Node测试；四个类型示例；实际包检查；3项消费脚本边界测试及独立归档消费。记录见 [acceptance-local-20261114.json](evidence/acceptance-local-20261114.json)。原有测试函数数量未把新增示例的断言混算进去。
 - `cmd/consumer` 只使用公开接口。实际0.2.0包解压后，在独立workspace执行冻结依赖检查和三个后端运行，8组能力均通过：约束DTW、距离专用计算、DBA、聚类模型和同簇预测、子序列、长输入预处理、软梯度、拟合 / 排序。[归档消费记录](evidence/consumer-package-20261114.json)明确 `registry_install_verified: false`，不是Mooncakes安装证明。
 - 包验证脚本的3项集成测试检查：拒绝版本中的manifest片段、拒绝归档与请求版本不一致、拒绝ZIP路径越界。手动注册表消费工作流已准备且YAML解析通过，尚未推送或执行；不能把它写成新远程CI已通过。
