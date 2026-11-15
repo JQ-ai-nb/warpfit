@@ -75,7 +75,7 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 **输入**：[select-k.json](../examples/select-k.json)：6 条 4 点序列；`candidates=[2,3]`；`window=1`、`max_iterations=10`、`max_dba_steps=20`、`first_index=0`、`max_work_units=4000000`。
 
-**操作**：`node bin/warpfit.mjs examples/select-k.json`，或在浏览器选择“自动选簇数”后运行。
+**操作**：`node bin/warpfit.mjs examples/select-k.json`，或在浏览器选择“候选簇数选择”后运行。
 
 **预期输出与验证**：`best_k=3`；`scores` 为 2 条，每项含 `k` / `silhouette` / `inertia` / `labels`，本例 k=2 的轮廓系数 `0.7379034772198393`、k=3 为 `0.9543542346760311`（后者更大，因此被选中）；逻辑工作量 3168。网页显示 `best_k`、按 k 的表格与轮廓系数折线。`tests/cli.test.mjs` 断言 `best_k`、候选数量和轮廓系数比较；`tests/knn_reference.py` 独立重算轮廓系数；`tests/browser.mjs` 复核同组数值与表格渲染。
 
