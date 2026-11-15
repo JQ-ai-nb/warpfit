@@ -17,6 +17,10 @@
 
 [在线工作台](https://jq-ai-nb.github.io/warpfit/) ｜ [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)
 
+### 为什么在 MoonBit 重做
+
+tslearn 需要 Python、numpy 与 scipy，无法嵌入 MoonBit 产物。本库提供同源 Wasm / Wasm-GC / JS 内核：浏览器 Worker 内本地计算、不经网络，预算在计算前校验，产物是单文件引擎、无外部运行时依赖。差异在部署位置，不在算法新颖性；与 tslearn 的数值对照和边界见验证文档。
+
 ## 快速运行
 
 需要 MoonBit SDK、Node.js ≥22；Python ≥3.10 用于独立验证，不是核心运行依赖。记录的本机工具链：moon 0.1.20261021 / moonc 0.10.17+093cb8f9c。CI 使用官方安装器的当前稳定 SDK，并在日志中记录实际版本。
