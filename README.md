@@ -1,14 +1,21 @@
-# WarpFit — 时序对齐、模板学习与聚类
+# WarpFit — MoonBit 时序对齐、模板学习、聚类与分类
 
-> **当前源码为 0.2.0 修订版，Mooncakes 0.2.0 尚未发布。** 本项目在 2026 年 10 月已公开的 WarpFit 0.1.2 基础上扩展。2026-11-13 核对的注册表最新版本仍为 0.1.2；新增接口需构建本仓库源码。下文验证记录明确区分本地检查、历史远程 CI 和注册表安装结果。
+覆盖重采样 → 逐维标准化 → 硬 DTW 约束对齐 → DBA 模板 → 聚类 → 最近邻分类 → 候选簇数选择 → 模型保存复用，全部有界预算。
 
-2026-11-14的本地验收维护新增了独立包消费验证；依用户要求暂未推送或发布。已公开的`8695d8a`与本轮本地新增检查分开记录，详见 [验收自查](docs/ACCEPTANCE.md) 和 [机制与演示](docs/WALKTHROUGH.md)。
+摘要，逐条见[完整工作流](#完整工作流)：
 
-为不同长度、节奏和量纲的数值序列提供一套**有界的时序分析流程**：按采样点重采样、逐维标准化、硬 DTW 约束对齐、DBA 模板、DTW 聚类与最近邻分类、按轮廓系数选择簇数，训练后保存模型供新序列使用，并在较长输入中定位完整查询的最佳匹配区间；保留原有 Soft-DTW 损失、两侧梯度、可微分模板拟合和示例检索。
+| 任务族 | 命令 | 已验证输出 |
+|---|---|---|
+| 约束对齐 | `node bin/warpfit.mjs examples/align.json` | 距离 0；`window=0` 时平方代价 2 |
+| 模板学习 | `node bin/warpfit.mjs examples/dba.json` | 目标 0.166667 → 0.118056 |
+| 预处理 + 聚类 | `node bin/warpfit.mjs examples/pipeline.json` | 标签 `[0,0,1,1]` |
+| 最近邻分类 | `node bin/warpfit.mjs examples/knn.json` | `rise`，投票 `[2,1]` |
+| 候选簇数选择 | `node bin/warpfit.mjs examples/select-k.json` | `best_k=3`，轮廓系数 0.9544 |
+| 模型保存与复用 | `node bin/warpfit-model.mjs train examples/model_train.json work/cluster-model.json && node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predict_data.json` | 新数据标签 `[0,1,0]` |
 
-目标用户是 MoonBit 时序模型、传感器周期与离线数值应用开发者。逐点误差和直接平均要求采样位置一致；调用者可以根据问题选择硬路径对齐、带梯度的软目标，或对未标记序列做分组。核心使用 MoonBit 标准库，不依赖 Python 运行时或外部学习服务；浏览器演示在本地 Worker 计算用户数据。
+**版本披露**：源码为 0.2.0，尚未发布到 Mooncakes，注册表最新为 0.1.2，新增接口须构建本仓库；样例均为合成数据本地验证，非准确率或生产效果；验证记录分别标注本地检查、历史远程 CI 与注册表安装结果，本地结果不推断已发布状态。
 
-维护者 / 个人参赛申请人：**蒋琦**；GitHub / Mooncakes：**JQ-ai-nb**。Apache-2.0。设计、编码与测试使用 AI 辅助，维护者负责理解与核实成果。算法来自公开论文，**不宣称算法首创或世界唯一**。
+[在线工作台](https://jq-ai-nb.github.io/warpfit/) ｜ [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)
 
 ## 快速运行
 
@@ -56,7 +63,7 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 以下新增示例是本地 0.2.0 的合成数据，执行前先运行 `node scripts/build.mjs`：
 
-| 使用者及问题 | 输入 / 操作 | 已验证输出 |
+| 逐条工作流 | 输入 / 操作 | 已验证输出 |
 |---|---|---|
 | 生产信号分析开发者：周期信号存在有限的时间偏移 | `examples/align.json`，两条四点序列和 `window=1` | 返回完整硬 DTW 路径与距离 0；改为 `window=0` 时平方路径代价为 2 |
 | 传感器模板开发者：重复动作长度不一致 | `examples/dba.json`，三条观测和四点初始模板 | 经硬 DTW 路径与 DBA 更新，目标从约 0.166667 降至 0.118056；返回模板、轨迹与终止原因 |
@@ -95,6 +102,8 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 复杂度和边界见 [SEMANTICS.md](docs/SEMANTICS.md)。工作量按完整矩阵格点 × 特征数保守计费，不是墙钟时限；预处理另受数据规模限制，不计入聚类工作量。完整路径接口仍分配完整 DP 矩阵；仅求距离的接口采用两行空间，`max_cells` 仍按完整逻辑矩阵保守限制。原始 Soft-DTW 可为负；DBA / 聚类不保证全局最优，初始中心与尺度选择会影响结果。重采样基于样本下标，不支持真实时间戳、抗混叠或缺失值；没有 GPU、实时设备接入、无候选的簇数推断或大规模索引。
 
+目标用户是 MoonBit 时序模型、传感器周期与离线数值应用开发者。逐点误差和直接平均要求采样位置一致；调用者可以根据问题选择硬路径对齐、带梯度的软目标，或对未标记序列做分组。核心使用 MoonBit 标准库，不依赖 Python 运行时或外部学习服务；浏览器演示在本地 Worker 计算用户数据。
+
 ## 验证与可复现性
 
 ```text
@@ -108,9 +117,9 @@ node scripts/benchmark_hard.mjs
 
 本地执行结果与真实命令见 [VALIDATION.md](docs/VALIDATION.md)。源码修订 `bb8c309` 已在 [此次远程 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/43449875490) 通过 Linux / macOS / Windows × Wasm / Wasm-GC / JS / native 检查、构建和测试：每个系统、每个后端各71项 MoonBit 测试，另各38项 Node 测试；Linux 浏览器检查22项通过。已下载 CI 原始产物复核这些数量，[汇总记录](docs/evidence/remote-validation-0.2.0.json) 对应上述提交。本机仍缺 MSVC，本机 native 未运行；远程 native 已通过。已部署的 [在线工作台](https://jq-ai-nb.github.io/warpfit/) 也实际通过22项浏览器检查。
 
-本地新增最近邻分类与簇数选择后，本机 `moon test` 为 80 项、Node 测试为 42 项；这两个数字是本机结果，相关提交尚未推送，远程 CI 记录仍对应上面的 71 / 38 项。
+本地新增最近邻分类与簇数选择后，本机 `moon test` 为 80 项、Node 测试为 42 项；这两个数字是本机结果，相关提交尚未推送，远程 CI 记录仍对应上面的 71 / 38 项。本地验收维护、独立包消费检查与本轮本地新增检查的记录见 [验收自查](docs/ACCEPTANCE.md) 和 [机制与演示](docs/WALKTHROUGH.md)，它们不改变上述远程与注册表结论。
 
-此前 0.1.2 的注册表独立消费测试和线上演示已有验证记录；0.2.0 尚未发布到注册表，新增功能没有完成注册表安装测试。发布后需用 `python scripts/registry_consumer.py` 独立验证。
+此前 0.1.2 的注册表独立消费测试和线上演示已有验证记录；0.2.0 仍未进入注册表，新增功能没有完成注册表安装测试。发布后需用 `python scripts/registry_consumer.py` 独立验证。
 
 发布前可运行 `python scripts/package_check.py` 和 `python scripts/registry_consumer.py --packaged`：它在独立工程中只使用实际归档包，以冻结本地workspace检查并运行10组公共能力（原有8组，另加最近邻分类`knn`与选簇数`select_k`）。默认不带`--packaged`才从注册表安装。归档验证不能写成Mooncakes安装已通过，详情见 [消费验证说明](docs/API.md#独立消费与发布准备)。
 
@@ -133,3 +142,7 @@ Soft-DTW 和自项校正来自 [Cuturi / Blondel 2017](https://proceedings.mlr.p
 详细比较、检索限制及与既往工程的关系见 [RELATED_WORK.md](docs/RELATED_WORK.md)。未发现同类不等于生态不存在；没有完整审计全部公开 / 私有工程。本项目从论文公式独立编写数值核心，没有复制上述工程源码或测试夹具。许可与分发说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
 ![本地原型拟合工作台](docs/screenshots/desktop.png)
+
+## 维护者与许可
+
+维护者 / 个人参赛申请人：**蒋琦**；GitHub / Mooncakes：**JQ-ai-nb**。Apache-2.0。设计、编码与测试使用 AI 辅助，维护者负责理解与核实成果。算法来自公开论文，**不宣称算法首创或世界唯一**。
