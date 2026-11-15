@@ -1,8 +1,20 @@
 import { performance } from 'node:perf_hooks';
 import { cpus, platform, arch } from 'node:os';
 import { mkdir, writeFile } from 'node:fs/promises';
+import { readdirSync, statSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { run } from '../dist/engine.mjs';
+
+const buildHint='run `node scripts/build.mjs` first';
+const newestSource=Math.max(...['core','api'].flatMap(folder=>readdirSync(folder,{recursive:true,encoding:'utf8'})
+  .filter(name=>String(name).endsWith('.mbt')).map(name=>statSync(`${folder}/${name}`).mtimeMs)));
+let engineMtime;
+try {engineMtime=statSync('dist/engine.mjs').mtimeMs;}
+catch {console.error(`dist/engine.mjs is missing; ${buildHint}.`);process.exit(1);}
+if(engineMtime<newestSource) {
+  console.error(`dist/engine.mjs is older than core/api sources; ${buildHint}.`);
+  process.exit(1);
+}
 
 const engine = request => {
   const out=JSON.parse(run(JSON.stringify(request)));
@@ -31,13 +43,17 @@ times.sort((a,b)=>a-b);
 results.push({operation:'pipeline',series:16,samples:64,dimensions:1,clusters:2,window:4,repeats:3,
   median_ms:times[1],min_ms:times[0],max_ms:times[2],stop:out.clustering.stop,work_units:out.clustering.work_units});
 const labels=['rise','fall','flat','bump'];
-const training=labels.flatMap((label,index)=>Array.from({length:8},(_,j)=>{
-  const phase=j*.17+index*1.4;
-  return {label,series:Array.from({length:256},(_,i)=>
-    Array.from({length:3},(_,d)=>Math.sin(i*.05+d*.7+phase)+d*.2))};
-}));
-const query=Array.from({length:256},(_,i)=>
-  Array.from({length:3},(_,d)=>Math.sin(i*.05+d*.7+.07)+d*.2));
+const shapeOf=(label,t)=>label==='rise'?Math.pow(t,1.2)
+  :label==='fall'?1-Math.pow(t,1.2)
+  :label==='flat'?.5+.01*Math.sin(t*9.7)
+  :Math.sin(Math.PI*t);
+const dimensionsOf=3;
+const valuesOf=(label,i,amp,jitter)=>Array.from({length:dimensionsOf},(_,d)=>
+  amp*shapeOf(label,Math.min(1,Math.max(0,i/255+jitter)))*(1+d*.25)+d*.3);
+const training=labels.flatMap((label,index)=>Array.from({length:8},(_,j)=>({
+  label,
+  series:Array.from({length:256},(_,i)=>valuesOf(label,i,[.9,1,1.1][j%3]+(j-index)*1e-4,(j-3.5)*.004+index*.01))})));
+const query=Array.from({length:256},(_,i)=>valuesOf('rise',i,1.02,.013));
 const knnRequest={schema:'warpfit.request/1',operation:'knn',query,training,options:{k:3}};
 for(let i=0;i<2;i++)engine(knnRequest);
 {
@@ -47,7 +63,7 @@ for(let i=0;i<2;i++)engine(knnRequest);
   const neighbor_indices=out.neighbors.map(neighbor=>neighbor.train_index);
   assert.equal(out.label,'rise');
   assert.equal(neighbor_indices.length,3);
-  results.push({operation:'knn',training_series:training.length,series:training.length+1,samples:256,dimensions:3,k:3,
+  results.push({operation:'knn',training_series:training.length,series:training.length+1,samples:256,dimensions:dimensionsOf,k:3,
     repeats:7,median_ms:times[3],min_ms:times[0],max_ms:times[6],work_units:out.work_units,
     label:out.label,neighbor_indices});
 }
@@ -67,5 +83,5 @@ for(const candidates of [[2,3],[2,3,4]]) {
     repeats:3,median_ms:times[1],min_ms:times[0],max_ms:times[2],best_k:out.best_k,scores,work_units:out.work_units});
 }
 const report={recorded_at_utc:new Date().toISOString(),node:process.version,platform:platform(),arch:arch(),cpu:cpus()[0].model,
-  description:'Single-process MoonBit JS engine; includes JSON parsing/serialization and output generation. DTW: 2 warmups, 7 calls. Pipeline: 1 warmup, 3 calls. KNN: 2 warmups, 7 calls. select_k: 1 warmup, 3 calls. Not a wall-clock guarantee or a comparison with other implementations.',results};
+  description:'Single-process MoonBit JS engine; includes JSON parsing/serialization and output generation. Synthetic inputs only. DTW: 2 warmups, 7 calls. Pipeline: 1 warmup, 3 calls. KNN (single-query latency, not throughput): 2 warmups, 7 calls. select_k (single-call latency): 1 warmup, 3 calls. Not a wall-clock guarantee or a comparison with other implementations.',results};
 await mkdir('artifacts',{recursive:true});await writeFile('artifacts/benchmark-hard.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report));
