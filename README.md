@@ -1,12 +1,12 @@
 # WarpFit — MoonBit 时序对齐、模板学习、聚类与分类
 
-覆盖重采样 → 逐维标准化 → 硬 DTW 约束对齐 → DBA 模板 → 聚类 → 最近邻分类 → 候选簇数选择 → 模型保存复用，全部有界预算。
+覆盖重采样 → 逐维标准化 → 硬 DTW 约束对齐 → DBA 模板 → 聚类 → 最近邻分类 → 候选簇数选择 → 模型保存复用 → 子序列定位，全部有界预算。
 
 摘要，逐条见[完整工作流](#完整工作流)：
 
 | 任务族 | 命令 | 已验证输出 |
 |---|---|---|
-| 约束对齐 | `node bin/warpfit.mjs examples/align.json` | 距离 0；`window=0` 时平方代价 2 |
+| 约束对齐 | `node bin/warpfit.mjs examples/align.json` | 距离 0；把请求 JSON 的 `window` 改为 0 后平方代价 2 |
 | 模板学习 | `node bin/warpfit.mjs examples/dba.json` | 目标 0.166667 → 0.118056 |
 | 预处理 + 聚类 | `node bin/warpfit.mjs examples/pipeline.json` | 标签 `[0,0,1,1]` |
 | 最近邻分类 | `node bin/warpfit.mjs examples/knn.json` | `rise`，投票 `[2,1]` |
