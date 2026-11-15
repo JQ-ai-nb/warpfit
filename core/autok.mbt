@@ -135,18 +135,23 @@ pub fn select_cluster_count(
       Err(error) => return Err(error)
     }
   }
-  // One symmetric distance matrix serves every candidate k.
-  let mut matrix_units = 0
+  // One symmetric distance matrix serves every candidate k. The sum is
+  // accumulated in Int64: the 32 x 512 x 16 worst case is exactly 2^32, which
+  // wraps to zero in Int32 and would slip past the budget check below.
+  let max_units : Int64 = options.max_work_units.to_int64()
+  let mut matrix_units : Int64 = 0
   for i = 0; i < n; i = i + 1 {
     for j = 0; j < n; j = j + 1 {
       match validate_dtw_pair(data[i], data[j], options.alignment) {
         Ok(_) => ()
         Err(error) => return Err(error)
       }
-      matrix_units += data[i].count * data[j].count * data[i].dimensions
+      matrix_units += data[i].count.to_int64() *
+        data[j].count.to_int64() *
+        data[i].dimensions.to_int64()
     }
   }
-  if matrix_units > options.max_work_units {
+  if matrix_units > max_units {
     return Err(
       failure("work_budget", "budget cannot cover the pairwise distance matrix"),
     )
@@ -162,7 +167,9 @@ pub fn select_cluster_count(
       matrix[j * n + i] = measured.distance
     }
   }
-  let mut work = matrix_units
+  // The matrix check above bounds this at max_work_units <= 1e8, so the
+  // running total fits Int32 for the per-candidate phases.
+  let mut work = matrix_units.to_int()
   let scores : Array[KScore] = []
   for k in candidates {
     let remaining = options.max_work_units - work

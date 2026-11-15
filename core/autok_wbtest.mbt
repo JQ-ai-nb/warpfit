@@ -60,3 +60,46 @@ test "silhouette selection enforces the shared work budget" {
   }
   assert_true(error.contains("budget"))
 }
+
+///|
+test "pairwise budget rejects the 32x512x16 worst case before computing DTW" {
+  // The full matrix costs 32*32*512*512*16 = 2^32 work units. One shared
+  // sample value keeps 32 copies cheap; the rejection must happen before any
+  // distance is measured, so the test returns immediately.
+  let sample : Series = {
+    count: 512,
+    dimensions: 16,
+    values: Array::make(512 * 16, 0.0),
+  }
+  let data = Array::make(32, sample)
+  match
+    select_cluster_count(data, [2], {
+      ..auto_k_options(),
+      max_work_units: 100000000,
+    }) {
+    Ok(_) => assert_true(false)
+    Err(error) => {
+      assert_eq(error.code, "work_budget")
+      assert_true(error.message.contains("pairwise distance matrix"))
+      assert_true(!error.message.contains("seed"))
+    }
+  }
+}
+
+///|
+test "pairwise budget stands even when the Int32 sum would wrap around" {
+  let sample : Series = {
+    count: 410,
+    dimensions: 16,
+    values: Array::make(410 * 16, 0.0),
+  }
+  let data = Array::make(32, sample)
+  match
+    select_cluster_count(data, [2], { ..auto_k_options(), max_work_units: 1, }) {
+    Ok(_) => assert_true(false)
+    Err(error) => {
+      assert_true(error.message.contains("pairwise distance matrix"))
+      assert_true(!error.message.contains("max_work_units must be within"))
+    }
+  }
+}
