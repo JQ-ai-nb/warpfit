@@ -98,8 +98,8 @@ test "pairwise budget stands even when the Int32 sum would wrap around" {
     select_cluster_count(data, [2], { ..auto_k_options(), max_work_units: 1, }) {
     Ok(_) => assert_true(false)
     Err(error) => {
+      assert_eq(error.code, "work_budget")
       assert_true(error.message.contains("pairwise distance matrix"))
-      assert_true(!error.message.contains("max_work_units must be within"))
     }
   }
 }
