@@ -19,7 +19,7 @@
 
 ### 为什么在 MoonBit 重做
 
-tslearn 需要 Python、numpy 与 scipy，无法嵌入 MoonBit 产物。本库提供同源 Wasm / Wasm-GC / JS 内核：浏览器 Worker 内本地计算、不经网络，预算在计算前校验，产物是单文件引擎、无外部运行时依赖。差异在部署位置，不在算法新颖性；与 tslearn 的数值对照和边界见验证文档。
+tslearn 需要 Python、numpy 与 scipy，无法嵌入 MoonBit 产物。本库提供同源 Wasm / Wasm-GC / JS 内核：浏览器 Worker 内本地计算、不经网络，预算在计算前校验，产物是单文件引擎、无外部运行时依赖。在线工作台即该内核的一个无后端实例：静态页面加载引擎，数据不上传。差异在部署位置，不在算法新颖性；与 tslearn 的数值对照和边界见验证文档。
 
 ## 快速运行
 
