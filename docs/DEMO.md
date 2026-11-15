@@ -12,7 +12,7 @@
 node scripts/check_demo.mjs
 ```
 
-脚本核对文件 SHA-256、CLI 版本、约束对齐、DBA 模板、预处理与分组、模型文件往返、子序列定位、固定真实数据划分以及静态网页资源，共9组检查。结果写入 `artifacts/demo-check.json`，成功时 `status` 为 `passed`。它使用本包文件，创建并清理自己的模型临时文件，不需要访问互联网；失败时请保留报告，不要手动把状态改成通过。
+脚本核对文件 SHA-256、CLI 版本、约束对齐、DBA 模板、预处理与分组、模型文件往返、子序列定位、最近邻分类与候选簇数选择、固定真实数据划分以及静态网页资源，共10组检查。其中分类检查直接运行 `web/examples/knn.json` 与 `web/examples/select-k.json`，断言最近邻标签、投票分布以及候选 k 的轮廓系数排序；脚本还会读取 `web/index.html` 的 `data-example` 列表，逐个确认包内存在对应示例文件，并断言检查组数量为10。结果写入 `artifacts/demo-check.json`，成功时 `status` 为 `passed`。它使用本包文件，创建并清理自己的模型临时文件，不需要访问互联网；失败时请保留报告，不要手动把状态改成通过。
 
 `DEMO_MANIFEST.json` 记录源码提交、打包时是否有未提交改动及各文件校验值，用于识别混用文件或损坏，**不是数字签名或第三方验收证明**。若打包时 PATH 中没有 MoonBit，报告的 `sdk_absence_verified` 为 true；日常运行时装有 SDK 也不影响使用。
 

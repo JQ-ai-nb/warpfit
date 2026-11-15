@@ -15,10 +15,10 @@ ROOT = Path(__file__).resolve().parent.parent
 EXAMPLES = [
     'align', 'dba', 'clusters', 'pipeline', 'model_train', 'model_predict_data',
     'subsequence', 'prototype', 'training', 'retrieval', 'uci-room',
-    'uci-model-train', 'uci-model-test-data', 'uci-model-split',
+    'uci-model-train', 'uci-model-test-data', 'uci-model-split', 'knn', 'select-k',
 ]
 WEB_EXAMPLES = ['prototype', 'training', 'retrieval', 'align', 'dba', 'clusters',
-                'pipeline', 'uci-room', 'model_train', 'subsequence']
+                'pipeline', 'uci-room', 'model_train', 'subsequence', 'knn', 'select-k']
 NOTICES = ['MOONBIT_CORE_LICENSE', 'MOONBIT_CORE_NOTICE', 'WARPFIT_LICENSE']
 
 
@@ -38,6 +38,13 @@ def main():
     module = (ROOT / 'moon.mod').read_text(encoding='utf-8')
     assert re.search(r'^name\s*=\s*"JQ-ai-nb/warpfit"\s*$', module, re.M)
     assert re.search(r'^version\s*=\s*"' + re.escape(version) + r'"\s*$', module, re.M)
+    # The workbench and the bundle must expose the same scenarios: stop with a
+    # non-zero exit instead of silently shipping a subset of web/examples.
+    on_disk = sorted(path.stem for path in (ROOT / 'web/examples').glob('*.json'))
+    declared = sorted(WEB_EXAMPLES)
+    if on_disk != declared:
+        raise SystemExit('web/examples mismatch: missing={} unexpected={}'.format(
+            sorted(set(declared) - set(on_disk)), sorted(set(on_disk) - set(declared))))
     node = shutil.which('node')
     if node is None:
         raise RuntimeError('Node.js >=22 is required.')

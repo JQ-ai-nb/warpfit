@@ -88,16 +88,31 @@ try {
     'web/engine.mjs', 'web/MOONBIT_CORE_LICENSE', 'web/MOONBIT_CORE_NOTICE', 'web/WARPFIT_LICENSE',
     'web/UCI_ROOM_DATA_NOTICE.md']) assert.ok(names.has(required), required);
   assert.equal(hash(await readFile(join(root, 'dist/engine.mjs'))), hash(await readFile(join(root, 'web/engine.mjs'))));
+  const advertised = [...(await text('web/index.html')).matchAll(/data-example="([^"]+)"/g)].map(match => match[1]);
+  assert.equal(new Set(advertised).size, advertised.length, 'duplicate data-example entry');
+  for (const name of advertised) assert.ok(names.has(`web/examples/${name}.json`), `web/examples/${name}.json`);
   report.version = manifest.version;
   report.source_commit = manifest.source_commit;
   report.source_dirty = manifest.source_dirty;
   const moon = spawnSync('moon', ['version'], { cwd: root, encoding: 'utf8', timeout: 5_000 });
   report.sdk_absence_verified = moon.error?.code === 'ENOENT';
   if (process.env.WARPFIT_REQUIRE_NO_SDK === '1') assert.equal(report.sdk_absence_verified, true);
-  passed('bundle_integrity', { files: manifest.files.length, matching_browser_and_cli_engine: true });
+  passed('bundle_integrity', { files: manifest.files.length, matching_browser_and_cli_engine: true,
+    workbench_examples_verified: advertised.length });
 
   assert.equal(call(['bin/warpfit.mjs', '--version']).trim(), `WarpFit ${manifest.version}`);
   passed('cli_version', { version: manifest.version });
+
+  const knn = JSON.parse(call(['bin/warpfit.mjs', 'web/examples/knn.json']));
+  assert.equal(knn.ok, true); assert.equal(knn.label, 'rise'); assert.deepEqual(knn.votes, [2, 1]);
+  const selectK = JSON.parse(call(['bin/warpfit.mjs', 'web/examples/select-k.json']));
+  assert.equal(selectK.ok, true); assert.equal(selectK.best_k, 3); assert.equal(selectK.scores.length, 2);
+  assert.ok(selectK.scores[1].silhouette > selectK.scores[0].silhouette,
+    `${selectK.scores[1].silhouette} <= ${selectK.scores[0].silhouette}`);
+  passed('recent_neighbor_classification', {
+    knn_label: knn.label, knn_votes: knn.votes, best_k: selectK.best_k,
+    silhouette_by_k: selectK.scores.map(score => [score.k, score.silhouette]),
+  });
 
   const alignment = cli('align');
   assert.equal(alignment.ok, true); close(alignment.distance, 0);
@@ -154,6 +169,7 @@ try {
   });
 
   await checkWebFiles(manifest);
+  assert.equal(report.checks.length, 10, `expected 10 check groups, got ${report.checks.length}`);
   report.status = 'passed';
 } catch (error) {
   report.error = error.stack || String(error);
