@@ -55,6 +55,32 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 新增的完整文件模型真实数据场景见 [训练后预测不重叠的后续数据](REAL_DATA.md#训练后预测不重叠的后续数据)：使用者为离线传感器数据开发者，输入16段较早的三维记录训练模型，将其保存后加载，对16段后续记录分组。运行 `node scripts/evaluate_holdout.mjs`，得到训练状态、后续标签、距离和初始中心基线；原始输入可按划分清单从引用的UCI压缩包精确校对，数值另有独立参考复算。该场景检验文件复用流程，不解释为人数识别或准确率。
 
+以下两节为 2026-11-15 本地新增，仍未推送 / 未发布。
+
+### 用硬 DTW 近邻投票分类
+
+**使用者与问题**：已有若干带标签、节奏不同的短序列，需要对一条新序列给出按形状的类别，并看清投票来自哪些训练样本。
+
+**输入**：[knn.json](../examples/knn.json)：query=`[0,1,2,2]`；6 条带标签训练序列，`rise` / `fall` / `flat` 各两条；`k=3`、`window=1`、`max_work_units=2000000`。均为合成输入。
+
+**操作**：`node bin/warpfit.mjs examples/knn.json`，或在浏览器选择“最近邻分类”后运行。
+
+**预期输出与验证**：`label=rise`，`votes=[2,1]`；`neighbors` 为 3 条，按硬 DTW 距离升序，分别记录 `label` / `train_index` / `distance`（本例 `1`、`1.4142135623730951`、`1.7320508075688772`），逻辑工作量 96。网页显示预测标签、投票分布、邻居表和查询 / 近邻曲线。`tests/cli.test.mjs` 断言标签、投票与邻居距离单调；`tests/knn_reference.py` 用独立实现复算随机输入；`tests/browser.mjs` 复核同组数值并检查邻居表渲染。
+
+**限制**：训练集 1..32 条，`k` 不得超过训练条数；标签为 1..80 个 UTF-16 单元的非空文本，允许重复。距离与排序受 `window`、`feature_weights`、`max_cells`、`max_work_units` 约束。输出是邻居投票，票数并列时先比距离和、再按邻居顺序决胜，不是概率或校准置信度；训练集之外的类别不会被预测。
+
+### 在给定候选簇数中按轮廓系数选择
+
+**使用者与问题**：开发者已知簇数应在少数几个候选之内，希望用可复核的指标比较这些候选，而不是手工逐个训练比对。
+
+**输入**：[select-k.json](../examples/select-k.json)：6 条 4 点序列；`candidates=[2,3]`；`window=1`、`max_iterations=10`、`max_dba_steps=20`、`first_index=0`、`max_work_units=4000000`。
+
+**操作**：`node bin/warpfit.mjs examples/select-k.json`，或在浏览器选择“自动选簇数”后运行。
+
+**预期输出与验证**：`best_k=3`；`scores` 为 2 条，每项含 `k` / `silhouette` / `inertia` / `labels`，本例 k=2 的轮廓系数 `0.7379034772198393`、k=3 为 `0.9543542346760311`（后者更大，因此被选中）；逻辑工作量 3168。网页显示 `best_k`、按 k 的表格与轮廓系数折线。`tests/cli.test.mjs` 断言 `best_k`、候选数量和轮廓系数比较；`tests/knn_reference.py` 独立重算轮廓系数；`tests/browser.mjs` 复核同组数值与表格渲染。
+
+**限制**：样本 3..32 条；候选为 1..15 个严格递增整数，须落在 `2..min(16, 样本数-1)`。只在调用方给出的候选中按平均轮廓系数选择（单元素簇按惯例计 0），不做无候选的簇数推断，也不保证所选 k 在业务上最优。空簇候选被跳过并可能报 `empty_cluster`；成对距离矩阵预检预算，任一候选预算不足即整体报错，不返回部分排名。
+
 ## 0.1.x 原有场景
 
 以下三个旧版场景为固定合成数值示例。先执行 `node scripts/build.mjs`。三个文件均可在浏览器选择对应场景后运行、编辑或下载结果，也可在 CLI 独立运行。不同工具链最后若干位可能有浮点差异。

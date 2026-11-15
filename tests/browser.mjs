@@ -33,7 +33,7 @@ try {
   const downloadPromise = page.waitForEvent('download'); await page.locator('#download').click();
   const download = await downloadPromise; assert.equal(download.suggestedFilename(), 'warpfit-rank.json');
   report.checks.push('result JSON download');
-  for (const [name, operation] of [['align','dtw'],['dba','dba'],['clusters','cluster'],['pipeline','pipeline'],['uci-room','pipeline'],['subsequence','subsequence']]) {
+  for (const [name, operation] of [['align','dtw'],['dba','dba'],['clusters','cluster'],['pipeline','pipeline'],['uci-room','pipeline'],['subsequence','subsequence'],['knn','knn'],['select-k','select_k']]) {
     await page.locator(`[data-example=${name}]`).click();
     await page.waitForFunction(n => document.querySelector(`[data-example="${n}"]`).getAttribute('aria-pressed') === 'true', name);
     await page.waitForFunction(n => JSON.parse(document.getElementById('request').value).operation === n, operation);
@@ -43,6 +43,8 @@ try {
     if (operation === 'cluster') { assert.deepEqual(result.labels,[0,0,0,1,1,1]); assert.equal(await page.locator('table.rank').count(),1); }
     if (operation === 'pipeline') { assert.deepEqual(result.clustering.labels,name === 'uci-room' ? [0,1,0,1,1,1] : [0,0,1,1]); assert.equal(await page.locator('table.rank').count(),1); }
     if (operation === 'subsequence') { assert.deepEqual([result.start,result.end,result.distance],[2,4,0]); assert.equal(await page.locator('canvas.heat').count(),1); await page.screenshot({path:'artifacts/subsequence.png',fullPage:true}); }
+    if (operation === 'knn') { assert.equal(result.label,'rise'); assert.deepEqual(result.votes,[2,1]); assert.equal(await page.locator('table.rank').count(),1); }
+    if (operation === 'select_k') { assert.equal(result.best_k,3); assert.equal(result.scores.length,2); assert.ok(result.scores[1].silhouette > result.scores[0].silhouette); assert.equal(await page.locator('table.rank').count(),1); }
     report.checks.push(`${name} workflow and visualization`);
   }
   await page.locator('[data-example=model_train]').click();

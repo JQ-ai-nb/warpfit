@@ -67,7 +67,7 @@ match @warpfit.divergence(prediction, target, 0.4) {
 
 ### 可保存的聚类模型
 
-`auto_train_model.cluster_count` 为1..min(16,样本数)，最多32条样本；`first_index` 在输入数组范围内。先预处理，再按距最近已选中心最远的样本确定性选择初始中心；并列选最小下标。初始化和聚类共享 `max_work_units`，`total_work_units=seed_work_units+clustering.work_units`。不足以完成初始化或首次完整分配时报错；不能找到足够多非零 DTW 距离的中心时报 `seed_distinct`。它不是随机 k-means++，不自动选择簇数。
+`auto_train_model.cluster_count` 为1..min(16,样本数)，最多32条样本；`first_index` 在输入数组范围内。先预处理，再按距最近已选中心最远的样本确定性选择初始中心；并列选最小下标。初始化和聚类共享 `max_work_units`，`total_work_units=seed_work_units+clustering.work_units`。不足以完成初始化或首次完整分配时报错；不能找到足够多非零 DTW 距离的中心时报 `seed_distinct`。它不是随机 k-means++，也不在训练中推断簇数；候选簇数由 `select_k` 在调用方给定范围内按轮廓系数选择。
 
 成功训练响应中的 `model` 可单独保存为 JSON 文件，schema 为 `warpfit.cluster-model/1`。字段全部必需，未知字段和重复键拒绝：
 

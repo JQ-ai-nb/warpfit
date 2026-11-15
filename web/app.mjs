@@ -10,7 +10,9 @@ const descriptions = {
   pipeline: '不同设备的序列可能长度、量纲不同。先按采样点重采样并逐维标准化，再按指定样本初始化聚类中心。',
   'uci-room': 'UCI Room Occupancy Estimation 公共数据节选（CC BY 4.0）：六段温度、光照、CO₂ 序列按形状分组。这里不预测房间人数。',
   subsequence: '输入短查询与较长目标，返回匹配片段的起止下标、距离与路径；起止下标均包含。',
-  model_train: '学习不同形状的簇中心；运行后可以下载模型，或填入新序列继续预测。簇编号不是分类概率。'
+  model_train: '学习不同形状的簇中心；运行后可以下载模型，或填入新序列继续预测。簇编号不是分类概率。',
+  knn: '带标签训练序列与一条查询：按硬 DTW 距离取前 k 个邻居投票，票数并列时比较距离和。输出是投票结果，不是概率。',
+  'select-k': '在调用方给定的候选簇数中，按平均轮廓系数选出最佳 k；每个候选各自训练。它不做无候选的簇数推断。'
 };
 function status(text, label = '', kind = '') { $('status').textContent = text; $('badge').textContent = label; $('badge').className = `badge ${kind}`; }
 function busy(value) {
@@ -179,6 +181,23 @@ function render(result, source, elapsed) {
     result.labels.forEach((label,i)=>{const row=el('tr'); [i,label,fmt(result.distances[i])].forEach(v=>row.append(el('td',String(v)))); table.append(row);});
     $('visuals').append(table);
     plot('首条预处理输入与其所属中心', [...channels('新序列',result.prepared[0].series).slice(0,3),...channels('中心',request.model.centers[result.labels[0]]).slice(0,3)]);
+  } else if (result.operation === 'knn') {
+    metric('预测标签', result.label); metric('投票分布', result.votes.join(' / ')); metric('逻辑工作量', String(result.work_units));
+    const table = el('table', undefined, 'rank'), head = el('tr');
+    ['标签', '训练下标', 'DTW 距离'].forEach(t => head.append(el('th', t))); table.append(head);
+    result.neighbors.forEach(n => { const row = el('tr'); [n.label, n.train_index, fmt(n.distance)].forEach(v => row.append(el('td', String(v)))); table.append(row); });
+    $('visuals').append(table);
+    plot('查询与近邻 · 横轴按各自长度归一显示', [
+      ...channels('查询', request.query),
+      ...result.neighbors.slice(0, 3).flatMap(n => channels(`邻居 ${n.train_index}（${n.label}）`, request.training[n.train_index].series))
+    ]);
+  } else if (result.operation === 'select_k') {
+    metric('选中簇数', String(result.best_k)); metric('候选数', String(result.scores.length)); metric('逻辑工作量', String(result.work_units));
+    const table = el('table', undefined, 'rank'), head = el('tr');
+    ['k', '平均轮廓系数', '平均平方 DTW 代价'].forEach(t => head.append(el('th', t))); table.append(head);
+    result.scores.forEach(s => { const row = el('tr'); [s.k, fmt(s.silhouette), fmt(s.inertia)].forEach(v => row.append(el('td', String(v)))); table.append(row); });
+    $('visuals').append(table);
+    plot('轮廓系数随候选 k 变化 · 横轴为候选顺序', [{ label: '平均轮廓系数', values: result.scores.map(s => s.silhouette) }]);
   } else {
     metric('完整评估候选', String(result.candidates_evaluated)); metric('返回数量', String(result.matches.length)); metric('逻辑工作量', String(result.work_units));
     const table = el('table', undefined, 'rank'), head = el('tr'); ['顺序', '候选 ID', '校正值 ↓'].forEach(t => head.append(el('th', t))); table.append(head);

@@ -21,6 +21,8 @@
       <button class="scenario" data-example="uci-room" aria-pressed="false"><span class="num">08</span><strong>真实传感器数据</strong><span>UCI 房间传感器数据节选 · CC BY 4.0 · 仅示范分组</span></button>
       <button class="scenario" data-example="subsequence" aria-pressed="false"><span class="num">09</span><strong>查找相似片段</strong><span>短模板 → 长序列中的匹配位置与路径</span></button>
       <button class="scenario" data-example="model_train" aria-pressed="false"><span class="num">10</span><strong>训练并保存模型</strong><span>学习簇中心 → 保存模型 → 对新序列分组</span></button>
+      <button class="scenario" data-example="knn" aria-pressed="false"><span class="num">11</span><strong>最近邻分类</strong><span>带标签训练序列 → 硬 DTW 近邻投票</span></button>
+      <button class="scenario" data-example="select-k" aria-pressed="false"><span class="num">12</span><strong>自动选簇数</strong><span>给定候选 k → 轮廓系数比较</span></button>
     </section>
     <div class="workspace">
       <section class="panel editor-panel"><div class="panel-head"><h2>输入请求</h2><div class="imports"><label class="file-label">导入请求<input id="file" type="file" accept=".json,application/json"></label><label class="file-label">导入模型<input id="model-file" type="file" accept=".json,application/json"></label></div></div><p class="hint" id="scenario-hint">修改示例或导入自己的数值序列。参数和预算均在 options 中。</p><label class="sr" for="request">版本化 JSON 请求</label><textarea id="request" spellcheck="false" aria-describedby="scenario-hint"></textarea><div class="actions"><button id="run" class="primary">运行计算 <span>↗</span></button><button id="cancel" disabled>取消</button><button id="reset">重置示例</button></div><p class="limits">分析序列 1–512 点 · 预处理原始序列最多 8192 点 · 1–16 个特征<br>可设置矩阵、评估次数与逻辑工作量上限。</p></section>
