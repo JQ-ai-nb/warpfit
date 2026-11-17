@@ -2,7 +2,7 @@
 
 ## 0.2.0
 
-- 2026-11-17：0.2.0 源码推送至公开 main（`8195d88`），Linux / macOS / Windows CI 通过；Mooncakes 发布状态以包页面为准。
+- 2026-11-17：0.2.0 源码推送至公开 main（`8195d88`），Linux / macOS / Windows CI 通过；0.2.0 已发布到 Mooncakes，`registry_consumer --version 0.2.0` 注册表安装验证通过。
 - 浏览器工作台新增 `knn` / `select_k` 两个场景，场景数扩至 12 个；本机 Chromium 浏览器检查覆盖 12 个场景、共 24 项。
 - 演示包补齐 12 个网页示例，解压后自检覆盖 10 组检查。
 - 修复 `select_k` 成对距离预算的 Int32 溢出：累计改用 Int64，32 × 512 × 16 的最坏情形（2^32）不再回绕为 0，超限在任何 DTW 计算前即拒绝。

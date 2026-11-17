@@ -13,7 +13,7 @@
 | 候选簇数选择 | `node bin/warpfit.mjs examples/select-k.json` | `best_k=3`，轮廓系数 0.9544 |
 | 模型保存与复用 | `node bin/warpfit-model.mjs train examples/model_train.json work/cluster-model.json && node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predict_data.json` | 新数据标签 `[0,1,0]` |
 
-**版本披露**：源码为 0.2.0；Mooncakes 注册表版本以[包页面](https://mooncakes.io/docs/JQ-ai-nb/warpfit)为准，新增接口以本仓库源码为准；样例均为合成数据本地验证，非准确率或生产效果；验证记录分别标注本地检查、远程 CI 与注册表安装结果，本地结果不推断已发布状态。
+**版本披露**：源码与 Mooncakes 注册表均为 0.2.0（2026-11-17 发布），注册表安装验证通过；样例均为合成数据本地验证，非准确率或生产效果；验证记录分别标注本地检查、远程 CI 与注册表安装结果，本地结果不推断已发布状态。
 
 [在线工作台](https://jq-ai-nb.github.io/warpfit/) ｜ [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)
 
@@ -65,7 +65,7 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 另有训练与验证分开的公开传感器数据流程：`node scripts/evaluate_holdout.mjs`。16段较早记录用于训练，另16段不重叠的后续记录用于文件模型加载后的预测；脚本输出训练状态、测试距离及训练初始中心的基线，完整方法见 [真实数据说明](docs/REAL_DATA.md)。单次固定划分只证明对应输入的结果，不能解读为分类准确率或生产效果。
 
-库包导入：`"JQ-ai-nb/warpfit/core" @warpfit`。此前发布并验证的 0.1.2 **没有本次新增的 0.2.0 接口**；[Mooncakes 包页面](https://mooncakes.io/docs/JQ-ai-nb/warpfit)的发布版本与仓库源码版本应分别核对。类型化示例见 [cmd/series_pipeline](cmd/series_pipeline/main.mbt)，签名见 [pkg.generated.mbti](core/pkg.generated.mbti)，JSON 与 CLI 契约见 [API.md](docs/API.md)。
+库包导入：`"JQ-ai-nb/warpfit/core" @warpfit`。0.2.0 已发布到 [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)；此前的 0.1.2 不包含本次新增接口。类型化示例见 [cmd/series_pipeline](cmd/series_pipeline/main.mbt)，签名见 [pkg.generated.mbti](core/pkg.generated.mbti)，JSON 与 CLI 契约见 [API.md](docs/API.md)。
 
 ## 完整工作流
 
@@ -129,7 +129,7 @@ node scripts/benchmark_hard.mjs
 
 本地新增最近邻分类与簇数选择后，本机 `moon test` 为 82 项、Node 测试为 43 项；同一提交已推送至公开 main（`8195d88`），远程 CI 44095202653 已通过。本地验收维护、独立包消费检查与本轮本地新增检查的记录见 [验收自查](docs/ACCEPTANCE.md) 和 [机制与演示](docs/WALKTHROUGH.md)。
 
-此前 0.1.2 的注册表独立消费测试和线上演示已有验证记录；0.2.0 的注册表发布状态以 [Mooncakes 包页面](https://mooncakes.io/docs/JQ-ai-nb/warpfit) 为准，发布后用 `python scripts/registry_consumer.py --version 0.2.0` 独立验证注册表安装。
+此前 0.1.2 的注册表独立消费测试和线上演示已有验证记录；0.2.0 已于 2026-11-17 发布到 [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)，`python scripts/registry_consumer.py --version 0.2.0` 返回 `registry install verified: True`。
 
 发布前可运行 `python scripts/package_check.py` 和 `python scripts/registry_consumer.py --packaged`：它在独立工程中只使用实际归档包，以冻结本地workspace检查并运行10组公共能力（原有8组，另加最近邻分类`knn`与选簇数`select_k`）。默认不带`--packaged`才从注册表安装。归档验证不能写成Mooncakes安装已通过，详情见 [消费验证说明](docs/API.md#独立消费与发布准备)。
 
