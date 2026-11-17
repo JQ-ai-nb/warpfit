@@ -13,7 +13,7 @@
 | 候选簇数选择 | `node bin/warpfit.mjs examples/select-k.json` | `best_k=3`，轮廓系数 0.9544 |
 | 模型保存与复用 | `node bin/warpfit-model.mjs train examples/model_train.json work/cluster-model.json && node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predict_data.json` | 新数据标签 `[0,1,0]` |
 
-**版本披露**：源码为 0.2.0，尚未发布到 Mooncakes，注册表最新为 0.1.2，新增接口须构建本仓库；样例均为合成数据本地验证，非准确率或生产效果；验证记录分别标注本地检查、历史远程 CI 与注册表安装结果，本地结果不推断已发布状态。
+**版本披露**：源码为 0.2.0；Mooncakes 注册表版本以[包页面](https://mooncakes.io/docs/JQ-ai-nb/warpfit)为准，新增接口以本仓库源码为准；样例均为合成数据本地验证，非准确率或生产效果；验证记录分别标注本地检查、远程 CI 与注册表安装结果，本地结果不推断已发布状态。
 
 [在线工作台](https://jq-ai-nb.github.io/warpfit/) ｜ [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)
 
@@ -125,11 +125,11 @@ node scripts/benchmark_hard.mjs
 
 `tests/knn_reference.py` 的三种用法：默认只把本次复算写到忽略目录 `artifacts/knn-reference.json`，并在末尾打印证据是否落后（`evidence: current` / `evidence: STALE`，不改变退出码），所以 `python verify.py` 不会弄脏工作树；`--evidence` 同时刷新 `docs/evidence/knn-reference.json`（固定 `newline="\n"`，除 `recorded_at_utc` / `python` 外无变化时跳过并打印 `evidence: unchanged`）；`--check-evidence` 只比较不写入，忽略 `recorded_at_utc`、`python` 与仅表示来源的 `engine_commit`，一致退出 0 打印 `evidence: current`，不一致退出 1 打印 `evidence: STALE` 并逐行列出差异键。
 
-本地执行结果与真实命令见 [VALIDATION.md](docs/VALIDATION.md)。公开 main `8695d8a` 的 [CI 运行](https://github.com/JQ-ai-nb/warpfit/actions/runs/43451072577) 已通过 Linux / macOS / Windows × Wasm / Wasm-GC / JS / native 检查、构建和测试。此前 `bb8c309` 的原始产物已下载复核：每个系统、每个后端各71项 MoonBit 测试，另各38项 Node 测试，Linux 浏览器检查22项通过；[汇总记录](docs/evidence/remote-validation-0.2.0.json) 对应 `bb8c309`，它与 main 之间只有文档改动。本机仍缺 MSVC，本机 native 未运行；远程 native 已通过。已部署的 [在线工作台](https://jq-ai-nb.github.io/warpfit/) 也实际通过22项浏览器检查。
+本地执行结果与真实命令见 [VALIDATION.md](docs/VALIDATION.md)。公开 main `8195d88` 的 [CI 运行](https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653) 已通过 Linux / macOS / Windows × Wasm / Wasm-GC / JS / native 检查、构建和测试；本机 Wasm / Wasm-GC / JS 各 82 项 MoonBit 测试、Node 43 项、Chromium 浏览器 24 项通过。本机仍缺 MSVC，本机 native 未运行；远程 native 已通过。工作台部署随 main 更新；本机 Chromium 24 项覆盖 12 个场景。
 
-本地新增最近邻分类与簇数选择后，本机 `moon test` 为 82 项、Node 测试为 43 项；这两个数字是本机结果，相关提交尚未推送，远程 CI 记录仍对应上面的 71 / 38 项。本地验收维护、独立包消费检查与本轮本地新增检查的记录见 [验收自查](docs/ACCEPTANCE.md) 和 [机制与演示](docs/WALKTHROUGH.md)，它们不改变上述远程与注册表结论。
+本地新增最近邻分类与簇数选择后，本机 `moon test` 为 82 项、Node 测试为 43 项；同一提交已推送至公开 main（`8195d88`），远程 CI 44095202653 已通过。本地验收维护、独立包消费检查与本轮本地新增检查的记录见 [验收自查](docs/ACCEPTANCE.md) 和 [机制与演示](docs/WALKTHROUGH.md)。
 
-此前 0.1.2 的注册表独立消费测试和线上演示已有验证记录；0.2.0 仍未进入注册表，新增功能没有完成注册表安装测试。发布后需用 `python scripts/registry_consumer.py` 独立验证。
+此前 0.1.2 的注册表独立消费测试和线上演示已有验证记录；0.2.0 的注册表发布状态以 [Mooncakes 包页面](https://mooncakes.io/docs/JQ-ai-nb/warpfit) 为准，发布后用 `python scripts/registry_consumer.py --version 0.2.0` 独立验证注册表安装。
 
 发布前可运行 `python scripts/package_check.py` 和 `python scripts/registry_consumer.py --packaged`：它在独立工程中只使用实际归档包，以冻结本地workspace检查并运行10组公共能力（原有8组，另加最近邻分类`knn`与选簇数`select_k`）。默认不带`--packaged`才从注册表安装。归档验证不能写成Mooncakes安装已通过，详情见 [消费验证说明](docs/API.md#独立消费与发布准备)。
 
