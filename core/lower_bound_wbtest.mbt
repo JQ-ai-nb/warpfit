@@ -111,7 +111,11 @@ test "pruned knn keeps an exact tie that the bounding threshold squares away" {
     { label: "b", series: lb_univariate([0.0, 2.0, 0.0, 3.0, 3.0]), },
     { label: "c", series: lb_univariate([0.0, 0.0, 1.0, 0.0]), },
   ]
-  let options : KnnOptions = { k: 2, alignment: dtw_options(), max_work_units: 1000000 }
+  let options : KnnOptions = {
+    k: 2,
+    alignment: dtw_options(),
+    max_work_units: 1000000,
+  }
   let exhaustive = knn_classify(query, training, options).unwrap()
   let pruned = knn_classify_pruned(query, training, options).unwrap()
   assert_eq(pruned.neighbors.length(), exhaustive.neighbors.length())
@@ -120,6 +124,9 @@ test "pruned knn keeps an exact tie that the bounding threshold squares away" {
       pruned.neighbors[index].train_index,
       exhaustive.neighbors[index].train_index,
     )
-    lb_near(pruned.neighbors[index].distance, exhaustive.neighbors[index].distance)
+    lb_near(
+      pruned.neighbors[index].distance,
+      exhaustive.neighbors[index].distance,
+    )
   }
 }

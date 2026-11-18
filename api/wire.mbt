@@ -1055,7 +1055,8 @@ fn dispatch(source : String) -> Json raise WireError {
       ]
     "motifs" =>
       [
-        "window", "feature_weights", "max_cells", "max_windows", "max_work_units", "min_gap",
+        "window", "feature_weights", "max_cells", "max_windows", "max_work_units",
+        "min_gap",
       ]
     "outliers" =>
       ["k", "window", "feature_weights", "max_cells", "max_work_units"]

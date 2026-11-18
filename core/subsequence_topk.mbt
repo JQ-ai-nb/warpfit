@@ -40,6 +40,7 @@ fn subsequence_candidate_better(
 /// The DP also carries the start index, so each candidate is available in O(1)
 /// after the forward pass. Windows are rejected because the band would need a
 /// separate definition relative to an unknown target start.
+
 ///|
 /// Full DTW cost between the query and the length-`n` target window starting at
 /// `start`. Used when the unconstrained best path compresses the query onto
@@ -48,7 +49,7 @@ fn subsequence_candidate_better(
 fn window_squared_cost(
   query : Series,
   target : Series,
-  start : Int,
+  start : Int32,
   options : DtwOptions,
 ) -> Double {
   let n = query.count

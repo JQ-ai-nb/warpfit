@@ -51,8 +51,8 @@ test "selected motifs land on distinct regions by default" {
   // A ramp makes every shifted window a near-copy; without an exclusion zone
   // the top pairs were (0,1), (1,2), (2,3) - three views of one region.
   let series = motif_series([
-    0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0,
-    10.0, 11.0, 12.0, 13.0, 14.0, 15.0,
+    0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0,
+    15.0,
   ])
   let result = discover_motifs(series, 3, 3, motif_options()).unwrap()
   assert_true(result.pairs.length() >= 2)
@@ -70,12 +70,7 @@ test "selected motifs land on distinct regions by default" {
 ///|
 test "min_gap zero restores the overlapping behaviour" {
   let series = motif_series([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0])
-  let loose = discover_motifs(
-    series,
-    3,
-    3,
-    { ..motif_options(), min_gap: 0 },
-  ).unwrap()
+  let loose = discover_motifs(series, 3, 3, { ..motif_options(), min_gap: 0, }).unwrap()
   assert_eq(loose.pairs.length(), 3)
   // The first three best pairs are consecutive shifts of the same region.
   assert_eq(loose.pairs[0].first_start, 0)
@@ -86,15 +81,13 @@ test "min_gap zero restores the overlapping behaviour" {
 test "motif options reject an out-of-range gap" {
   let series = motif_series([0.0, 1.0, 0.0, 9.0, 9.0, 0.0, 1.0, 0.0])
   assert_true(
-    match
-      discover_motifs(series, 3, 1, { ..motif_options(), min_gap: -2 }) {
+    match discover_motifs(series, 3, 1, { ..motif_options(), min_gap: -2, }) {
       Err(_) => true
       Ok(_) => false
     },
   )
   assert_true(
-    match
-      discover_motifs(series, 3, 1, { ..motif_options(), min_gap: 1025 }) {
+    match discover_motifs(series, 3, 1, { ..motif_options(), min_gap: 1025, }) {
       Err(_) => true
       Ok(_) => false
     },
