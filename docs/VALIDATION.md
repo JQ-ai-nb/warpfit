@@ -17,7 +17,7 @@
 | README 的 11 条 CLI 示例 | `node bin/warpfit.mjs examples/*.json` | 11/11 `ok:true` |
 | 畸形输入 16 例 | 空、截断、`null`、数组顶层、未知 operation、operation 为数字、缺字段、类型错、空序列、`NaN`、重复键、80 层嵌套、5 万元素、未知字段、schema 不匹配 | 全部返回 `ok:false`，无进程崩溃 |
 
-本机 native 未运行（缺 MSVC），由远程 CI 覆盖。源码规模按可复核口径统计：56 个 `.mbt`，排除 `*_wbtest.mbt` 后 5,549 行，含测试 10,528 行。
+本机 native 未运行（缺 MSVC），由远程 CI 覆盖。源码规模按可复核口径统计：5,631 行（27 个 `.mbt`，排除 `*_wbtest.mbt`；其中有效代码 5,068 行，不含空行与注释；含测试共 10,666 行）。
 
 ## 2026-11-17 推送与远程 CI
 
