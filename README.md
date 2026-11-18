@@ -4,7 +4,7 @@
 
 对齐 → 模板学习 → 聚类 → 最近邻分类 → 子序列检索，22 个 JSON 操作；工作量在计算前校验，排不出来时返回原因而不是崩溃或空结果。
 
-[在线工作台](https://jq-ai-nb.github.io/warpfit/) ｜ [Mooncakes 0.2.3](https://mooncakes.io/docs/JQ-ai-nb/warpfit) ｜ [当前状态与全部实测数字](docs/STATUS.md) ｜ Apache-2.0
+[在线工作台](https://jq-ai-nb.github.io/warpfit/) ｜ [Mooncakes 0.2.4](https://mooncakes.io/docs/JQ-ai-nb/warpfit) ｜ [当前状态与全部实测数字](docs/STATUS.md) ｜ Apache-2.0
 
 ![本地工作台：曲线、对齐轨迹与热图](docs/screenshots/desktop.png)
 
@@ -31,7 +31,7 @@ node scripts/serve.mjs                       # 打开 127.0.0.1:4194，看曲线
 | 候选簇数选择 | `node bin/warpfit.mjs examples/select-k.json` | `best_k=3`，轮廓系数 0.9544 | 各候选的轮廓系数对比 |
 | 模型保存与复用 | `node bin/warpfit-model.mjs train examples/model_train.json work/cluster-model.json && node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predict_data.json` | 新数据标签 `[0,1,0]` | 可下载、可重新导入的模型文件 |
 
-**版本**：源码与 Mooncakes 均为 0.2.3，注册表独立消费验证通过（证据见 [STATUS.md](docs/STATUS.md)）。本地检查、远程 CI 与注册表结果分开记录，本地结果不推断已发布状态。
+**版本**：源码与 Mooncakes 均为 0.2.4，注册表独立消费验证通过（证据见 [STATUS.md](docs/STATUS.md)）。本地检查、远程 CI 与注册表结果分开记录，本地结果不推断已发布状态。
 
 ## 为什么在 MoonBit 重做
 
@@ -98,7 +98,7 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 另有训练与验证分开的公开传感器数据流程：`node scripts/evaluate_holdout.mjs`。16段较早记录用于训练，另16段不重叠的后续记录用于文件模型加载后的预测；脚本输出训练状态、测试距离及训练初始中心的基线，完整方法见 [真实数据说明](docs/REAL_DATA.md)。单次固定划分只证明对应输入的结果，不能解读为分类准确率或生产效果。
 
-库包导入：`"JQ-ai-nb/warpfit/core" @warpfit`。0.2.3 已发布到 [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)；0.1.2 不包含本期新增接口。库用法见 [LIBRARY.md](docs/LIBRARY.md)（构造 `Series`、训练→预测、错误处理、预算），可编译示例见 [cmd/library_demo](cmd/library_demo/main.mbt) 与 [cmd/series_pipeline](cmd/series_pipeline/main.mbt)，签名见 [pkg.generated.mbti](core/pkg.generated.mbti)，JSON 与 CLI 契约见 [API.md](docs/API.md)。
+库包导入：`"JQ-ai-nb/warpfit/core" @warpfit`。0.2.4 已发布到 [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)；0.1.2 不包含本期新增接口。库用法见 [LIBRARY.md](docs/LIBRARY.md)（构造 `Series`、训练→预测、错误处理、预算），可编译示例见 [cmd/library_demo](cmd/library_demo/main.mbt) 与 [cmd/series_pipeline](cmd/series_pipeline/main.mbt)，签名见 [pkg.generated.mbti](core/pkg.generated.mbti)，JSON 与 CLI 契约见 [API.md](docs/API.md)。
 
 ## 完整工作流
 
@@ -197,7 +197,7 @@ node scripts/benchmark_hard.mjs
 
 0.2.1 发布提交为 `d6c15e4`，0.2.0 源码提交 `8195d88` 为上一版；main 最新 CI 见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)。本地验收维护、独立包消费检查与本轮本地新增检查的记录见 [验收自查](docs/ACCEPTANCE.md) 和 [机制与演示](docs/WALKTHROUGH.md)。
 
-版本发布链：0.2.0 于 2026-11-17、0.2.1 与 0.2.2 于 2026-11-18、0.2.3 于 2026-11-18（文档与验证工具）发布到 [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)；当前版本的独立消费验证结果只写在 [STATUS.md](docs/STATUS.md)，避免本文件与证据文件口径不一致。
+版本发布链：0.2.0 于 2026-11-17、0.2.1 与 0.2.2 于 2026-11-18、0.2.3 与 0.2.4 于 2026-11-18 发布到 [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)；当前版本的独立消费验证结果只写在 [STATUS.md](docs/STATUS.md)，避免本文件与证据文件口径不一致。
 
 发布前可运行 `python scripts/package_check.py` 和 `python scripts/registry_consumer.py --packaged`：它在独立工程中只使用实际归档包，以冻结本地workspace检查并运行10组公共能力（原有8组，另加最近邻分类`knn`与选簇数`select_k`）。默认不带`--packaged`才从注册表安装。归档验证不能写成Mooncakes安装已通过，详情见 [消费验证说明](docs/API.md#独立消费与发布准备)。
 

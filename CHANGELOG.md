@@ -1,5 +1,26 @@
 # 版本记录
 
+## 0.2.4
+
+修复（均先复现再改）：
+
+- `motifs` 的 `options.min_gap:-1` 是文档承诺的哨兵值，却被通用整数解析拒绝；改用有符号解析后可用，核心仍拒绝小于 -1 的值。
+- 未知字段名不再整段回显：5000 字符的字段名此前产生 5039 字符的错误消息，现截断到 80 字符。
+- `bin/warpfit.mjs` 不再把 Node 原始错误写进响应：文件不存在时只返回 `cannot read the request file`，绝对路径与 errno 走 stderr；参数个数错误改用 `usage` 码。
+- `medoids` 每次接受交换后都会立刻退出（比较的是由它自身重算出的代价），导致只做一次交换；现持续交换到没有改进。
+- `describe` 对常量列先求和再求均值，留下 1 ulp 残差：`constant:true` 时标准差是 1.4e-17。改用 Welford，并保证常量列方差精确为 0。
+- `motifs` 的排除半径此前只约束不同 pair 之间，不约束同一对内的两个窗口，导致 top-1 仍返回重叠副本；现同时约束对内间距。
+
+新增：
+
+- `Series::from_rows` / `to_rows` / `at`：第三方不再需要手写行主序 record。
+- `WarpError::to_string`：返回 `code: message`，便于日志与断言。
+- `docs/LIBRARY.md` 与可编译示例 `cmd/library_demo`。
+- `scripts/budget_check.mjs`（预算双向断言）、`scripts/determinism_check.mjs`（同进程两次输出逐字节一致）、`scripts/api_coverage.mjs`（22 个操作都有示例与文档条目）。
+- `examples/{dtw-distance,preprocess,train-model,predict}.json`：22 个操作现在全部有可运行示例。
+
+文档：`docs/API.md` 补全 `describe`/`medoids`/`outliers`/`cross_validate`/`subsequence_topk`/`motifs` 的实际语义；修正 `cross_validate` “与标签顺序无关”的过度声称。
+
 ## 0.2.3
 
 - 文档：README 重写首屏（一句话定位、60 秒路径、架构图），把“给谁解决什么”放到第 3 行；截图与示例命令前置。
