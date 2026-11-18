@@ -45,7 +45,7 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 ## 证据
 
-- CI（当前 main `fbd17a5`）：<https://github.com/JQ-ai-nb/warpfit/actions/runs/44106313819>
+- CI（0.2.0 源码 `8195d88`）：<https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653>；main 最新 CI 见 <https://github.com/JQ-ai-nb/warpfit/actions>
 - CI（0.2.0 源码 `8195d88`）：<https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653>
 - Mooncakes：<https://mooncakes.io/docs/JQ-ai-nb/warpfit>（0.2.0）
 - 注册表安装验证：`python scripts/registry_consumer.py --version 0.2.0` → `registry install verified: True`

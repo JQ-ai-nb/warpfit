@@ -8,7 +8,7 @@
 - **0.2.0（本期新申报版本）**：在原型上新增硬 DTW 约束对齐、DBA 模板、DTW/DBA 聚类、预处理、模型保存与复用、子序列定位、最近邻分类、候选簇数选择，并把浏览器场景扩至 12 个。
 - **源码提交**：`8195d88`，相对 `8695d8a` 为 26 个功能提交、43 个文件、+2532/-64 行。
 - **发布文档提交**：`faf9119`（发布前中性化）、`fbd17a5`（发布后状态同步）。
-- **当前 main**：`fbd17a5`；**tag**：`v0.2.0`（指向 `faf9119`）。
+- **main 最新提交**：以仓库为准；**0.2.0 源码提交**：`8195d88`；**tag**：`v0.2.0`（指向 `faf9119`）。
 
 ## 新增能力
 
@@ -28,7 +28,7 @@
 - **MoonBit**：wasm / wasm-gc / js / native 四个后端各 82/82；本机三后端各 82/82，native 由远程 CI 覆盖。
 - **Node**：43/43。
 - **浏览器**：24/24，覆盖 12 个场景、模型文件往返、错误输入、预算、取消和 390px 布局；线上页面无 pageerror、无外部数据请求。
-- **CI**：当前 main `fbd17a5` 的 [44106313819](https://github.com/JQ-ai-nb/warpfit/actions/runs/44106313819)；0.2.0 源码 `8195d88` 的 [44095202653](https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653)。
+- **CI**：0.2.0 源码 `8195d88` 的 [44095202653](https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653)；发布文档提交 `fbd17a5` 的 [44106313819](https://github.com/JQ-ai-nb/warpfit/actions/runs/44106313819) 也通过；main 最新 CI 见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)。
 - **Mooncakes**：`JQ-ai-nb/warpfit@0.2.0`，`build_status: success`；`python scripts/registry_consumer.py --version 0.2.0` 返回 `registry install verified: True`。
 - **独立参考**：硬 DTW 240 组全路径穷举；tslearn 对照 160 组硬 DTW、80 组单步 DBA、9 组聚类、100 组预处理；子序列 256 组枚举 + 120 组 tslearn；UCI 16 段训练 / 16 段后续验证与 64 个距离复算。
 
