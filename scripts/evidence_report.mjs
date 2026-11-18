@@ -6,7 +6,7 @@
 //
 //   node scripts/evidence_report.mjs
 //   node scripts/evidence_report.mjs --json
-import {readFileSync, existsSync} from 'node:fs';
+import {readFileSync, existsSync, readdirSync} from 'node:fs';
 
 const root = new URL('..', import.meta.url);
 const read = (name) => {
@@ -14,6 +14,16 @@ const read = (name) => {
   if (!existsSync(path)) throw new Error(`missing evidence file: docs/evidence/${name}`);
   return JSON.parse(readFileSync(path, 'utf8'));
 };
+
+// Pick the newest evidence file for a prefix instead of naming a version in
+// code: a release bump must not require editing the checker.
+function latest(prefix) {
+  const files = readdirSync(new URL('docs/evidence/', root))
+    .filter((f) => f.startsWith(prefix) && f.endsWith('.json'))
+    .sort();
+  if (!files.length) throw new Error(`no evidence file matching ${prefix}*.json`);
+  return files[files.length - 1];
+}
 
 const rows = [];
 const problems = [];
@@ -61,13 +71,15 @@ claim('真实数据留出段', 16, holdout.split.test_offsets.length, 'uci-model
 claim('真实数据训练样本', 16, holdout.training.samples, 'uci-model-holdout.json');
 claim('真实数据留出样本', 16, holdout.heldout.samples, 'uci-model-holdout.json');
 
-const browser = read('browser-0.2.2-20261118.json');
-claim('浏览器检查', 24, browser.checks.length, 'browser-0.2.2-20261118.json');
-claim('浏览器页面错误', 0, browser.pageErrors.length, 'browser-0.2.2-20261118.json');
+const browserFile = latest('browser-0.');
+const browser = read(browserFile);
+claim('浏览器检查', 24, browser.checks.length, browserFile);
+claim('浏览器页面错误', 0, browser.pageErrors.length, browserFile);
 
-const consumer = read('consumer-registry-0.2.2-20261118.json');
-claim('注册表消费检查', 10, consumer.checks.length, 'consumer-registry-0.2.2-20261118.json');
-claim('注册表安装验证', true, consumer.registry_install_verified, 'consumer-registry-0.2.2-20261118.json');
+const consumerFile = latest('consumer-registry-');
+const consumer = read(consumerFile);
+claim('注册表消费检查', 10, consumer.checks.length, consumerFile);
+claim('注册表安装验证', true, consumer.registry_install_verified, consumerFile);
 
 if (process.argv.includes('--json')) {
   console.log(JSON.stringify({rows, problems, status: problems.length ? 'mismatch' : 'consistent'}, null, 2));

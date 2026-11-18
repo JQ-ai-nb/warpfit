@@ -1,0 +1,104 @@
+{
+  "recorded_at_utc": "2026-11-18T12:54:01.557515+00:00",
+  "commit": "504e1e2",
+  "command": "python scripts/registry_consumer.py --version 0.2.3",
+  "note": "Isolated consumer workspace, installed from the Mooncakes registry. First attempt failed on a network timeout; this file records the successful retry.",
+  "module": "JQ-ai-nb/warpfit",
+  "version": "0.2.3",
+  "mode": "registry",
+  "path_dependency": false,
+  "archive_sha256": null,
+  "runtime_targets": [
+    "wasm",
+    "wasm-gc",
+    "js"
+  ],
+  "registry_install_verified": true,
+  "source_checkout_dependency": false,
+  "checks": [
+    "dtw",
+    "distance_only",
+    "dba",
+    "cluster_model",
+    "subsequence",
+    "long_preprocess",
+    "soft_gradient",
+    "fit_rank",
+    "knn",
+    "select_k"
+  ],
+  "results": [
+    {
+      "command": [
+        "moon",
+        "version",
+        "--all"
+      ],
+      "returncode": 0,
+      "stdout": "moon 0.1.20261021 (a4f8933 2026-10-21) ~\\.moon\\bin\\moon.exe\nmoonc v0.10.17+093cb8f9c (2026-10-21) \\\\?\\C:\\Users\\11619\\.moon\\bin\\moonc.exe\nmoonrun 0.1.20261021 (a4f8933 2026-10-21) \\\\?\\C:\\Users\\11619\\.moon\\bin\\moonrun.exe\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "moon",
+        "update"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "Warning: failed to update symbols: failed to fetch symbols.zip: error sending request for url (https://download.mooncakes.io/symbols.zip): operation timed out\nRegistry index updated successfully\n"
+    },
+    {
+      "command": [
+        "moon",
+        "check",
+        "--target",
+        "all",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "Downloading JQ-ai-nb/warpfit@0.2.3\nFinished. moon: ran 13 tasks, now up to date\n"
+    },
+    {
+      "command": [
+        "moon",
+        "run",
+        ".",
+        "--target",
+        "wasm",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout": "warpfit_consumer_ok: dtw, distance_only, dba, cluster_model, subsequence, long_preprocess, soft_gradient, fit_rank, knn, select_k\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "moon",
+        "run",
+        ".",
+        "--target",
+        "wasm-gc",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout": "warpfit_consumer_ok: dtw, distance_only, dba, cluster_model, subsequence, long_preprocess, soft_gradient, fit_rank, knn, select_k\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "moon",
+        "run",
+        ".",
+        "--target",
+        "js",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout": "warpfit_consumer_ok: dtw, distance_only, dba, cluster_model, subsequence, long_preprocess, soft_gradient, fit_rank, knn, select_k\n",
+      "stderr": ""
+    }
+  ],
+  "dependency_sync": "registry_update",
+  "status": "passed"
+}

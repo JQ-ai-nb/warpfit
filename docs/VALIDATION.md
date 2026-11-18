@@ -2,6 +2,13 @@
 
 > 本页分别记录远程验证和推送前的本地验证。历史记录中“未推送 / 未发布”描述当次检查时的状态，不应据此推断当前默认分支或注册表版本；远程结果均对应下列具体提交。2026-11-17 已将 0.2.0 源码推送至公开 main（`8195d88`），三系统 CI 通过。Mooncakes 0.2.0 已于 2026-11-17 发布，`registry_consumer.py --version 0.2.0` 返回 `registry install verified: True`；源码 CI 与注册表安装是两项独立验证。
 
+## 2026-11-18 0.2.3 发布（文档与验证工具）
+
+- 0.2.3 无接口与算法变更：README 首屏重写、`docs/STATUS.md` 成为数字的唯一出处、新增 `scripts/evidence_report.mjs` 与 `scripts/check_examples.mjs` 并接入 CI。
+- `moon publish` 返回 `Server status: 200 OK`，Mooncakes 构建状态 `success`，`latest_version` 为 0.2.3。
+- 注册表消费验证：首次执行因 `operation timed out` 失败，第二次通过，`registry install verified: True`，三目标均返回 0。记录见 `evidence/consumer-registry-0.2.3-20261118.json`。
+- 发布前本机复跑：四目标类型检查通过，Wasm / Wasm-GC / JS 各 117/117，Node 43/43，示例 20/20 两次一致，证据一致性 19/19。
+
 ## 2026-11-18 0.2.2 发布
 
 - 发布前本机复跑：四目标类型检查通过；Wasm / Wasm-GC / JS 各 117/117；Node 43/43；浏览器 24/24。
