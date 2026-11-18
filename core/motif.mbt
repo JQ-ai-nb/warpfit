@@ -5,11 +5,20 @@ pub(all) struct MotifOptions {
   /// Maximum number of fixed-length windows considered; pairs are O(k^2).
   max_windows : Int32
   max_work_units : Int32
+  /// Exclusion zone between selected motifs, in samples. `-1` (the default)
+  /// uses the window length, so the top-K land on distinct places instead of
+  /// stacking shifted copies of the same region. `0` disables the zone.
+  min_gap : Int32
 }
 
 ///|
 pub fn motif_options() -> MotifOptions {
-  { alignment: dtw_options(), max_windows: 16, max_work_units: 100000000, }
+  {
+    alignment: dtw_options(),
+    max_windows: 16,
+    max_work_units: 100000000,
+    min_gap: -1,
+  }
 }
 
 ///|
@@ -57,8 +66,10 @@ fn motif_pair_better(a : MotifPair, b : MotifPair) -> Bool {
 
 ///|
 /// Find the `top_k` most similar pairs of fixed-length windows under hard DTW.
-/// Windows may overlap; the result is a bounded self-similarity search, not a
-/// claim that the pair is a semantically meaningful motif.
+/// Selected pairs respect `min_gap`: by default no two selected windows sit
+/// closer than one window length, so the result points at distinct regions.
+/// This is a bounded self-similarity search, not a claim that a pair is a
+/// semantically meaningful motif.
 pub fn discover_motifs(
   series : Series,
   window : Int32,
@@ -83,6 +94,9 @@ pub fn discover_motifs(
       failure("work_budget", "max_work_units must be within 1..100000000"),
     )
   }
+  if options.min_gap < -1 || options.min_gap > 1024 {
+    return Err(failure("min_gap", "min_gap must be -1 or within 0..1024"))
+  }
   let count = series.count - window + 1
   if count < 2 || count > options.max_windows {
     return Err(
@@ -97,7 +111,7 @@ pub fn discover_motifs(
   }
   let pair_units = window * window * series.dimensions
   let mut work = 0
-  let mut pairs : Array[MotifPair] = []
+  let candidates : Array[MotifPair] = []
   for first = 0; first < count; first = first + 1 {
     for second = first + 1; second < count; second = second + 1 {
       if pair_units > options.max_work_units ||
@@ -112,40 +126,55 @@ pub fn discover_motifs(
         Ok(value) => value
         Err(error) => return Err(error)
       }
-      let candidate : MotifPair = {
+      candidates.push({
         first_start: first,
         second_start: second,
         distance: measured.distance,
         squared_cost: measured.squared_cost,
-      }
-      if pairs.length() < top_k {
-        pairs.push(candidate)
-        pairs.sort_by(fn(a, b) {
-          if motif_pair_better(a, b) {
-            -1
-          } else if motif_pair_better(b, a) {
-            1
-          } else {
-            0
+      })
+    }
+  }
+  candidates.sort_by(fn(a, b) {
+    if motif_pair_better(a, b) {
+      -1
+    } else if motif_pair_better(b, a) {
+      1
+    } else {
+      0
+    }
+  })
+  // Greedy with an exclusion zone: a pair is only accepted when neither of its
+  // windows falls within `span` of a window already selected. Without this,
+  // top-K on a ramp or a constant series returns shifted copies of one region.
+  // `min_gap` is the exclusion radius itself: -1 defaults to one window, 0
+  // disables the zone (identical windows still cannot repeat, since the pair
+  // loop only visits second > first).
+  let span = if options.min_gap < 0 { window } else { options.min_gap }
+  let pairs : Array[MotifPair] = []
+  for candidate in candidates {
+    if pairs.length() >= top_k {
+      break
+    }
+    let mut clash = false
+    for chosen in pairs {
+      let starts : Array[Int32] = [
+        chosen.first_start,
+        chosen.second_start,
+        candidate.first_start,
+        candidate.second_start,
+      ]
+      for left = 0; left < 2; left = left + 1 {
+        for right = 2; right < 4; right = right + 1 {
+          let delta = starts[left] - starts[right]
+          let distance = if delta < 0 { -delta } else { delta }
+          if distance < span {
+            clash = true
           }
-        })
-      } else if motif_pair_better(candidate, pairs[pairs.length() - 1]) {
-        let next : Array[MotifPair] = []
-        for index = 0; index < top_k - 1; index = index + 1 {
-          next.push(pairs[index])
         }
-        next.push(candidate)
-        next.sort_by(fn(a, b) {
-          if motif_pair_better(a, b) {
-            -1
-          } else if motif_pair_better(b, a) {
-            1
-          } else {
-            0
-          }
-        })
-        pairs = next
       }
+    }
+    if !clash {
+      pairs.push(candidate)
     }
   }
   Ok({ window, pairs, work_units: work, })

@@ -2,6 +2,13 @@
 
 > 本页分别记录远程验证和推送前的本地验证。历史记录中“未推送 / 未发布”描述当次检查时的状态，不应据此推断当前默认分支或注册表版本；远程结果均对应下列具体提交。2026-11-17 已将 0.2.0 源码推送至公开 main（`8195d88`），三系统 CI 通过。Mooncakes 0.2.0 已于 2026-11-17 发布，`registry_consumer.py --version 0.2.0` 返回 `registry install verified: True`；源码 CI 与注册表安装是两项独立验证。
 
+## 2026-11-18 0.2.2 发布
+
+- 发布前本机复跑：四目标类型检查通过；Wasm / Wasm-GC / JS 各 117/117；Node 43/43；浏览器 24/24。
+- `moon publish` 返回 Server status 200 OK，Mooncakes 构建状态 `success`。
+- `python scripts/registry_consumer.py --version 0.2.2` 返回 `registry install verified: True`，隔离 workspace 中 Wasm / Wasm-GC / JS 均通过（首次尝试因网络 `operation timed out` 失败，重试通过，记录保留）。
+- 0.2.2 相对 0.2.1 的实质变更：`knn_pruned` 并列代价、`subsequence_topk` 压缩回退、`medoids` 重复样本、`motifs` 排除半径、`cross_validate` 分层分折。
+
 ## 2026-11-18 验收前复跑（commit `9c3a102`）
 
 验收前对当前 main 做了一次完整复跑，命令与结果如下，均为本机实测（moon 0.1.20261021 / moonc 0.10.17 / Node 22 / Windows）：

@@ -75,11 +75,11 @@ match @warpfit.divergence(prediction, target, 0.4) {
 | `subsequence_topk` | `query`、`target`、`top_k` | `matches`（start/end/distance） | `subsequence-topk.json` |
 | `cross_validate` | `data`、`labels`、`options.k/folds` | `accuracy`、`confusion`、`scores`、`predictions` | `cross-validate.json` |
 | `medoids` | `data`、`cluster_count`、`options.first_index` | `medoid_indices`、`labels`、`cost`、`history` | `medoids.json` |
-| `motifs` | `series`、`window`、`top_k`、`options.max_windows` | `pairs`（first_start/second_start/distance） | `motifs.json` |
+| `motifs` | `series`、`window`、`top_k`、`options.max_windows`、`options.min_gap` | `pairs`（first_start/second_start/distance） | `motifs.json` |
 | `outliers` | `data`、`options.k` | `scores`（index/score/neighbor_indices/neighbor_distances） | `outliers.json` |
 | `describe` | `series` | 每特征 min/max/mean/variance/stddev/constant | `describe.json` |
 
-`knn_pruned` 的结果与 `knn` 逐条一致（并列距离也保留相同次序，阈值比较带相对容差，避免 `sqrt` 平方回代把精确并列判成更远）；额外计数器只说明下界排序和 early abandon 节省了多少完整距离调用。`subsequence_topk` 要求返回区间长度不小于查询长度：无约束最优路径压缩查询点时，改为评估以该终点结尾的最短合法窗口，而不是丢弃该终点，因此不会对合法输入返回空列表。`medoids` 允许重复样本（常量序列退化为代价 0，未选下标按升序补齐）。`cross_validate` 的折按输入下标确定性分配，不是分层抽样，因此标签排列会影响某折训练集是否含有测试折的类别。
+`knn_pruned` 的结果与 `knn` 逐条一致（并列距离也保留相同次序，阈值比较带相对容差，避免 `sqrt` 平方回代把精确并列判成更远）；额外计数器只说明下界排序和 early abandon 节省了多少完整距离调用。`subsequence_topk` 要求返回区间长度不小于查询长度：无约束最优路径压缩查询点时，改为评估以该终点结尾的最短合法窗口，而不是丢弃该终点，因此不会对合法输入返回空列表。`medoids` 允许重复样本（常量序列退化为代价 0，未选下标按升序补齐）。`cross_validate` 的折按标签分层轮转分配：同类样本按出现顺序依次分到各折，标签排列不再决定某折训练集是否缺类；当折数大于最小类的样本数时仍会有训练集缺类，这是数据本身无法分层，不是算法选择。`motifs` 的 `min_gap` 是排除半径（默认 -1 取窗口长度，0 关闭）：选中一对后，任一新对的窗口落在已选窗口的半径内即被跳过，因此 top-K 指向不同区域，而不是同一段信号的平移副本。
 
 ### 可保存的聚类模型
 

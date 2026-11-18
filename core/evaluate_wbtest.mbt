@@ -76,3 +76,27 @@ test "cross-validation rejects invalid shapes and folds" {
     },
   )
 }
+
+///|
+test "stratified folds do not depend on how the labels are ordered" {
+  // Interleaving the classes used to put a single class in every training
+  // fold, so a perfectly separable dataset scored 0.
+  let data : Array[Series] = [
+    cv_series([0.0, 0.0, 0.0]),
+    cv_series([5.0, 5.0, 5.0]),
+    cv_series([0.1, 0.0, 0.0]),
+    cv_series([5.1, 5.0, 5.0]),
+  ]
+  let interleaved = ["a", "b", "a", "b"]
+  let grouped = ["a", "a", "b", "b"]
+  let options : CrossValidationOptions = {
+    ..cross_validation_options(),
+    k: 1,
+    folds: 2,
+  }
+  let first = cross_validate_knn(data, interleaved, options).unwrap()
+  assert_true((first.accuracy - 1.0).abs() <= 1.0e-12)
+  let reordered : Array[Series] = [data[0], data[2], data[1], data[3]]
+  let second = cross_validate_knn(reordered, grouped, options).unwrap()
+  assert_true((second.accuracy - 1.0).abs() <= 1.0e-12)
+}

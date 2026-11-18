@@ -346,6 +346,7 @@ pub(all) struct MotifOptions {
   alignment : DtwOptions
   max_windows : Int32
   max_work_units : Int32
+  min_gap : Int32
 }
 
 pub(all) struct MotifPair {

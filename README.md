@@ -15,7 +15,7 @@
 | 候选簇数选择 | `node bin/warpfit.mjs examples/select-k.json` | `best_k=3`，轮廓系数 0.9544 |
 | 模型保存与复用 | `node bin/warpfit-model.mjs train examples/model_train.json work/cluster-model.json && node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predict_data.json` | 新数据标签 `[0,1,0]` |
 
-**版本披露**：源码与 Mooncakes 注册表均为 0.2.1（2026-11-18 发布），注册表安装验证通过；样例均为合成数据本地验证，非准确率或生产效果；验证记录分别标注本地检查、远程 CI 与注册表安装结果，本地结果不推断已发布状态。
+**版本披露**：源码与 Mooncakes 注册表均为 0.2.2（2026-11-18 发布），注册表安装验证通过；样例均为合成数据本地验证，非准确率或生产效果；验证记录分别标注本地检查、远程 CI 与注册表安装结果，本地结果不推断已发布状态。
 
 [在线工作台](https://jq-ai-nb.github.io/warpfit/) ｜ [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)
 
@@ -114,9 +114,9 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 目标用户是 MoonBit 时序模型、传感器周期与离线数值应用开发者。逐点误差和直接平均要求采样位置一致；调用者可以根据问题选择硬路径对齐、带梯度的软目标，或对未标记序列做分组。核心使用 MoonBit 标准库，不依赖 Python 运行时或外部学习服务；浏览器演示在本地 Worker 计算用户数据。
 
-## 2026-11-18 源码增强（已包含在 0.2.1）
+## 2026-11-18 源码增强（0.2.1 起提供，0.2.2 修正并列与排除区）
 
-新增 JSON 操作：`knn_pruned`（LB_Keogh 排序 + 精确 early abandon）、`subsequence_topk`、`cross_validate`、`medoids`、`motifs`、`outliers`、`describe`。这些能力已包含在 Mooncakes `0.2.1`，`0.2.0` 包不包含；当前 main 的 MoonBit 源码 5,631 行（27 个 `.mbt`，排除 `*_wbtest.mbt`；其中有效代码 5,068 行，不含空行与注释；含测试共 10,666 行），测试 113 项。示例：`node bin/warpfit.mjs examples/knn-pruned.json`、`subsequence-topk.json`、`cross-validate.json`、`medoids.json`、`motifs.json`、`outliers.json`、`describe.json`。
+新增 JSON 操作：`knn_pruned`（LB_Keogh 排序 + 精确 early abandon）、`subsequence_topk`、`cross_validate`（按标签分层分折）、`medoids`、`motifs`（`options.min_gap` 排除半径）、`outliers`、`describe`。这些能力自 Mooncakes `0.2.1` 起提供，`0.2.2` 另加 motif 排除半径与分层分折，`0.2.0` 包不包含；当前 main 的 MoonBit 源码 5,631 行（27 个 `.mbt`，排除 `*_wbtest.mbt`；其中有效代码 5,068 行，不含空行与注释；含测试共 10,666 行），测试 117 项。示例：`node bin/warpfit.mjs examples/knn-pruned.json`、`subsequence-topk.json`、`cross-validate.json`、`medoids.json`、`motifs.json`、`outliers.json`、`describe.json`。
 
 ## 验证与可复现性
 
@@ -131,9 +131,9 @@ node scripts/benchmark_hard.mjs
 
 `tests/knn_reference.py` 的三种用法：默认只把本次复算写到忽略目录 `artifacts/knn-reference.json`，并在末尾打印证据是否落后（`evidence: current` / `evidence: STALE`，不改变退出码），所以 `python verify.py` 不会弄脏工作树；`--evidence` 同时刷新 `docs/evidence/knn-reference.json`（固定 `newline="\n"`，除 `recorded_at_utc` / `python` 外无变化时跳过并打印 `evidence: unchanged`）；`--check-evidence` 只比较不写入，忽略 `recorded_at_utc`、`python` 与仅表示来源的 `engine_commit`，一致退出 0 打印 `evidence: current`，不一致退出 1 打印 `evidence: STALE` 并逐行列出差异键。
 
-本地执行结果与真实命令见 [VALIDATION.md](docs/VALIDATION.md)。0.2.0 源码提交 `8195d88` 的 [CI 运行](https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653) 与发布文档提交 `fbd17a5` 的 [CI 运行](https://github.com/JQ-ai-nb/warpfit/actions/runs/44106313819) 均已通过 Linux / macOS / Windows × Wasm / Wasm-GC / JS / native 检查、构建和测试；本机 Wasm / Wasm-GC / JS 各 113 项 MoonBit 测试（0.2.1 发布包为 110 项；0.2.0 为 82 项）、Node 43 项、Chromium 浏览器 24 项通过。本机仍缺 MSVC，本机 native 未运行；远程 native 已通过。工作台部署随 main 更新，线上 24 项检查已通过；main 最新 CI 见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)。
+本地执行结果与真实命令见 [VALIDATION.md](docs/VALIDATION.md)。0.2.0 源码提交 `8195d88` 的 [CI 运行](https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653) 与发布文档提交 `fbd17a5` 的 [CI 运行](https://github.com/JQ-ai-nb/warpfit/actions/runs/44106313819) 均已通过 Linux / macOS / Windows × Wasm / Wasm-GC / JS / native 检查、构建和测试；本机 Wasm / Wasm-GC / JS 各 117 项 MoonBit 测试（0.2.2 发布包为 117 项；0.2.1 为 110 项；0.2.0 为 82 项）、Node 43 项、Chromium 浏览器 24 项通过。本机仍缺 MSVC，本机 native 未运行；远程 native 已通过。工作台部署随 main 更新，线上 24 项检查已通过；main 最新 CI 见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)。
 
-本地新增最近邻分类与簇数选择后，本机 `moon test` 为 113 项、Node 测试为 43 项；0.2.1 发布提交为 `d6c15e4`，0.2.0 源码提交 `8195d88` 为上一版；main 最新 CI 见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)。本地验收维护、独立包消费检查与本轮本地新增检查的记录见 [验收自查](docs/ACCEPTANCE.md) 和 [机制与演示](docs/WALKTHROUGH.md)。
+本地新增最近邻分类与簇数选择后，本机 `moon test` 为 117 项、Node 测试为 43 项；0.2.1 发布提交为 `d6c15e4`，0.2.0 源码提交 `8195d88` 为上一版；main 最新 CI 见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)。本地验收维护、独立包消费检查与本轮本地新增检查的记录见 [验收自查](docs/ACCEPTANCE.md) 和 [机制与演示](docs/WALKTHROUGH.md)。
 
 此前 0.1.2 的注册表独立消费测试和线上演示已有验证记录；0.2.0 已于 2026-11-17 发布到 [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)，`python scripts/registry_consumer.py --version 0.2.0` 返回 `registry install verified: True`。
 

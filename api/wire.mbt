@@ -813,6 +813,7 @@ fn hard_motifs(
     alignment: hard_alignment(options),
     max_windows: integer_option(options, "max_windows", 16),
     max_work_units: integer_option(options, "max_work_units", 100000000),
+    min_gap: integer_option(options, "min_gap", -1),
   }
   let result = from_result(
     @warpfit.discover_motifs(source, window, top_k, params),
@@ -1054,7 +1055,7 @@ fn dispatch(source : String) -> Json raise WireError {
       ]
     "motifs" =>
       [
-        "window", "feature_weights", "max_cells", "max_windows", "max_work_units",
+        "window", "feature_weights", "max_cells", "max_windows", "max_work_units", "min_gap",
       ]
     "outliers" =>
       ["k", "window", "feature_weights", "max_cells", "max_work_units"]

@@ -86,12 +86,32 @@ pub fn cross_validate_knn(
     return Err(failure("k", "k must be within 1..the smallest training fold"))
   }
   let predictions = Array::make(n, "")
+  // Stratified assignment: deal the samples to folds round-robin *within each
+  // class*, so every fold that can hold a class also has it in the training
+  // part. `index % folds` made the score depend on label order - [A,B,A,B] put
+  // a single class in each training fold and scored a separable dataset 0.
+  let fold_of : Array[Int32] = Array::make(n, 0)
+  let seen_labels : Array[String] = []
+  for label in class_labels {
+    if !seen_labels.contains(label) {
+      seen_labels.push(label)
+    }
+  }
+  let mut cursor = 0
+  for label in seen_labels {
+    for index, sample_label in class_labels {
+      if sample_label == label {
+        fold_of[index] = cursor % options.folds
+        cursor = cursor + 1
+      }
+    }
+  }
   let mut work = 0
   for fold = 0; fold < options.folds; fold = fold + 1 {
     let training : Array[LabeledSeries] = []
     let test_indices : Array[Int32] = []
     for index, sample in data {
-      if index % options.folds == fold {
+      if fold_of[index] == fold {
         test_indices.push(index)
       } else {
         training.push({ label: class_labels[index], series: sample, })
