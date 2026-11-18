@@ -98,7 +98,7 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 另有训练与验证分开的公开传感器数据流程：`node scripts/evaluate_holdout.mjs`。16段较早记录用于训练，另16段不重叠的后续记录用于文件模型加载后的预测；脚本输出训练状态、测试距离及训练初始中心的基线，完整方法见 [真实数据说明](docs/REAL_DATA.md)。单次固定划分只证明对应输入的结果，不能解读为分类准确率或生产效果。
 
-库包导入：`"JQ-ai-nb/warpfit/core" @warpfit`。0.2.3 已发布到 [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)；0.1.2 不包含本期新增接口。类型化示例见 [cmd/series_pipeline](cmd/series_pipeline/main.mbt)，签名见 [pkg.generated.mbti](core/pkg.generated.mbti)，JSON 与 CLI 契约见 [API.md](docs/API.md)。
+库包导入：`"JQ-ai-nb/warpfit/core" @warpfit`。0.2.3 已发布到 [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)；0.1.2 不包含本期新增接口。库用法见 [LIBRARY.md](docs/LIBRARY.md)（构造 `Series`、训练→预测、错误处理、预算），可编译示例见 [cmd/library_demo](cmd/library_demo/main.mbt) 与 [cmd/series_pipeline](cmd/series_pipeline/main.mbt)，签名见 [pkg.generated.mbti](core/pkg.generated.mbti)，JSON 与 CLI 契约见 [API.md](docs/API.md)。
 
 ## 完整工作流
 

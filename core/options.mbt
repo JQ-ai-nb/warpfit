@@ -6,6 +6,13 @@ pub(all) struct WarpError {
 }
 
 ///|
+/// Human-readable form for logs and test failures: `code: message`. Callers that
+/// branch on the failure should compare `code`, which is the stable part.
+pub fn WarpError::to_string(self : WarpError) -> String {
+  self.code + ": " + self.message
+}
+
+///|
 fn failure(code : String, message : String) -> WarpError {
   { code, message, }
 }

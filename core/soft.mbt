@@ -8,6 +8,64 @@ pub(all) struct Series {
 }
 
 ///|
+/// Build a series from rows of equal length, validating shape and bounds the
+/// same way every public entry point does. Without this, a caller had to write
+/// the row-major record by hand and guess that `count × dimensions` must equal
+/// `values.length()`.
+pub fn Series::from_rows(
+  rows : Array[Array[Double]],
+) -> Result[Series, WarpError] {
+  if rows.is_empty() {
+    return Err(failure("series_shape", "series must not be empty"))
+  }
+  let dimensions = rows[0].length()
+  if dimensions == 0 {
+    return Err(
+      failure("series_shape", "each row must contain at least one feature"),
+    )
+  }
+  let values : Array[Double] = []
+  for row in rows {
+    if row.length() != dimensions {
+      return Err(
+        failure("series_shape", "all rows must have the same feature count"),
+      )
+    }
+    for value in row {
+      values.push(value)
+    }
+  }
+  let series : Series = { count: rows.length(), dimensions, values, }
+  match validate_series(series) {
+    Ok(_) => Ok(series)
+    Err(error) => Err(error)
+  }
+}
+
+///|
+/// Rows in the same layout `from_rows` accepts. The returned arrays are fresh;
+/// mutating them cannot change the series.
+pub fn Series::to_rows(self : Series) -> Array[Array[Double]] {
+  let rows : Array[Array[Double]] = []
+  for i = 0; i < self.count; i = i + 1 {
+    let row : Array[Double] = []
+    for k = 0; k < self.dimensions; k = k + 1 {
+      row.push(self.values[i * self.dimensions + k])
+    }
+    rows.push(row)
+  }
+  rows
+}
+
+///|
+/// Value of one feature at one step. Bounds are not checked; the index follows
+/// the same convention as the underlying array, so an out-of-range read fails
+/// the same way it would there.
+pub fn Series::at(self : Series, index : Int32, feature : Int32) -> Double {
+  self.values[index * self.dimensions + feature]
+}
+
+///|
 pub(all) struct Evaluation {
   value : Double
   gradient_x : Array[Double]
