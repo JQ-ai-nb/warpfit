@@ -2,6 +2,13 @@
 
 > 本页分别记录远程验证和推送前的本地验证。历史记录中“未推送 / 未发布”描述当次检查时的状态，不应据此推断当前默认分支或注册表版本；远程结果均对应下列具体提交。2026-11-17 已将 0.2.0 源码推送至公开 main（`8195d88`），三系统 CI 通过。Mooncakes 0.2.0 已于 2026-11-17 发布，`registry_consumer.py --version 0.2.0` 返回 `registry install verified: True`；源码 CI 与注册表安装是两项独立验证。
 
+## 2026-11-18 推送与三系统 CI
+
+- 15:11（UTC+8）推送 10 个提交与 `v0.2.2`、`v0.2.3` 两个 tag 到 `JQ-ai-nb/warpfit`；远程 main 与本地一致。仓库全部提交的作者只有 `蒋琦 <314918884+JQ-ai-nb@users.noreply.github.com>`。
+- 首次 CI（`a4e5883`）三系统同时失败，原因不是算法而是 `moon fmt --check`：最后几轮改动后没有格式化，`verify.py` 在第一步失败，后面的证据一致性、示例稳定性与浏览器检查都被跳过。已在 `a9734c3` 修复。
+- `a9734c3` 的 CI 三系统全绿：<https://github.com/JQ-ai-nb/warpfit/actions/runs/44312371517>；Pages 部署成功：<https://github.com/JQ-ai-nb/warpfit/actions/runs/44312371459>。
+- 期间 `github.com:443` 在本机不可达（直连超时、代理 CONNECT 502），修复提交改由 Git Data API 发布：blob → tree → commit → 更新 ref，本地与远程树一致，随后把同一个提交对象写回本地并更新 ref，`git rev-list --count origin/main..HEAD` 为 0。
+
 ## 2026-11-18 0.2.3 发布（文档与验证工具）
 
 - 0.2.3 无接口与算法变更：README 首屏重写、`docs/STATUS.md` 成为数字的唯一出处、新增 `scripts/evidence_report.mjs` 与 `scripts/check_examples.mjs` 并接入 CI。
