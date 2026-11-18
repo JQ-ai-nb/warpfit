@@ -45,8 +45,9 @@ EOF
 | 命令 | 检查什么 | 失败行为 |
 | --- | --- | --- |
 | `node scripts/evidence_report.mjs` | 19 项声明与本目录 `evidence/*.json` 逐项比对（用例数、误差、浏览器项数、注册表验证） | 列出不一致项，退出 1 |
-| `node scripts/check_examples.mjs` | `examples/` 全部 23 个文件：20 个请求断言 `ok:true`、`operation` 匹配、两次运行逐字节一致；3 个数据文件按设计跳过 | 列出失败文件，退出 1 |
-| `node scripts/budget_check.mjs` | 19 个接收预算的操作：预算=1 必须拒绝（`work_budget` 或 `cell_limit`），宽裕预算必须成功 | 列出失败项，退出 1 |
+| `node scripts/check_examples.mjs` | `examples/` 全部 27 个文件：24 个请求断言 `ok:true`、`operation` 匹配、两次运行逐字节一致；3 个数据文件按设计跳过 | 列出失败文件，退出 1 |
+| `node scripts/api_coverage.mjs` | 22 个 JSON 操作每个都有可运行示例，且出现在 `docs/API.md`；示例不得引用未知操作 | 列出缺口，退出 1 |
+| `node scripts/budget_check.mjs` | 所有接收预算的示例（当前 22 个）：预算=1 必须拒绝（`work_budget` 或 `cell_limit`），宽裕预算必须成功 | 列出失败项，退出 1 |
 | `node scripts/determinism_check.mjs` | 12 个生成请求在同一进程内连续跑两次，输出必须逐字节相同（同时暴露跨调用残留状态） | 列出失败项，退出 1 |
 
 ```text
@@ -54,6 +55,7 @@ node scripts/evidence_report.mjs
 node scripts/check_examples.mjs
 node scripts/budget_check.mjs
 node scripts/determinism_check.mjs
+node scripts/api_coverage.mjs
 ```
 
 ## 测试矩阵

@@ -1,0 +1,7 @@
+{
+  "schema": "warpfit.request/1",
+  "operation": "dtw_distance",
+  "x": [[0], [1], [0]],
+  "y": [[0], [1], [1]],
+  "options": {"window": 1}
+}

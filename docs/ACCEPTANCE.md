@@ -10,7 +10,7 @@
 | --- | --- | --- | --- |
 | MoonBit 为主要实现 | 具备 | 核心 27 个 `.mbt`（排除测试）；Node 只做文件、页面与 Worker 包装 | STATUS.md「代码规模」 |
 | 公开仓库与开发记录 | 具备：远程 main 与本地一致，提交作者单一（JQ-ai-nb） | 提交历史、CHANGELOG | `git rev-parse HEAD` 与 `git ls-remote origin main` |
-| 可运行、可检查、可测试 | 具备 | 117 项 × 三后端、43 项 Node、24 项浏览器、20 个示例 | `node scripts/check_examples.mjs` |
+| 可运行、可检查、可测试 | 具备 | 125 项 × 三后端、45 项 Node、24 项浏览器、24 个示例；数字见 [STATUS.md](STATUS.md) | `node scripts/check_examples.mjs` |
 | 本期实质新增 | 具备 | 0.2.0：26 个功能提交 / 43 文件 / +2,532 行；0.2.1–0.2.2：7 个新操作 + 5 项修复 | CHANGELOG.md、NOVEMBER.md |
 | 开源合规 | 具备 | Apache-2.0；四类来源声明；UCI 数据 CC BY 4.0（含 DOI 与校验和） | THIRD_PARTY_NOTICES.md、REAL_DATA.md |
 | AI 可解释 | 具备 | 目标与边界、关键取舍、AI 参与环节、人工核对边界 | AI_AND_DECISIONS.md、SEMANTICS.md、WALKTHROUGH.md |

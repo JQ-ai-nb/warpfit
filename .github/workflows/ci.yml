@@ -49,6 +49,8 @@ jobs:
         run: node scripts/budget_check.mjs
       - name: Same request, same bytes
         run: node scripts/determinism_check.mjs
+      - name: Every operation has an example and a doc entry
+        run: node scripts/api_coverage.mjs
       - name: Browser integration on Linux
         if: runner.os == 'Linux'
         shell: bash

@@ -1,0 +1,6 @@
+{
+  "schema": "warpfit.request/1",
+  "operation": "preprocess",
+  "series": [[0], [1], [2], [3]],
+  "options": {"target_count": 3, "normalize": true}
+}

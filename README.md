@@ -155,7 +155,7 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 ```text
 node scripts/evidence_report.mjs     # 19 项声明与证据文件逐项比对；不一致退出 1
-node scripts/check_examples.mjs      # 20 个示例请求各跑两次，输出逐字节一致
+node scripts/check_examples.mjs      # 24 个示例请求各跑两次，输出逐字节一致
 node scripts/budget_check.mjs        # 预算=1 必须拒绝，宽裕预算必须成功
 node scripts/determinism_check.mjs   # 12 个生成请求，两次输出逐字节相同
 ```
@@ -176,9 +176,9 @@ tslearn 单步 DBA 用例     80  ->   80     hard-reference.json
 一致性检查通过：19 项声明与证据文件逐项一致。
 ```
 
-`check_examples` 覆盖 `examples/` 下全部 23 个文件：20 个请求逐个断言 `ok:true`、`operation` 与请求一致、两次运行字节相同；3 个模型训练/预测数据文件按设计跳过并标注。此前只有 8 个样例被测试引用，其余 15 个无人执行。
+`check_examples` 覆盖 `examples/` 下全部 27 个文件：24 个请求逐个断言 `ok:true`、`operation` 与请求一致、两次运行字节相同；3 个模型训练/预测数据文件按设计跳过并标注。此前只有 8 个样例被测试引用，其余无人执行。`api_coverage` 进一步保证 **22 个操作每个都至少有一个可运行示例**，并出现在 `API.md` 里。
 
-`budget_check` 对 19 个接收预算的操作做双向断言：把预算压到 1 必须返回 `work_budget` 或 `cell_limit`，放宽到各自上限必须成功——只测“能拒绝”会漏掉“永远拒绝”的实现。`determinism_check` 用固定种子生成 12 个请求，在同一进程内连续跑两次并比较字节，顺带暴露跨调用残留状态。
+`budget_check` 对所有接收预算的操作（当前 22 个示例请求）做双向断言：把预算压到 1 必须返回 `work_budget` 或 `cell_limit`，放宽到各自上限必须成功——只测“能拒绝”会漏掉“永远拒绝”的实现。`determinism_check` 用固定种子生成 12 个请求，在同一进程内连续跑两次并比较字节，顺带暴露跨调用残留状态。
 
 再往下是单项算法的重算：
 
