@@ -23,7 +23,10 @@ fn object(
   }
   for key in fields.keys() {
     if !allowed.contains(key) {
-      invalid("unknown_field", path + " contains an unsupported field: " + key)
+      invalid(
+        "unknown_field",
+        path + " contains an unsupported field: " + brief(key, 80),
+      )
     }
   }
   fields
@@ -206,6 +209,66 @@ fn numeric_option(
     Some(v) => number(v, "options." + key)
     None => fallback
   }
+}
+
+///|
+/// Same token checks as `integer`, but allows a negative value. Only options
+/// whose contract defines a negative sentinel use it (`min_gap: -1` means
+/// "one window length"); the range itself is still validated by the core.
+fn signed_integer(value : Json, path : String) -> Int32 raise WireError {
+  match value {
+    Number(x, repr~) => {
+      if x < -100000000.0 ||
+        x > 100000000.0 ||
+        x != x ||
+        x.to_int().to_double() != x {
+        invalid("integer", path + " must be an integer within ±100000000")
+      }
+      match repr {
+        Some(raw) =>
+          for c in raw {
+            if (c < '0' || c > '9') && c != '-' {
+              invalid("integer", path + " requires a plain integer token")
+            }
+          }
+        None => ()
+      }
+      x.to_int()
+    }
+    _ => {
+      invalid("integer", path + " must be an integer")
+      abort("unreachable")
+    }
+  }
+}
+
+///|
+fn signed_integer_option(
+  fields : Map[String, Json],
+  key : String,
+  fallback : Int32,
+) -> Int32 raise WireError {
+  match fields.get(key) {
+    Some(v) => signed_integer(v, "options." + key)
+    None => fallback
+  }
+}
+
+///|
+/// First `limit` characters of `text`, with an ellipsis when shortened. Used on
+/// echo-back of user input so a 500 KB field name cannot become a 500 KB error.
+fn brief(text : String, limit : Int32) -> String {
+  let out = StringBuilder()
+  let mut count = 0
+  for c in text {
+    if count >= limit {
+      out.write_string("...")
+      break
+    }
+    out.write_char(c)
+    count = count + 1
+  }
+  out.to_string()
 }
 
 ///|
@@ -813,7 +876,7 @@ fn hard_motifs(
     alignment: hard_alignment(options),
     max_windows: integer_option(options, "max_windows", 16),
     max_work_units: integer_option(options, "max_work_units", 100000000),
-    min_gap: integer_option(options, "min_gap", -1),
+    min_gap: signed_integer_option(options, "min_gap", -1),
   }
   let result = from_result(
     @warpfit.discover_motifs(source, window, top_k, params),

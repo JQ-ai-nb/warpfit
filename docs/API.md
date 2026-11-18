@@ -38,7 +38,7 @@ match @warpfit.divergence(prediction, target, 0.4) {
 | `preprocess` | `series` | `prepared`：处理后的序列及均值、标准差、常量特征标记 |
 | `pipeline` | `data`, `seed_indices` | `prepared` 和嵌套的 `clustering`（中心、标签、目标和状态） |
 | `train_model` | `data`, `seed_indices` | `model`、`prepared`、`clustering`；手动指定初始样本 |
-| `auto_train_model` | `data`, `cluster_count` | 同上，另有 `seed_indices`、`seed_work_units`、`total_work_units`；可选 `first_index` 默认0 |
+| `auto_train_model` | `data`, `cluster_count` | 同上，另有 `seed_indices`、`seed_work_units`、`total_work_units`；可选顶层字段 `first_index`，默认 0 |
 | `predict` | `model`, `data` | `prepared`, `labels`, `distances`, `distances_to_centers`, `work_units` |
 | `knn` | `query`, `training:[{label,series}]` | `label`, `neighbors`, `labels`, `votes`, `work_units` |
 | `select_k` | `data`, `candidates` | `best_k`, `scores:[{k,silhouette,inertia,labels}]`, `work_units` |
@@ -49,7 +49,7 @@ match @warpfit.divergence(prediction, target, 0.4) {
 
 ### 选项与默认值
 
-原有 `loss` / `fit` / `rank` 的公共 `options`：gamma=0.5、feature_weights=[]（全部为1）、max_cells=262144。fit 额外默认 max_steps=60、learning_rate=1、gradient_tolerance=1e-8、improvement_tolerance=1e-10、max_evaluations=512、max_work_units=20000000、example_weights=[]（等权）。rank 额外 max_work_units=20000000，top_k 默认为全部候选。
+原有 `loss` / `fit` / `rank` 的公共 `options`：gamma=0.5、feature_weights=[]（全部为1）、max_cells=262144。fit 额外默认 max_steps=60、learning_rate=1、gradient_tolerance=1e-8、improvement_tolerance=1e-10、max_evaluations=512、max_work_units=20000000、example_weights=[]（等权）。rank 额外 `max_work_units=20000000`；`top_k` 是顶层字段，默认为全部候选。
 
 新增 `dtw` / `dtw_distance` / `dba` / `cluster` / `pipeline` / `train_model` / `auto_train_model`：`window` 省略表示无限制；非负整数表示 Sakoe-Chiba 半径，不等长时沿较长轴延伸。`feature_weights=[]` 为全1，`max_cells=262144`。dba 的 `max_steps=30`、`tolerance=1e-8`、`max_work_units=20000000`、`example_weights=[]`；cluster / pipeline / 模型训练的 `max_iterations=20`、`max_dba_steps=20`、`tolerance=1e-8`、`max_work_units=20000000`。
 
@@ -77,7 +77,7 @@ match @warpfit.divergence(prediction, target, 0.4) {
 | `medoids` | `data`、`cluster_count`、`options.first_index` | `medoid_indices`、`labels`、`cost`、`history` | `medoids.json` |
 | `motifs` | `series`、`window`、`top_k`、`options.max_windows`、`options.min_gap` | `pairs`（first_start/second_start/distance） | `motifs.json` |
 | `outliers` | `data`、`options.k` | `scores`（index/score/neighbor_indices/neighbor_distances） | `outliers.json` |
-| `describe` | `series` | 每特征 min/max/mean/variance/stddev/constant | `describe.json` |
+| `describe` | `series` | `features[]`，每项 `minimum`/`maximum`/`mean`/`variance`/`standard_deviation`/`constant` | `describe.json` |
 
 `knn_pruned` 的结果与 `knn` 逐条一致（并列距离也保留相同次序，阈值比较带相对容差，避免 `sqrt` 平方回代把精确并列判成更远）；额外计数器只说明下界排序和 early abandon 节省了多少完整距离调用。`subsequence_topk` 要求返回区间长度不小于查询长度：无约束最优路径压缩查询点时，改为评估以该终点结尾的最短合法窗口，而不是丢弃该终点，因此不会对合法输入返回空列表。`medoids` 允许重复样本（常量序列退化为代价 0，未选下标按升序补齐）。`cross_validate` 的折按标签分层轮转分配：同类样本按出现顺序依次分到各折，标签排列不再决定某折训练集是否缺类；当折数大于最小类的样本数时仍会有训练集缺类，这是数据本身无法分层，不是算法选择。`motifs` 的 `min_gap` 是排除半径（默认 -1 取窗口长度，0 关闭）：选中一对后，任一新对的窗口落在已选窗口的半径内即被跳过，因此 top-K 指向不同区域，而不是同一段信号的平移副本。
 

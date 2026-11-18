@@ -56,9 +56,9 @@ node scripts/check_examples.mjs
 
 | 层 | 范围 | 结果 | 证据 |
 | --- | --- | --- | --- |
-| MoonBit（本机） | `wasm-gc` / `wasm` / `js` | **117 / 117**，三后端一致 | 本节命令 |
-| MoonBit（远程） | Linux / macOS / Windows × 四目标 + `native` | 提交 `a9734c3` 三系统全绿（[run 44312371517](https://github.com/JQ-ai-nb/warpfit/actions/runs/44312371517)）；此后提交以 Actions 列表为准 | Actions |
-| Node / CLI | `tests/*.test.mjs` | **43 / 43** | 本节命令 |
+| MoonBit（本机） | `wasm-gc` / `wasm` / `js` | **119 / 119**，三后端一致 | 本节命令 |
+| MoonBit（远程） | Linux / macOS / Windows × 四目标 + `native` | 提交 `ec82aaf` 三系统全绿（[run 44313624973](https://github.com/JQ-ai-nb/warpfit/actions/runs/44313624973)）；此后提交以 Actions 列表为准 | Actions |
+| Node / CLI | `tests/*.test.mjs` | **45 / 45** | 本节命令 |
 | 浏览器工作台 | 本地 4194，系统 Chrome 158 | **24 / 24**，0 pageerror，0 外部请求 | [`evidence/browser-0.2.2-20261118.json`](evidence/browser-0.2.2-20261118.json) |
 | 注册表消费 | 隔离工程，从 Mooncakes 安装 | 10 / 10，三目标通过 | [`evidence/consumer-registry-0.2.3-20261118.json`](evidence/consumer-registry-0.2.3-20261118.json) |
 

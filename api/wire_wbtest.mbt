@@ -219,3 +219,35 @@ test "new operations reject unrelated options and non-integer windows" {
     "unknown_field",
   )
 }
+
+///|
+test "min_gap accepts the documented -1 sentinel" {
+  // The docs define -1 as "use one window length"; the generic integer parser
+  // rejected every negative value, so the declared default was unreachable.
+  let fields = response(
+    "{\"schema\":\"warpfit.request/1\",\"operation\":\"motifs\",\"series\":[0,1,0,9,9,0,1,0],\"window\":3,\"top_k\":2,\"options\":{\"min_gap\":-1}}",
+  )
+  match fields.get("ok").unwrap() {
+    True => ()
+    _ => abort("expected success")
+  }
+}
+
+///|
+test "an unsupported field name is truncated in the error message" {
+  let name = StringBuilder()
+  for _ in 0..<200 {
+    name.write_char('z')
+  }
+  let source = "{\"schema\":\"warpfit.request/1\",\"operation\":\"dtw\",\"x\":[0,1],\"y\":[0,1],\"" +
+    name.to_string() +
+    "\":1}"
+  let fields = response(source)
+  let error = match fields.get("error").unwrap() {
+    Object(inner) => inner
+    _ => abort("expected error object")
+  }
+  let message : String = @json.from_json(error.get("message").unwrap())
+  assert_true(message.contains("..."))
+  assert_true(message.length() <= 130)
+}

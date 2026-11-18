@@ -111,3 +111,19 @@ test('select_k rejects a single candidate cluster count', () => {
   const r = input(JSON.stringify(source)); assert.equal(r.status, 2);
   assert.match(JSON.parse(r.stdout).error.message, /strictly increasing/);
 });
+
+test('a missing request file does not echo its absolute path into the response', () => {
+  const r = cli('does-not-exist.json');
+  assert.equal(r.status, 2);
+  const out = JSON.parse(r.stdout);
+  assert.equal(out.error.code, 'io');
+  assert.equal(out.error.message, 'cannot read the request file');
+  assert.ok(!r.stdout.includes(root), 'response must not contain the working directory');
+  assert.match(r.stderr, /ENOENT/);
+});
+
+test('a wrong argument count is a usage error, not an io error', () => {
+  const r = cli('a', 'b', 'c');
+  assert.equal(r.status, 2);
+  assert.equal(JSON.parse(r.stdout).error.code, 'usage');
+});
