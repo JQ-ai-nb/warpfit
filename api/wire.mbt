@@ -607,6 +607,305 @@ fn hard_knn(
 }
 
 ///|
+fn hard_knn_pruned(
+  fields : Map[String, Json],
+  options : Map[String, Json],
+) -> Json raise WireError {
+  let query = series(required(fields, "query"), "query")
+  let training : Array[@warpfit.LabeledSeries] = []
+  for item in array(required(fields, "training"), "training", 32) {
+    let entry = object(item, "training[]", ["label", "series"])
+    training.push({
+      label: text(required(entry, "label"), "training[].label"),
+      series: series(required(entry, "series"), "training[].series"),
+    })
+  }
+  let params : @warpfit.KnnOptions = {
+    k: integer_option(options, "k", 3),
+    alignment: hard_alignment(options),
+    max_work_units: integer_option(options, "max_work_units", 20000000),
+  }
+  let result = from_result(
+    @warpfit.knn_classify_pruned(query, training, params),
+  )
+  let neighbors : Array[Json] = []
+  for neighbor in result.neighbors {
+    neighbors.push({
+      "label": Json::string(neighbor.label),
+      "train_index": Json::number(neighbor.train_index.to_double()),
+      "distance": Json::number(neighbor.distance),
+    })
+  }
+  let labels : Array[Json] = []
+  for label in result.labels {
+    labels.push(Json::string(label))
+  }
+  let votes : Array[Json] = []
+  for vote in result.votes {
+    votes.push(Json::number(vote.to_double()))
+  }
+  {
+    "schema": "warpfit.response/1",
+    "ok": true,
+    "operation": "knn_pruned",
+    "label": Json::string(result.label),
+    "neighbors": Json::array(neighbors),
+    "labels": Json::array(labels),
+    "votes": Json::array(votes),
+    "work_units": Json::number(result.work_units.to_double()),
+    "lower_bound_checks": Json::number(result.lower_bound_checks.to_double()),
+    "full_distance_calls": Json::number(result.full_distance_calls.to_double()),
+  }
+}
+
+///|
+fn hard_subsequence_topk(
+  fields : Map[String, Json],
+  options : Map[String, Json],
+) -> Json raise WireError {
+  let query = series(required(fields, "query"), "query")
+  let target = raw_series(required(fields, "target"), "target")
+  let top_k = integer(required(fields, "top_k"), "top_k")
+  let result = from_result(
+    @warpfit.subsequence_topk(query, target, top_k, hard_alignment(options)),
+  )
+  let matches : Array[Json] = []
+  for match_ in result.matches {
+    matches.push({
+      "start": Json::number(match_.start.to_double()),
+      "end": Json::number(match_.end.to_double()),
+      "distance": Json::number(match_.distance),
+      "squared_cost": Json::number(match_.squared_cost),
+    })
+  }
+  {
+    "schema": "warpfit.response/1",
+    "ok": true,
+    "operation": "subsequence_topk",
+    "matches": Json::array(matches),
+    "visited_cells": Json::number(result.visited_cells.to_double()),
+    "work_units": Json::number(result.work_units.to_double()),
+  }
+}
+
+///|
+fn hard_cross_validate(
+  fields : Map[String, Json],
+  options : Map[String, Json],
+) -> Json raise WireError {
+  let data : Array[@warpfit.Series] = []
+  for value in array(required(fields, "data"), "data", 32) {
+    data.push(series(value, "data[]"))
+  }
+  let labels : Array[String] = []
+  for value in array(required(fields, "labels"), "labels", 32) {
+    labels.push(text(value, "labels[]"))
+  }
+  let params : @warpfit.CrossValidationOptions = {
+    k: integer_option(options, "k", 3),
+    folds: integer_option(options, "folds", 2),
+    alignment: hard_alignment(options),
+    max_work_units: integer_option(options, "max_work_units", 40000000),
+  }
+  let result = from_result(@warpfit.cross_validate_knn(data, labels, params))
+  let confusion : Array[Json] = []
+  for row in result.confusion {
+    let values : Array[Json] = []
+    for value in row {
+      values.push(Json::number(value.to_double()))
+    }
+    confusion.push(Json::array(values))
+  }
+  let scores : Array[Json] = []
+  for score in result.scores {
+    scores.push({
+      "label": Json::string(score.label),
+      "support": Json::number(score.support.to_double()),
+      "predicted": Json::number(score.predicted.to_double()),
+      "true_positive": Json::number(score.true_positive.to_double()),
+      "precision": Json::number(score.precision),
+      "recall": Json::number(score.recall),
+      "f1": Json::number(score.f1),
+    })
+  }
+  let predictions : Array[Json] = []
+  for prediction in result.predictions {
+    predictions.push(Json::string(prediction))
+  }
+  let result_labels : Array[Json] = []
+  for label in result.labels {
+    result_labels.push(Json::string(label))
+  }
+  {
+    "schema": "warpfit.response/1",
+    "ok": true,
+    "operation": "cross_validate",
+    "accuracy": Json::number(result.accuracy),
+    "labels": Json::array(result_labels),
+    "confusion": Json::array(confusion),
+    "scores": Json::array(scores),
+    "predictions": Json::array(predictions),
+    "work_units": Json::number(result.work_units.to_double()),
+  }
+}
+
+///|
+fn hard_medoids(
+  fields : Map[String, Json],
+  options : Map[String, Json],
+) -> Json raise WireError {
+  let data : Array[@warpfit.Series] = []
+  for value in array(required(fields, "data"), "data", 32) {
+    data.push(series(value, "data[]"))
+  }
+  let cluster_count = integer(
+    required(fields, "cluster_count"),
+    "cluster_count",
+  )
+  let params : @warpfit.MedoidOptions = {
+    alignment: hard_alignment(options),
+    max_iterations: integer_option(options, "max_iterations", 20),
+    max_work_units: integer_option(options, "max_work_units", 40000000),
+  }
+  let result = from_result(
+    @warpfit.dtw_kmedoids(
+      data,
+      cluster_count,
+      integer_option(options, "first_index", 0),
+      params,
+    ),
+  )
+  let medoids : Array[Json] = []
+  for index in result.medoid_indices {
+    medoids.push(Json::number(index.to_double()))
+  }
+  let labels : Array[Json] = []
+  for label in result.labels {
+    labels.push(Json::number(label.to_double()))
+  }
+  let history : Array[Json] = []
+  for value in result.history {
+    history.push(Json::number(value))
+  }
+  {
+    "schema": "warpfit.response/1",
+    "ok": true,
+    "operation": "medoids",
+    "medoid_indices": Json::array(medoids),
+    "labels": Json::array(labels),
+    "cost": Json::number(result.cost),
+    "history": Json::array(history),
+    "iterations": Json::number(result.iterations.to_double()),
+    "stop": Json::string(result.stop),
+    "work_units": Json::number(result.work_units.to_double()),
+  }
+}
+
+///|
+fn hard_motifs(
+  fields : Map[String, Json],
+  options : Map[String, Json],
+) -> Json raise WireError {
+  let source = raw_series(required(fields, "series"), "series")
+  let window = integer(required(fields, "window"), "window")
+  let top_k = integer(required(fields, "top_k"), "top_k")
+  let params : @warpfit.MotifOptions = {
+    alignment: hard_alignment(options),
+    max_windows: integer_option(options, "max_windows", 16),
+    max_work_units: integer_option(options, "max_work_units", 100000000),
+  }
+  let result = from_result(
+    @warpfit.discover_motifs(source, window, top_k, params),
+  )
+  let pairs : Array[Json] = []
+  for pair in result.pairs {
+    pairs.push({
+      "first_start": Json::number(pair.first_start.to_double()),
+      "second_start": Json::number(pair.second_start.to_double()),
+      "distance": Json::number(pair.distance),
+      "squared_cost": Json::number(pair.squared_cost),
+    })
+  }
+  {
+    "schema": "warpfit.response/1",
+    "ok": true,
+    "operation": "motifs",
+    "window": Json::number(result.window.to_double()),
+    "pairs": Json::array(pairs),
+    "work_units": Json::number(result.work_units.to_double()),
+  }
+}
+
+///|
+fn hard_outliers(
+  fields : Map[String, Json],
+  options : Map[String, Json],
+) -> Json raise WireError {
+  let data : Array[@warpfit.Series] = []
+  for value in array(required(fields, "data"), "data", 32) {
+    data.push(series(value, "data[]"))
+  }
+  let params : @warpfit.OutlierOptions = {
+    alignment: hard_alignment(options),
+    k: integer_option(options, "k", 1),
+    max_work_units: integer_option(options, "max_work_units", 40000000),
+  }
+  let result = from_result(@warpfit.dtw_outlier_scores(data, params))
+  let scores : Array[Json] = []
+  for score in result.scores {
+    let indices : Array[Json] = []
+    for index in score.neighbor_indices {
+      indices.push(Json::number(index.to_double()))
+    }
+    let distances : Array[Json] = []
+    for distance in score.neighbor_distances {
+      distances.push(Json::number(distance))
+    }
+    scores.push({
+      "index": Json::number(score.index.to_double()),
+      "score": Json::number(score.score),
+      "neighbor_indices": Json::array(indices),
+      "neighbor_distances": Json::array(distances),
+    })
+  }
+  {
+    "schema": "warpfit.response/1",
+    "ok": true,
+    "operation": "outliers",
+    "scores": Json::array(scores),
+    "work_units": Json::number(result.work_units.to_double()),
+  }
+}
+
+///|
+fn hard_describe(
+  fields : Map[String, Json],
+  _options : Map[String, Json],
+) -> Json raise WireError {
+  let source = raw_series(required(fields, "series"), "series")
+  let result = from_result(@warpfit.summarize_series(source))
+  let features : Array[Json] = []
+  for feature in result.features {
+    features.push({
+      "minimum": Json::number(feature.minimum),
+      "maximum": Json::number(feature.maximum),
+      "mean": Json::number(feature.mean),
+      "variance": Json::number(feature.variance),
+      "standard_deviation": Json::number(feature.standard_deviation),
+      "constant": Json::boolean(feature.constant),
+    })
+  }
+  {
+    "schema": "warpfit.response/1",
+    "ok": true,
+    "operation": "describe",
+    "count": Json::number(result.count.to_double()),
+    "dimensions": Json::number(result.dimensions.to_double()),
+    "features": Json::array(features),
+  }
+}
+
+///|
 fn hard_select_k(
   fields : Map[String, Json],
   options : Map[String, Json],
@@ -701,6 +1000,14 @@ fn dispatch(source : String) -> Json raise WireError {
       ["schema", "operation", "data", "cluster_count", "first_index", "options"]
     "predict" => ["schema", "operation", "model", "data", "options"]
     "knn" => ["schema", "operation", "query", "training", "options"]
+    "knn_pruned" => ["schema", "operation", "query", "training", "options"]
+    "subsequence_topk" =>
+      ["schema", "operation", "query", "target", "top_k", "options"]
+    "cross_validate" => ["schema", "operation", "data", "labels", "options"]
+    "medoids" => ["schema", "operation", "data", "cluster_count", "options"]
+    "motifs" => ["schema", "operation", "series", "window", "top_k", "options"]
+    "outliers" => ["schema", "operation", "data", "options"]
+    "describe" => ["schema", "operation", "series"]
     "select_k" => ["schema", "operation", "data", "candidates", "options"]
     _ => {
       invalid("operation", "unsupported operation")
@@ -735,7 +1042,23 @@ fn dispatch(source : String) -> Json raise WireError {
         "max_iterations", "max_dba_steps", "tolerance", "max_work_units",
       ]
     "predict" => ["max_work_units"]
-    "knn" => ["k", "window", "feature_weights", "max_cells", "max_work_units"]
+    "knn" | "knn_pruned" =>
+      ["k", "window", "feature_weights", "max_cells", "max_work_units"]
+    "subsequence_topk" => ["feature_weights", "max_cells"]
+    "cross_validate" =>
+      ["k", "folds", "window", "feature_weights", "max_cells", "max_work_units"]
+    "medoids" =>
+      [
+        "window", "feature_weights", "max_cells", "max_iterations", "max_work_units",
+        "first_index",
+      ]
+    "motifs" =>
+      [
+        "window", "feature_weights", "max_cells", "max_windows", "max_work_units",
+      ]
+    "outliers" =>
+      ["k", "window", "feature_weights", "max_cells", "max_work_units"]
+    "describe" => []
     "select_k" =>
       [
         "window", "feature_weights", "max_cells", "max_iterations", "max_dba_steps",
@@ -761,6 +1084,13 @@ fn dispatch(source : String) -> Json raise WireError {
     "auto_train_model" => auto_train_model(fields, options)
     "predict" => predict_model(fields, options)
     "knn" => hard_knn(fields, options)
+    "knn_pruned" => hard_knn_pruned(fields, options)
+    "subsequence_topk" => hard_subsequence_topk(fields, options)
+    "cross_validate" => hard_cross_validate(fields, options)
+    "medoids" => hard_medoids(fields, options)
+    "motifs" => hard_motifs(fields, options)
+    "outliers" => hard_outliers(fields, options)
+    "describe" => hard_describe(fields, options)
     "select_k" => hard_select_k(fields, options)
     _ => pipeline_cluster(fields, options)
   }

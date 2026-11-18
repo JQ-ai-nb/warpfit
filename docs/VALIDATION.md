@@ -11,7 +11,8 @@
 ## 2026-11-18 边界测试增强
 
 - 新增 4 项边界回归测试（`core/robustness_wbtest.mbt`，72 行）：极端 gamma、k 等于训练集大小且距离全等、窗口覆盖全矩阵、8192→512 重采样。
-- 当前 main `33a3d4b` 的四后端各 86/86；0.2.0 发布包（tag `v0.2.0`）仍为 82 项，差异即这 4 项后续测试。
+- 当前 main `33a3d4b` 的四后端各 110/110；0.2.0 发布包（tag `v0.2.0`）仍为 82 项，差异即 2026-11-18 的后续边界与能力测试。
+- 新增 JSON 操作：`knn_pruned`、`subsequence_topk`、`cross_validate`、`medoids`、`motifs`、`outliers`、`describe`；这些只在 main，尚未进入 0.2.0 包。
 
 ## 2026-11-15 DBA 与逐点平均对照（未推送 / 未发布）
 

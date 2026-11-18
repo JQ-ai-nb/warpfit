@@ -8,9 +8,15 @@ pub fn auto_k_options() -> AutoKOptions
 
 pub fn cluster_options() -> ClusterOptions
 
+pub fn cross_validate_knn(Array[Series], Array[String], CrossValidationOptions) -> Result[CrossValidationResult, WarpError]
+
+pub fn cross_validation_options() -> CrossValidationOptions
+
 pub fn dba_fit(Series, Array[Series], DbaOptions) -> Result[DbaFit, WarpError]
 
 pub fn dba_options() -> DbaOptions
+
+pub fn discover_motifs(Series, Int32, Int32, MotifOptions) -> Result[MotifResult, WarpError]
 
 pub fn divergence(Series, Series, Double) -> Result[Divergence, WarpError]
 
@@ -18,11 +24,19 @@ pub fn divergence_with(Series, Series, AlignOptions) -> Result[Divergence, WarpE
 
 pub fn dtw_distance(Series, Series, DtwOptions) -> Result[DtwDistance, WarpError]
 
+pub fn dtw_distance_bounded(Series, Series, DtwOptions, Double) -> Result[DtwDistance?, WarpError]
+
 pub fn dtw_kmeans(Array[Series], Array[Series], ClusterOptions) -> Result[ClusterFit, WarpError]
+
+pub fn dtw_kmedoids(Array[Series], Int32, Int32, MedoidOptions) -> Result[MedoidFit, WarpError]
 
 pub fn dtw_options() -> DtwOptions
 
+pub fn dtw_outlier_scores(Array[Series], OutlierOptions) -> Result[OutlierResult, WarpError]
+
 pub fn dtw_path(Series, Series, DtwOptions) -> Result[DtwPath, WarpError]
+
+pub fn feature_range(SeriesSummary, Int32) -> Result[Double, WarpError]
 
 pub fn fit(Series, Array[Series], Double, Int32) -> Result[Fit, WarpError]
 
@@ -32,7 +46,17 @@ pub fn fitting_options(Double, Int32) -> FitOptions
 
 pub fn knn_classify(Series, Array[LabeledSeries], KnnOptions) -> Result[KnnPrediction, WarpError]
 
+pub fn knn_classify_pruned(Series, Array[LabeledSeries], KnnOptions) -> Result[KnnPrunedPrediction, WarpError]
+
 pub fn knn_options() -> KnnOptions
+
+pub fn lb_keogh_prepared(Array[Double], Array[Double], Series, Array[Double]) -> Double
+
+pub fn medoid_options() -> MedoidOptions
+
+pub fn motif_options() -> MotifOptions
+
+pub fn outlier_options() -> OutlierOptions
 
 pub fn pipeline_options() -> PipelineOptions
 
@@ -59,6 +83,10 @@ pub fn soft_dtw_with(Series, Series, AlignOptions) -> Result[Evaluation, WarpErr
 pub fn standardize(Series, Double) -> Result[StandardizedSeries, WarpError]
 
 pub fn subsequence_dtw(Series, Series, DtwOptions) -> Result[SubsequenceMatch, WarpError]
+
+pub fn subsequence_topk(Series, Series, Int32, DtwOptions) -> Result[SubsequenceTopK, WarpError]
+
+pub fn summarize_series(Series) -> Result[SeriesSummary, WarpError]
 
 pub fn train_cluster_model(Array[Series], Array[Int32], PipelineOptions) -> Result[ClusterModelFit, WarpError]
 
@@ -96,6 +124,16 @@ pub(all) struct Candidate {
   series : Series
 }
 
+pub(all) struct ClassificationScore {
+  label : String
+  support : Int32
+  predicted : Int32
+  true_positive : Int32
+  precision : Double
+  recall : Double
+  f1 : Double
+}
+
 pub(all) struct ClusterFit {
   centers : Array[Series]
   labels : Array[Int32]
@@ -131,6 +169,22 @@ pub(all) struct ClusterPrediction {
   labels : Array[Int32]
   distances : Array[Double]
   distances_to_centers : Array[Array[Double]]
+  work_units : Int32
+}
+
+pub(all) struct CrossValidationOptions {
+  k : Int32
+  folds : Int32
+  alignment : DtwOptions
+  max_work_units : Int32
+}
+
+pub(all) struct CrossValidationResult {
+  accuracy : Double
+  labels : Array[String]
+  confusion : Array[Array[Int32]]
+  scores : Array[ClassificationScore]
+  predictions : Array[String]
   work_units : Int32
 }
 
@@ -192,6 +246,15 @@ pub(all) struct Evaluation {
   alignment : Array[Double]
 }
 
+pub(all) struct FeatureSummary {
+  minimum : Double
+  maximum : Double
+  mean : Double
+  variance : Double
+  standard_deviation : Double
+  constant : Bool
+}
+
 pub(all) struct Fit {
   prototype : Series
   objective : Array[Double]
@@ -240,6 +303,16 @@ pub(all) struct KnnPrediction {
   work_units : Int32
 }
 
+pub(all) struct KnnPrunedPrediction {
+  label : String
+  neighbors : Array[Neighbor]
+  labels : Array[String]
+  votes : Array[Int32]
+  work_units : Int32
+  lower_bound_checks : Int32
+  full_distance_calls : Int32
+}
+
 pub(all) struct LabeledSeries {
   label : String
   series : Series
@@ -253,10 +326,63 @@ pub(all) struct Match {
   raw_self_candidate : Double
 }
 
+pub(all) struct MedoidFit {
+  medoid_indices : Array[Int32]
+  labels : Array[Int32]
+  cost : Double
+  history : Array[Double]
+  iterations : Int32
+  stop : String
+  work_units : Int32
+}
+
+pub(all) struct MedoidOptions {
+  alignment : DtwOptions
+  max_iterations : Int32
+  max_work_units : Int32
+}
+
+pub(all) struct MotifOptions {
+  alignment : DtwOptions
+  max_windows : Int32
+  max_work_units : Int32
+}
+
+pub(all) struct MotifPair {
+  first_start : Int32
+  second_start : Int32
+  distance : Double
+  squared_cost : Double
+}
+
+pub(all) struct MotifResult {
+  window : Int32
+  pairs : Array[MotifPair]
+  work_units : Int32
+}
+
 pub(all) struct Neighbor {
   label : String
   train_index : Int32
   distance : Double
+}
+
+pub(all) struct OutlierOptions {
+  alignment : DtwOptions
+  k : Int32
+  max_work_units : Int32
+}
+
+pub(all) struct OutlierResult {
+  scores : Array[OutlierScore]
+  work_units : Int32
+}
+
+pub(all) struct OutlierScore {
+  index : Int32
+  score : Double
+  neighbor_indices : Array[Int32]
+  neighbor_distances : Array[Double]
 }
 
 pub(all) struct PipelineFit {
@@ -301,11 +427,24 @@ pub(all) struct Series {
   values : Array[Double]
 }
 
+pub(all) struct SeriesSummary {
+  count : Int32
+  dimensions : Int32
+  features : Array[FeatureSummary]
+}
+
 pub(all) struct StandardizedSeries {
   series : Series
   means : Array[Double]
   standard_deviations : Array[Double]
   constant_features : Array[Bool]
+}
+
+pub(all) struct SubsequenceCandidate {
+  start : Int32
+  end : Int32
+  distance : Double
+  squared_cost : Double
 }
 
 pub(all) struct SubsequenceMatch {
@@ -315,6 +454,12 @@ pub(all) struct SubsequenceMatch {
   squared_cost : Double
   path : Array[DtwPoint]
   visited_cells : Int32
+}
+
+pub(all) struct SubsequenceTopK {
+  matches : Array[SubsequenceCandidate]
+  visited_cells : Int32
+  work_units : Int32
 }
 
 pub(all) struct WarpError {
