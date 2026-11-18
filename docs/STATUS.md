@@ -12,7 +12,7 @@
 | 当前版本 | **0.2.3** | `moon.mod` / `package.json` |
 | Mooncakes 构建 | `success` | 注册表 API `build_status` |
 | 注册表独立消费验证 | **通过**（`registry_install_verified: true`，10 组检查） | [`evidence/consumer-registry-0.2.3-20261118.json`](evidence/consumer-registry-0.2.3-20261118.json) |
-| 发布 tag | 、 已在本机创建；随下次推送一并上传 | `git tag --list "v0.2*"` |
+| 发布 tag | `v0.2.2`、`v0.2.3` 已在本机创建；随下次推送一并上传 | `git tag --list "v0.2*"` |
 | 本地仓库写入证据 | 远程 main 停在 `9c3a102`；本地有未推送提交（数量会随提交变化，用右侧命令查，不写死） | `git rev-list --count origin/main..HEAD` |
 
 版本历史：0.1.2 为原型；0.2.0 本期实质新增；0.2.1 增加 7 个 JSON 操作；0.2.2 修正并列剪枝、top-k 压缩回退、重复样本，并加入 motif 排除半径与分层分折；0.2.3 重写 README 首屏、统一数字出处、新增两条证据命令（无接口变更）。
