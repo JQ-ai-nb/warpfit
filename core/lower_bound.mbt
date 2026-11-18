@@ -134,6 +134,11 @@ pub fn dtw_distance_bounded(
     Err(error) => return Err(error)
   }
   let limit = threshold * threshold
+  // A squared distance is not exactly representable: sqrt(6)^2 evaluates to
+  // 5.999999999999999, which would reject a candidate whose cost is exactly
+  // 6.0 - an exact tie, not a worse neighbour. Allow a tiny relative slack so
+  // ties survive and the caller keeps its exact ordering promise.
+  let slack = limit * 1.0e-12 + 1.0e-12
   let n = x.count
   let m = y.count
   let dimensions = x.dimensions
@@ -188,7 +193,7 @@ pub fn dtw_distance_bounded(
       }
       visited += 1
     }
-    if row_min > limit {
+    if row_min > limit + slack {
       return Ok(None)
     }
     let old = previous
@@ -196,7 +201,7 @@ pub fn dtw_distance_bounded(
     current = old
   }
   let cost = previous[m]
-  if cost > limit {
+  if cost > limit + slack {
     Ok(None)
   } else {
     Ok(

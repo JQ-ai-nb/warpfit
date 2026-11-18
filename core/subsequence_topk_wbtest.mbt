@@ -69,3 +69,17 @@ test "top-k subsequence validates k, window and target length" {
     },
   )
 }
+
+///|
+test "top-k subsequence falls back to a legal window when the best path compresses" {
+  // The unconstrained best path squeezed both query points onto one target
+  // point, so its span was shorter than the query and the endpoint used to be
+  // dropped - returning no matches for an input that has an obvious one.
+  let query = topk_univariate([3.0, 1.0])
+  let target = topk_univariate([2.0, 3.0])
+  let result = subsequence_topk(query, target, 2, dtw_options()).unwrap()
+  assert_eq(result.matches.length(), 1)
+  assert_eq(result.matches[0].start, 0)
+  assert_eq(result.matches[0].end, 1)
+  assert_true((result.matches[0].distance - 5.0.sqrt()).abs() <= 1.0e-9)
+}

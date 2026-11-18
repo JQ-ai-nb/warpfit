@@ -40,6 +40,50 @@ fn subsequence_candidate_better(
 /// The DP also carries the start index, so each candidate is available in O(1)
 /// after the forward pass. Windows are rejected because the band would need a
 /// separate definition relative to an unknown target start.
+///|
+/// Full DTW cost between the query and the length-`n` target window starting at
+/// `start`. Used when the unconstrained best path compresses the query onto
+/// fewer target points than the contract allows: evaluating the tightest legal
+/// window is better than dropping that endpoint altogether.
+fn window_squared_cost(
+  query : Series,
+  target : Series,
+  start : Int,
+  options : DtwOptions,
+) -> Double {
+  let n = query.count
+  let d = query.dimensions
+  let weighted = dtw_alignment_options(options)
+  let stride = n + 1
+  let mut previous = Array::make(stride, @double.infinity)
+  let mut current = Array::make(stride, @double.infinity)
+  previous[0] = 0.0
+  for i = 1; i <= n; i = i + 1 {
+    current[0] = @double.infinity
+    for j = 1; j <= n; j = j + 1 {
+      let mut point_cost = 0.0
+      for k = 0; k < d; k = k + 1 {
+        let delta = query.values[(i - 1) * d + k] -
+          target.values[(start + j - 1) * d + k]
+        point_cost += feature_weight(weighted, k) * delta * delta
+      }
+      let mut best = previous[j - 1]
+      if previous[j] < best {
+        best = previous[j]
+      }
+      if current[j - 1] < best {
+        best = current[j - 1]
+      }
+      current[j] = point_cost + best
+    }
+    let stash = previous
+    previous = current
+    current = stash
+  }
+  previous[n]
+}
+
+///|
 pub fn subsequence_topk(
   query : Series,
   target : Series,
@@ -121,17 +165,35 @@ pub fn subsequence_topk(
     }
   }
   let mut matches : Array[SubsequenceCandidate] = []
+  let mut fallback_units = 0
   for j = 1; j <= m; j = j + 1 {
-    let cost = accum[n * stride + j]
+    let mut cost = accum[n * stride + j]
     if cost == @double.infinity {
       continue
     }
-    let start = starts[n * stride + j]
+    let mut start = starts[n * stride + j]
     // A valid contiguous interval must contain at least as many target points
-    // as the query; otherwise several query points were compressed onto one
-    // target point and the result is not a subsequence of the requested shape.
+    // as the query. When the unconstrained best path compressed several query
+    // points onto one target point, evaluate the tightest legal window ending
+    // here instead of dropping the endpoint: dropping produced empty results
+    // for inputs where a legal window plainly exists.
     if j - start < n {
-      continue
+      if j < n {
+        continue
+      }
+      let units = n * n * dimensions
+      // Bound the fallback to one extra forward pass: pathological inputs must
+      // not multiply the runtime. Endpoints beyond the allowance are skipped,
+      // exactly as before this fix.
+      if fallback_units + units > n * m * dimensions {
+        continue
+      }
+      fallback_units += units
+      start = j - n
+      cost = window_squared_cost(query, target, start, options)
+      if cost == @double.infinity {
+        continue
+      }
     }
     let candidate : SubsequenceCandidate = {
       start,
@@ -171,5 +233,9 @@ pub fn subsequence_topk(
       matches = next
     }
   }
-  Ok({ matches, visited_cells: n * m, work_units: n * m * dimensions, })
+  Ok({
+    matches,
+    visited_cells: n * m,
+    work_units: n * m * dimensions + fallback_units,
+  })
 }

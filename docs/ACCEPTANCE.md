@@ -4,7 +4,7 @@
 
 2026-11-17 更新：0.2.0 源码（`8195d88`）已推送；后续文档提交不改变源码，三系统 CI 均通过（main 最新 CI 见 Actions）；Mooncakes 0.2.0 已发布，注册表安装验证通过。以下 2026-11-14 记录保留当时状态：本轮按用户要求只做本地维护，未推送或发布；最近已公开的源码提交当时是 `8695d8a`，其三系统四后端 CI 与在线页面验证见 [VALIDATION.md](VALIDATION.md)。本轮新增独立消费样例和包验证，结果另行记录，不冒充线上版本已有能力。
 
-2026-11-18 更新：0.2.1 已发布（tag `v0.2.1` 指向 `d6c15e4`），四后端各 110 项测试与注册表安装验证通过；新增 `knn_pruned`、`subsequence_topk`、`cross_validate`、`medoids`、`motifs`、`outliers`、`describe`。
+2026-11-18 更新：0.2.1 已发布（tag `v0.2.1` 指向 `d6c15e4`），四后端各 110 项测试与注册表安装验证通过（main 现为 113 项：新增 3 条剪枝并列、top-k 回退与常量数据回归）；新增 `knn_pruned`、`subsequence_topk`、`cross_validate`、`medoids`、`motifs`、`outliers`、`describe`。
 
 ## 规则来源及适用范围
 

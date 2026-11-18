@@ -99,3 +99,27 @@ test "pruned knn still works when lengths differ" {
   assert_eq(pruned.label, full.label)
   assert_eq(pruned.neighbors[0].train_index, full.neighbors[0].train_index)
 }
+
+///|
+test "pruned knn keeps an exact tie that the bounding threshold squares away" {
+  // sqrt(6)^2 evaluates to 5.999999999999999. Comparing a squared cost against
+  // that value rejected a candidate at distance 6.0 - an exact tie - so the
+  // pruned neighbours disagreed with the exhaustive ones.
+  let query = lb_univariate([0.0, 2.0, 2.0])
+  let training : Array[LabeledSeries] = [
+    { label: "a", series: lb_univariate([1.0, 0.0, 1.0]), },
+    { label: "b", series: lb_univariate([0.0, 2.0, 0.0, 3.0, 3.0]), },
+    { label: "c", series: lb_univariate([0.0, 0.0, 1.0, 0.0]), },
+  ]
+  let options : KnnOptions = { k: 2, alignment: dtw_options(), max_work_units: 1000000 }
+  let exhaustive = knn_classify(query, training, options).unwrap()
+  let pruned = knn_classify_pruned(query, training, options).unwrap()
+  assert_eq(pruned.neighbors.length(), exhaustive.neighbors.length())
+  for index = 0; index < exhaustive.neighbors.length(); index = index + 1 {
+    assert_eq(
+      pruned.neighbors[index].train_index,
+      exhaustive.neighbors[index].train_index,
+    )
+    lb_near(pruned.neighbors[index].distance, exhaustive.neighbors[index].distance)
+  }
+}

@@ -159,11 +159,22 @@ pub fn dtw_kmedoids(
       }
     }
     if farthest < 0 || farthest_distance <= 0.0 {
-      return Err(
-        failure(
-          "seed_distinct", "not enough distinguishable medoids under the selected DTW settings",
-        ),
-      )
+      // Every remaining point coincides with an existing medoid: constant
+      // series, duplicated rows, or a batch that was not deduplicated. That is
+      // legitimate data, not an error - take the smallest unselected index,
+      // whose cost contribution is zero, and keep going.
+      farthest = -1
+      for i = 0; i < n; i = i + 1 {
+        if !selected[i] {
+          farthest = i
+          break
+        }
+      }
+      if farthest < 0 {
+        return Err(
+          failure("seed_distinct", "not enough points to seed medoids"),
+        )
+      }
     }
     selected[farthest] = true
     medoids.push(farthest)

@@ -9,9 +9,9 @@
 | 检查 | 命令 | 结果 |
 | --- | --- | --- |
 | 四目标类型检查 | `moon check --target all --deny-warn` | 通过 |
-| MoonBit 测试（Wasm-GC） | `moon test --target wasm-gc --deny-warn` | 110/110 |
-| MoonBit 测试（Wasm） | `moon test --target wasm --deny-warn` | 110/110 |
-| MoonBit 测试（JS） | `moon test --target js --deny-warn` | 110/110 |
+| MoonBit 测试（Wasm-GC） | `moon test --target wasm-gc --deny-warn` | 113/113 |
+| MoonBit 测试（Wasm） | `moon test --target wasm --deny-warn` | 113/113 |
+| MoonBit 测试（JS） | `moon test --target js --deny-warn` | 113/113 |
 | Node 测试 | `node --test tests/*.test.mjs` | 43/43 |
 | 浏览器工作台 | `node tests/browser.mjs`（本地 4194，系统 Chrome 158） | 24/24，0 pageerror，0 外部请求 |
 | README 的 11 条 CLI 示例 | `node bin/warpfit.mjs examples/*.json` | 11/11 `ok:true` |
@@ -28,7 +28,7 @@
 ## 2026-11-18 边界测试增强
 
 - 新增 4 项边界回归测试（`core/robustness_wbtest.mbt`，72 行）：极端 gamma、k 等于训练集大小且距离全等、窗口覆盖全矩阵、8192→512 重采样。
-- 当前 main 的四后端各 110/110；0.2.1 发布包（tag `v0.2.1`）为 110/110；0.2.0 发布包为 82/82。
+- 当前 main 的四后端各 110/110（2026-11-18 复跑后为 113/113）；0.2.1 发布包（tag `v0.2.1`）为 110/110；0.2.0 发布包为 82/82。
 - 新增 JSON 操作：`knn_pruned`、`subsequence_topk`、`cross_validate`、`medoids`、`motifs`、`outliers`、`describe`；这些已包含在 0.2.1，0.2.0 不包含。
 - 2026-11-18：0.2.1 已发布到 Mooncakes；tag `v0.2.1` 指向 `d6c15e4`；`registry_consumer --version 0.2.1` 返回 `registry install verified: True`。
 

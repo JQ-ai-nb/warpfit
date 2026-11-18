@@ -76,10 +76,10 @@ match @warpfit.divergence(prediction, target, 0.4) {
 | `cross_validate` | `data`、`labels`、`options.k/folds` | `accuracy`、`confusion`、`scores`、`predictions` | `cross-validate.json` |
 | `medoids` | `data`、`cluster_count`、`options.first_index` | `medoid_indices`、`labels`、`cost`、`history` | `medoids.json` |
 | `motifs` | `series`、`window`、`top_k`、`options.max_windows` | `pairs`（first_start/second_start/distance） | `motifs.json` |
-| `outliers` | `data`、`options.k` | `scores`（index/score/neighbors） | `outliers.json` |
+| `outliers` | `data`、`options.k` | `scores`（index/score/neighbor_indices/neighbor_distances） | `outliers.json` |
 | `describe` | `series` | 每特征 min/max/mean/variance/stddev/constant | `describe.json` |
 
-`knn_pruned` 的结果与 `knn` 一致，额外计数器只说明下界排序和 early abandon 节省了多少完整距离调用；`subsequence_topk` 要求返回区间长度不小于查询长度；`cross_validate` 的折按输入下标确定性分配，不是分层抽样。
+`knn_pruned` 的结果与 `knn` 逐条一致（并列距离也保留相同次序，阈值比较带相对容差，避免 `sqrt` 平方回代把精确并列判成更远）；额外计数器只说明下界排序和 early abandon 节省了多少完整距离调用。`subsequence_topk` 要求返回区间长度不小于查询长度：无约束最优路径压缩查询点时，改为评估以该终点结尾的最短合法窗口，而不是丢弃该终点，因此不会对合法输入返回空列表。`medoids` 允许重复样本（常量序列退化为代价 0，未选下标按升序补齐）。`cross_validate` 的折按输入下标确定性分配，不是分层抽样，因此标签排列会影响某折训练集是否含有测试折的类别。
 
 ### 可保存的聚类模型
 

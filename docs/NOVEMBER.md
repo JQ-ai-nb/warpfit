@@ -25,7 +25,7 @@
 
 ## 验证证据
 
-- **MoonBit**：0.2.1 发布包四后端各 110/110；0.2.0 为 82/82；本机三后端各 110/110，native 由远程 CI 覆盖。
+- **MoonBit**：0.2.1 发布包四后端各 110/110；0.2.0 为 82/82；本机三后端各 113/113（main；0.2.1 发布包为 110），native 由远程 CI 覆盖。
 - **Node**：43/43。
 - **浏览器**：24/24，覆盖 12 个场景、模型文件往返、错误输入、预算、取消和 390px 布局；线上页面无 pageerror、无外部数据请求。
 - **CI**：0.2.0 源码 `8195d88` 的 [44095202653](https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653)；发布文档提交 `fbd17a5` 的 [44106313819](https://github.com/JQ-ai-nb/warpfit/actions/runs/44106313819) 也通过；main 最新 CI 见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)。
@@ -42,7 +42,7 @@
 ## 2026-11-18 后续源码增强（已包含在 0.2.1）
 
 - 新增 JSON 操作：`knn_pruned`、`subsequence_topk`、`cross_validate`、`medoids`、`motifs`、`outliers`、`describe`。
-- 当前 main 有效 MoonBit 源码约 5,002 行；MoonBit 测试 110 项（0.2.0 发布包为 82 项）。
+- 当前 main 有效 MoonBit 源码 5,549 行（56 个 `.mbt`，排除 `*_wbtest.mbt`）；MoonBit 测试 113 项（0.2.1 发布包为 110 项，0.2.0 为 82 项）。
 - 这些能力已包含在 Mooncakes 0.2.1，0.2.0 包不包含；0.2.1 注册表安装验证通过。
 
 ## 与旧版关系

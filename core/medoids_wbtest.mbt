@@ -58,3 +58,21 @@ test "k-medoids rejects invalid sizes and budgets" {
     },
   )
 }
+
+///|
+test "identical samples seed distinct medoids instead of failing" {
+  // A constant series has no distinguishable points. Refusing to cluster it
+  // made `medoids` unusable on exactly the data where it is easiest to explain.
+  let data : Array[Series] = [
+    medoid_series([1.0]),
+    medoid_series([1.0]),
+    medoid_series([1.0]),
+    medoid_series([1.0]),
+  ]
+  let result = dtw_kmedoids(data, 2, 0, medoid_options()).unwrap()
+  assert_eq(result.medoid_indices.length(), 2)
+  assert_true((result.cost - 0.0).abs() <= 1.0e-12)
+  for label in result.labels {
+    assert_true(label >= 0 && label < 2)
+  }
+}

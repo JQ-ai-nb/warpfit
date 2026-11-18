@@ -1,5 +1,12 @@
 # 版本记录
 
+## 未发布（0.2.1 之后，验收前维护）
+
+- 修复 `knn_pruned`：平方阈值回代会把距离精确相等的候选判成更远（`sqrt(6)^2 = 5.999999999999999`），导致剪枝版邻居与 `knn` 不一致；阈值比较加入相对容差后两者逐条一致。
+- 修复 `subsequence_topk`：无约束最优路径压缩查询点时，该终点被整体丢弃，合法输入会返回空 `matches`；现改为评估以该终点结尾的最短合法窗口，并计入 `work_units`。
+- 修复 `medoids`：重复/常量样本不再以 `seed_distinct` 失败，改取最小未选下标补齐，代价为 0。
+- 新增 3 条回归测试（main 现为 113 项，0.2.1 发布包仍为 110 项）；文档中的源码规模更正为 5,549 行（56 个 `.mbt`，排除 `*_wbtest.mbt`）。
+
 ## 0.2.1
 
 - 2026-11-18：0.2.1 已发布到 Mooncakes（Server status 200 OK）；tag `v0.2.1`；`registry_consumer --version 0.2.1` 返回 `registry install verified: True`。
