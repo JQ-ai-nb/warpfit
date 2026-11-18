@@ -42,7 +42,7 @@
 ## 2026-11-18 后续源码增强（已包含在 0.2.1）
 
 - 新增 JSON 操作：`knn_pruned`、`subsequence_topk`、`cross_validate`、`medoids`、`motifs`、`outliers`、`describe`。
-- 当前 main 的 MoonBit 源码 5,631 行（27 个 `.mbt`，排除 `*_wbtest.mbt`；其中有效代码 5,068 行，不含空行与注释；含测试共 10,666 行）；MoonBit 测试 113 项（0.2.1 发布包为 110 项，0.2.0 为 82 项）。
+- 当前源码规模与测试数统一记录在 [STATUS.md](STATUS.md)（单一事实源），本文件不重复数字，避免版本迭代后出现两套口径。
 - 这些能力已包含在 Mooncakes 0.2.1，0.2.0 包不包含；0.2.1 注册表安装验证通过。
 
 ## 与旧版关系
