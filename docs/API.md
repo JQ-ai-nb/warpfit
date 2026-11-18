@@ -79,7 +79,19 @@ match @warpfit.divergence(prediction, target, 0.4) {
 | `outliers` | `data`、`options.k` | `scores`（index/score/neighbor_indices/neighbor_distances） | `outliers.json` |
 | `describe` | `series` | `features[]`，每项 `minimum`/`maximum`/`mean`/`variance`/`standard_deviation`/`constant` | `describe.json` |
 
-`knn_pruned` 的结果与 `knn` 逐条一致（并列距离也保留相同次序，阈值比较带相对容差，避免 `sqrt` 平方回代把精确并列判成更远）；额外计数器只说明下界排序和 early abandon 节省了多少完整距离调用。`subsequence_topk` 要求返回区间长度不小于查询长度：无约束最优路径压缩查询点时，改为评估以该终点结尾的最短合法窗口，而不是丢弃该终点，因此不会对合法输入返回空列表。`medoids` 允许重复样本（常量序列退化为代价 0，未选下标按升序补齐）。`cross_validate` 的折按标签分层轮转分配：同类样本按出现顺序依次分到各折，标签排列不再决定某折训练集是否缺类；当折数大于最小类的样本数时仍会有训练集缺类，这是数据本身无法分层，不是算法选择。`motifs` 的 `min_gap` 是排除半径（默认 -1 取窗口长度，0 关闭）：选中一对后，任一新对的窗口落在已选窗口的半径内即被跳过，因此 top-K 指向不同区域，而不是同一段信号的平移副本。
+`knn_pruned` 的结果与 `knn` 逐条一致（并列距离也保留相同次序，阈值比较带相对容差，避免 `sqrt` 平方回代把精确并列判成更远）；额外计数器只说明下界排序和 early abandon 节省了多少完整距离调用。不等长输入下 LB 下界退化为 0，此时不剪枝但仍返回精确结果。
+
+`subsequence_topk` 要求返回区间长度不小于查询长度，实现是“每个结束点保留其最优起点，再跨结束点取 top-k”。无约束最优路径压缩查询点时，该终点改为评估以它结尾的最短合法窗口。因此：返回条数可以少于 `top_k`；同一输入上的最佳区间可能与 `subsequence` 不同——后者允许区间短于查询长度，两者的契约不同，不能互相替代。
+
+`medoids` 允许重复样本（常量序列退化为代价 0，未选下标按升序补齐）。`cost` 是所有样本到其 medoid 的平均平方 DTW 距离，不是平均距离；`iterations` 是接受的交换次数；`stop` 为 `no_improvement` 或 `max_iterations`。每次接受的交换都严格降低 `cost`。
+
+`cross_validate` 的折按标签分组后轮转分配：在折数不超过最小类样本数时，每折训练集都含每一类。折成员仍按输入顺序确定，因此同一批样本换一个排列可能得到不同的折和不同的 `accuracy`——“分层”保证的是每折不缺类，不是分数与顺序无关。`scores` 是每类一条（不是每折一条）；`precision` 在 `predicted=0` 时记为 0。
+
+`motifs` 的 `min_gap` 是排除半径（默认 -1 取窗口长度，0 关闭），并同时约束一对之内的两个窗口：默认情况下 `second_start - first_start >= window`。可用 pair 不足时返回少于 `top_k` 条。
+
+`outliers` 的 `score` 是到最近 `k` 个其他样本的平均 DTW 距离（排除自身，分母恒为 `k`，要求 `k <= min(8, 样本数-1)`）。`work_units` 按 n² 对称矩阵保守计费，包含重复的对角线与对称项。
+
+`describe` 的 `variance` 是总体方差（除以样本数 n），`standard_deviation` 是它的平方根；`constant` 用 `minimum == maximum` 精确判定，因此与 `preprocess` 的 `std <= epsilon` 口径不同——前者是描述统计，后者是标准化策略。单样本时 `variance` 与 `standard_deviation` 为 0，`constant` 为真。
 
 ### 可保存的聚类模型
 

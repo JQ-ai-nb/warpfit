@@ -93,3 +93,16 @@ test "motif options reject an out-of-range gap" {
     },
   )
 }
+
+///|
+test "the exclusion radius also separates the two windows inside a pair" {
+  // Before this, top-1 on a ramp was (0,1): two overlapping copies of the same
+  // region, which is exactly what the default exclusion zone promises to avoid.
+  let series = motif_series([
+    0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,
+  ])
+  let result = discover_motifs(series, 4, 3, motif_options()).unwrap()
+  for pair in result.pairs {
+    assert_true(pair.second_start - pair.first_start >= 4)
+  }
+}

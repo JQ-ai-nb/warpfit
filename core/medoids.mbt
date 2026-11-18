@@ -222,10 +222,12 @@ pub fn dtw_kmedoids(
     assignment = medoid_assign(matrix, n, medoids)
     history.push(assignment.1)
     iterations += 1
-    if assignment.1 >= best_cost {
-      stop = "no_improvement"
-      break
-    }
+    // Every accepted swap strictly lowers the cost (the scan only records a
+    // candidate when cost < best_cost), so the loop cannot cycle. The old
+    // guard compared the freshly recomputed cost with the value it was built
+    // from, was therefore always equal, and stopped after the first swap -
+    // leaving a strictly better medoid set unexplored.
+
   }
   Ok({
     medoid_indices: medoids,

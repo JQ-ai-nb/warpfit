@@ -31,24 +31,32 @@ pub fn summarize_series(series : Series) -> Result[SeriesSummary, WarpError] {
   for k = 0; k < d; k = k + 1 {
     let mut minimum = series.values[k]
     let mut maximum = series.values[k]
-    let mut total = 0.0
+    /// Welford's online update. The naive sum-then-mean form left a 1-ulp
+    /// residue on a constant column, so `constant: true` came with a
+    /// standard deviation of 1.4e-17 instead of 0.
+    let mut mean = 0.0
+    let mut m2 = 0.0
+    let mut seen = 0.0
     for i = 0; i < n; i = i + 1 {
       let value = series.values[i * d + k]
-      total += value
       if value < minimum {
         minimum = value
       }
       if value > maximum {
         maximum = value
       }
+      seen += 1.0
+      let delta = value - mean
+      mean += delta / seen
+      m2 += delta * (value - mean)
     }
-    let mean = total / n.to_double()
-    let mut squared = 0.0
-    for i = 0; i < n; i = i + 1 {
-      let delta = series.values[i * d + k] - mean
-      squared += delta * delta
+    let mut variance = m2 / seen
+    if minimum == maximum {
+      // A column that never changes has no spread by definition; the guard
+      // also keeps the reporting identity `constant => variance == 0` exact.
+      variance = 0.0
+      mean = minimum
     }
-    let variance = squared / n.to_double()
     features.push({
       minimum,
       maximum,

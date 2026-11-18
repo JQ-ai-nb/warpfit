@@ -1,6 +1,7 @@
 ///|
 /// Deterministic k-fold evaluation options for the DTW nearest-neighbour
-/// classifier. Folds are assigned by input index, not by label.
+/// classifier. Folds are dealt round-robin within each label, so a fold's
+/// training part contains every class while the class has enough samples.
 pub(all) struct CrossValidationOptions {
   k : Int32
   folds : Int32

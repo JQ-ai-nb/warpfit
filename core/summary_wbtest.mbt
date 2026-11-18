@@ -40,3 +40,16 @@ test "summary rejects empty and ragged series" {
     },
   )
 }
+
+///|
+test "a constant feature reports exactly zero spread" {
+  // Naive sum-then-mean left a 1-ulp residue: 0.1*3/3 came back as
+  // 0.10000000000000002 and the reported stddev was 1.4e-17 while
+  // `constant` was true. A report that says "constant" must say zero.
+  let series : Series = { count: 3, dimensions: 1, values: [0.1, 0.1, 0.1], }
+  let feature = summarize_series(series).unwrap().features[0]
+  assert_true(feature.constant)
+  assert_eq(feature.variance, 0.0)
+  assert_eq(feature.standard_deviation, 0.0)
+  assert_true((feature.mean - 0.1).abs() <= 1.0e-15)
+}

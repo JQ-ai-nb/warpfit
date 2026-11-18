@@ -76,3 +76,20 @@ test "identical samples seed distinct medoids instead of failing" {
     assert_true(label >= 0 && label < 2)
   }
 }
+
+///|
+test "k-medoids keeps swapping while a better medoid set exists" {
+  // The loop used to compare the recomputed cost with the value it was built
+  // from, which is always equal, so it stopped after the first accepted swap.
+  // This dataset has a second improving swap: [1,2] cost 2.25 -> [1,3] 1.75.
+  let data : Array[Series] = [
+    medoid_series([4.0, 0.0, 4.0]),
+    medoid_series([4.0, 0.0, 3.0]),
+    medoid_series([4.0, 5.0, 1.0]),
+    medoid_series([2.0, 3.0, 3.0]),
+  ]
+  let result = dtw_kmedoids(data, 2, 0, medoid_options()).unwrap()
+  assert_eq(result.medoid_indices, [1, 3])
+  assert_true((result.cost - 1.75).abs() <= 1.0e-9)
+  assert_true(result.iterations >= 2)
+}

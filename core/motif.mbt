@@ -156,6 +156,16 @@ pub fn discover_motifs(
       break
     }
     let mut clash = false
+    if span > 0 {
+      // The exclusion radius also applies *within* a pair. Without this, top-1
+      // on a ramp returned (0,1): two copies of the same region, exactly what
+      // the option exists to prevent.
+      let delta = candidate.first_start - candidate.second_start
+      let separation = if delta < 0 { -delta } else { delta }
+      if separation < span {
+        clash = true
+      }
+    }
     for chosen in pairs {
       let starts : Array[Int32] = [
         chosen.first_start,
