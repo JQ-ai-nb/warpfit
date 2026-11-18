@@ -2,6 +2,8 @@
 
 覆盖重采样 → 逐维标准化 → 硬 DTW 约束对齐 → DBA 模板 → 聚类 → 最近邻分类 → 候选簇数选择 → 模型保存复用 → 子序列定位，全部有界预算。
 
+本期新申报版本为 0.2.0：0.1.2 是已公开原型，0.2.0 在本期完成实质新增（26 个功能提交、12 个场景、四后端测试与 Mooncakes 发布）；新增清单见 [CHANGELOG](CHANGELOG.md) 与 [本期新增说明](docs/NOVEMBER.md)。
+
 摘要，逐条见[完整工作流](#完整工作流)：
 
 | 任务族 | 命令 | 已验证输出 |
@@ -125,9 +127,9 @@ node scripts/benchmark_hard.mjs
 
 `tests/knn_reference.py` 的三种用法：默认只把本次复算写到忽略目录 `artifacts/knn-reference.json`，并在末尾打印证据是否落后（`evidence: current` / `evidence: STALE`，不改变退出码），所以 `python verify.py` 不会弄脏工作树；`--evidence` 同时刷新 `docs/evidence/knn-reference.json`（固定 `newline="\n"`，除 `recorded_at_utc` / `python` 外无变化时跳过并打印 `evidence: unchanged`）；`--check-evidence` 只比较不写入，忽略 `recorded_at_utc`、`python` 与仅表示来源的 `engine_commit`，一致退出 0 打印 `evidence: current`，不一致退出 1 打印 `evidence: STALE` 并逐行列出差异键。
 
-本地执行结果与真实命令见 [VALIDATION.md](docs/VALIDATION.md)。公开 main `8195d88` 的 [CI 运行](https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653) 已通过 Linux / macOS / Windows × Wasm / Wasm-GC / JS / native 检查、构建和测试；本机 Wasm / Wasm-GC / JS 各 82 项 MoonBit 测试、Node 43 项、Chromium 浏览器 24 项通过。本机仍缺 MSVC，本机 native 未运行；远程 native 已通过。工作台部署随 main 更新；本机 Chromium 24 项覆盖 12 个场景。
+本地执行结果与真实命令见 [VALIDATION.md](docs/VALIDATION.md)。当前 main `fbd17a5` 的 [CI 运行](https://github.com/JQ-ai-nb/warpfit/actions/runs/44106313819) 与 0.2.0 源码提交 `8195d88` 的 [CI 运行](https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653) 均已通过 Linux / macOS / Windows × Wasm / Wasm-GC / JS / native 检查、构建和测试；本机 Wasm / Wasm-GC / JS 各 82 项 MoonBit 测试、Node 43 项、Chromium 浏览器 24 项通过。本机仍缺 MSVC，本机 native 未运行；远程 native 已通过。工作台部署随 main 更新，线上 24 项检查已通过。
 
-本地新增最近邻分类与簇数选择后，本机 `moon test` 为 82 项、Node 测试为 43 项；同一提交已推送至公开 main（`8195d88`），远程 CI 44095202653 已通过。本地验收维护、独立包消费检查与本轮本地新增检查的记录见 [验收自查](docs/ACCEPTANCE.md) 和 [机制与演示](docs/WALKTHROUGH.md)。
+本地新增最近邻分类与簇数选择后，本机 `moon test` 为 82 项、Node 测试为 43 项；0.2.0 源码提交 `8195d88` 已推送，当前 main 为 `fbd17a5`（发布文档同步），两次 CI 均通过。本地验收维护、独立包消费检查与本轮本地新增检查的记录见 [验收自查](docs/ACCEPTANCE.md) 和 [机制与演示](docs/WALKTHROUGH.md)。
 
 此前 0.1.2 的注册表独立消费测试和线上演示已有验证记录；0.2.0 已于 2026-11-17 发布到 [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)，`python scripts/registry_consumer.py --version 0.2.0` 返回 `registry install verified: True`。
 
@@ -155,4 +157,4 @@ Soft-DTW 和自项校正来自 [Cuturi / Blondel 2017](https://proceedings.mlr.p
 
 ## 维护者与许可
 
-维护者 / 个人参赛申请人：**蒋琦**；GitHub / Mooncakes：**JQ-ai-nb**。Apache-2.0。设计、编码与测试使用 AI 辅助，维护者负责理解与核实成果。算法来自公开论文，**不宣称算法首创或世界唯一**。
+维护者 / 个人参赛申请人：**蒋琦**；GitHub / Mooncakes：**JQ-ai-nb**。Apache-2.0。设计、编码与测试使用 AI 辅助；维护者负责目标、边界、关键数值与发布结论的最终核对，AI 生成内容经过测试、独立参考与 CI 复核。算法来自公开论文，**不宣称算法首创或世界唯一**。

@@ -35,14 +35,14 @@
 
 - 2026-11-15 `cmd/consumer` 在原有8组之后追加两组公开接口断言：`a:[0.0]`、`a:[0.2]`、`b:[9.0]` 训练、查询 `[0.1]`、`k=3` 断言 `label=="a"`、`neighbors.length()==3`、`votes==[2,1]`（不断言浮点距离）；六条一维序列 `[0.0, 0.1, 5.0, 5.1, 10.0, 10.1]` 在候选 `[2,3]` 上断言 `best_k==3`、`scores.length()==2`。标记行只在尾部追加 `, knn, select_k`，原有名称不变。重新执行 `moon package` 生成归档后：`python scripts/package_check.py` 检查150个文件，并要求归档包含 `core/classify.mbt`、`core/autok.mbt` 且 `core/pkg.generated.mbti` 含 `pub fn knn_classify` 与 `pub fn select_cluster_count`；`python scripts/registry_consumer.py --packaged` 的冻结依赖检查与 Wasm / Wasm-GC / JS 三次运行均返回0，三个后端末行均为 `warpfit_consumer_ok: dtw, distance_only, dba, cluster_model, subsequence, long_preprocess, soft_gradient, fit_rank, knn, select_k`。记录见 [归档消费记录](evidence/consumer-package-20261115.json)，仍是归档包验证（`registry_install_verified: false`），不是Mooncakes安装结果。同一工作树的 `python verify.py` 22 条命令全部通过。本机仍缺MSVC，`--native` 未运行，native 未验证。
 
-## 0.2.0 公开源码与远程验证（2026-11-13）
+## 0.2.0 公开源码与远程验证（2026-11-13，历史记录）
 
 - 授权服务端、仓库所有者、提交作者及提交者均核对为 `JQ-ai-nb`；源码修订 `bb8c309b286eb7d5ebfa25b268426db7b6a4ddc5` 已推送公开默认分支 main，窗口DTW、DBA、聚类、模型与子序列等文件均已逐项核对存在。
 - [CI 43449875490](https://github.com/JQ-ai-nb/warpfit/actions/runs/43449875490) 的 Linux、macOS、Windows 三个任务全部成功。下载三个真实验证产物检查：每系统的 Wasm / Wasm-GC / JS / native 各71项 MoonBit测试及构建通过，Node各38项通过；Linux另完成22项浏览器检查。[真实产物摘要](evidence/remote-validation-0.2.0.json)。这是新版远程结果，区别于下文0.1.2的历史CI。
 - [工作台部署 43449875437](https://github.com/JQ-ai-nb/warpfit/actions/runs/43449875437) 成功后，对实际公开地址 <https://jq-ai-nb.github.io/warpfit/> 执行完整浏览器流程：22项通过，覆盖10个场景、模型文件往返、输入错误、预算、取消和390px布局；无页面错误或外部数据请求。[在线页面验证](evidence/browser-public-0.2.0.json)。
-- 这些结果不能推断尚未发布的0.2.0已可从Mooncakes安装；注册表0.2.0发布与独立消费验证仍未执行。没有虚构业务准确率或审核结果。
+- 这是 2026-11-13 的历史结论；2026-11-17 已发布 0.2.0，并通过注册表安装验证。没有虚构业务准确率或审核结果。
 
-## 0.2.0 本次维护（2026-11-13，未推送 / 未发布）
+## 0.2.0 本次维护（2026-11-13，历史记录）
 
 - `python verify.py` 实际通过：Windows 本地的 `moon check --target all --deny-warn`、格式与生成接口检查；Wasm、Wasm-GC、JS 各71项 MoonBit 测试及构建；三个类型示例；构建共用 JSON 引擎；38项 Node 测试和实际 Mooncakes 打包内容检查。命令及输出见 [validation-current.json](evidence/validation-current.json)。这是测试函数数量，下面列出的批量样本数量另算，没有混称为独立测试函数。
 - 本轮先复现再修复模型 / 数据文档边界问题：原来独立无效的文件 `模型JSON + ,"options":{...}` 可被拼成合法请求并影响预测参数。现在每个文件先验证为单个完整 JSON，保留原文供 MoonBit 进一步检测重复键。回归测试覆盖模型和数据文件各自附加字段、连续文档；原始重复键拒绝及文件往返测试继续通过，网页导入也拒绝并保留当前请求。
@@ -53,7 +53,7 @@
 - 模型相关测试实际执行自动 / 手动初始化比较、文件保存及重新读取、全新批次预测、全部新样本同簇、初始化与训练共享预算、预算中断不写模型、错误版本与重复键、拒绝文件覆盖。长输入测试验证2880点显式重采样到100点，以及600点数据的分析流程；超过8192点拒绝，原有普通 DTW 的512点限制仍有效。
 - 本地 Chromium 148.0.7778.96 实际完成22项浏览器检查，包含10个内置场景、模型下载和重新导入、重复键、拒绝多文档模型、延迟导入与切换请求、8192点×16特征的预处理与绘图、预算提示、Worker取消及390px布局。无 pageerror 或外部数据请求。见 [browser-nov.json](evidence/browser-nov.json) 和 [模型界面](screenshots/model.png) / [子序列界面](screenshots/subsequence.png)。
 - 从本地提交 `ccb83ce` 用 `git archive` 重新导出到空目录，不复制构建缓存；全部目标检查、格式、JS的71项 MoonBit测试、35项 Node测试、80组 Soft-DTW 夹具独立重算和打包内容检查通过：[clean-current.json](evidence/clean-current.json)。初次打包为空：导出目录位于父仓库忽略的 work 下，继承了父 Git 根目录。构建和测试均在无 .git 状态执行；打包前为导出目录建立独立 Git 索引并暂存源文件后通过，没有制造提交或修改源码。记录保留初次失败及处理方式。这仍是同机工具链验证，不是远程检出或跨系统结果。
-- 本机缺少 MSVC，native 运行和新版远程多系统 CI **尚未验证**；本次仍未推送 / 发布，所以也没有新增接口的注册表安装结果。完整检查的原始输出保存在忽略目录 `artifacts/validation.json`；公开证据仅将本机 Python 可执行文件的绝对路径改成可移植的 `python`，其余命令参数与结果不变。
+- 本机缺少 MSVC，native 运行在 2026-11-13 尚未验证；2026-11-17 的远程 CI 已覆盖 native，0.2.0 也已发布并通过注册表安装验证。完整检查的原始输出保存在忽略目录 `artifacts/validation.json`；公开证据仅将本机 Python 可执行文件的绝对路径改成可移植的 `python`，其余命令参数与结果不变。
 
 ## 0.2.0 前一阶段的独立数值与数据验证
 
