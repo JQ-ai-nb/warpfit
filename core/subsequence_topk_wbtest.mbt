@@ -13,6 +13,9 @@ test "top-k subsequence finds the planted interval first" {
   assert_eq(best.start, 2)
   assert_eq(best.end, 4)
   assert_true((best.distance - 0.0).abs() <= 1.0e-9)
+  for match_ in result.matches {
+    assert_true(match_.end - match_.start + 1 >= 3)
+  }
   assert_eq(result.visited_cells, 21)
   assert_true(result.work_units > 0)
 }

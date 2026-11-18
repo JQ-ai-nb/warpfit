@@ -1,0 +1,6 @@
+{
+  "schema": "warpfit.request/1",
+  "operation": "medoids",
+  "data": [[0, 0, 0], [0, 0.1, 0], [5, 5, 5], [5, 5.1, 5]],
+  "cluster_count": 2
+}

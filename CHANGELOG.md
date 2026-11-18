@@ -1,5 +1,13 @@
 # 版本记录
 
+## 0.2.1
+
+- 2026-11-18：新增 `knn_pruned`、`subsequence_topk`、`cross_validate`、`medoids`、`motifs`、`outliers`、`describe` 七个 JSON 操作与对应核心模块；有效 MoonBit 源码约 5,002 行，测试 110 项（四后端 110/110）。
+- `knn_pruned` 使用 LB_Keogh 下界排序和精确 early abandon，结果与 `knn` 一致，并返回下界检查/完整距离调用计数。
+- `subsequence_topk` 要求返回区间长度不小于查询长度；`cross_validate` 使用按下标确定性分折，输出混淆矩阵与每类 precision/recall/F1。
+- `medoids` 为确定性 PAM 风格 k-medoids；`motifs` 为有界固定窗口自相似对；`outliers` 为 k 近邻平均距离分数；`describe` 输出逐特征统计。
+- 示例见 `examples/{knn-pruned,subsequence-topk,cross-validate,medoids,motifs,outliers,describe}.json`。
+
 ## 0.2.0
 
 - 2026-11-17：0.2.0 源码推送至公开 main（`8195d88`），Linux / macOS / Windows CI 通过；0.2.0 已发布到 Mooncakes，`registry_consumer --version 0.2.0` 注册表安装验证通过。

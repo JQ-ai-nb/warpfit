@@ -1,0 +1,5 @@
+{
+  "schema": "warpfit.request/1",
+  "operation": "describe",
+  "series": [[1, 2], [3, 2]]
+}

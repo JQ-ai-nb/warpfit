@@ -1,0 +1,11 @@
+{
+  "schema": "warpfit.request/1",
+  "operation": "knn_pruned",
+  "query": [0, 1, 0],
+  "training": [
+    { "label": "rise", "series": [0, 1, 0] },
+    { "label": "fall", "series": [0, 0, 1] },
+    { "label": "rise", "series": [0.1, 0.9, 0.1] }
+  ],
+  "options": { "k": 2, "window": 1 }
+}

@@ -15,7 +15,7 @@
 | 候选簇数选择 | `node bin/warpfit.mjs examples/select-k.json` | `best_k=3`，轮廓系数 0.9544 |
 | 模型保存与复用 | `node bin/warpfit-model.mjs train examples/model_train.json work/cluster-model.json && node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predict_data.json` | 新数据标签 `[0,1,0]` |
 
-**版本披露**：源码与 Mooncakes 注册表均为 0.2.0（2026-11-17 发布），注册表安装验证通过；样例均为合成数据本地验证，非准确率或生产效果；验证记录分别标注本地检查、远程 CI 与注册表安装结果，本地结果不推断已发布状态。
+**版本披露**：源码为 0.2.1；Mooncakes 注册表当前版本以[包页面](https://mooncakes.io/docs/JQ-ai-nb/warpfit)为准（0.2.0 为上一版）；样例均为合成数据本地验证，非准确率或生产效果；验证记录分别标注本地检查、远程 CI 与注册表安装结果，本地结果不推断已发布状态。
 
 [在线工作台](https://jq-ai-nb.github.io/warpfit/) ｜ [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)
 
@@ -116,7 +116,7 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 ## 2026-11-18 源码增强（尚未进入 0.2.0 包）
 
-新增 JSON 操作：`knn_pruned`（LB_Keogh 排序 + 精确 early abandon）、`subsequence_topk`、`cross_validate`、`medoids`、`motifs`、`outliers`、`describe`。这些能力当前只在公开 main 源码中，Mooncakes `0.2.0` 包不包含；发布包验证仍以 tag `v0.2.0` 为准。当前 main 的有效 MoonBit 源码约 5,002 行，测试 110 项。
+新增 JSON 操作：`knn_pruned`（LB_Keogh 排序 + 精确 early abandon）、`subsequence_topk`、`cross_validate`、`medoids`、`motifs`、`outliers`、`describe`。这些能力当前只在公开 main 源码中，Mooncakes `0.2.0` 包不包含；发布包验证仍以 tag `v0.2.0` 为准。当前 main 的有效 MoonBit 源码约 5,002 行，测试 110 项。示例：`node bin/warpfit.mjs examples/knn-pruned.json`、`subsequence-topk.json`、`cross-validate.json`、`medoids.json`、`motifs.json`、`outliers.json`、`describe.json`。
 
 ## 验证与可复现性
 

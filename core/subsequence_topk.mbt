@@ -126,8 +126,15 @@ pub fn subsequence_topk(
     if cost == @double.infinity {
       continue
     }
+    let start = starts[n * stride + j]
+    // A valid contiguous interval must contain at least as many target points
+    // as the query; otherwise several query points were compressed onto one
+    // target point and the result is not a subsequence of the requested shape.
+    if j - start < n {
+      continue
+    }
     let candidate : SubsequenceCandidate = {
-      start: starts[n * stride + j],
+      start,
       end: j - 1,
       distance: cost.sqrt(),
       squared_cost: cost,

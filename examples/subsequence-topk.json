@@ -1,0 +1,7 @@
+{
+  "schema": "warpfit.request/1",
+  "operation": "subsequence_topk",
+  "query": [0, 1, 0],
+  "target": [0, 1, 0, 9, 0, 1, 0],
+  "top_k": 2
+}

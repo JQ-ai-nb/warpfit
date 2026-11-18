@@ -65,6 +65,22 @@ match @warpfit.divergence(prediction, target, 0.4) {
 
 `select_k` 要求 3..32 条样本、1..15 个严格递增且落在 `2..min(16, 样本数-1)` 的候选簇数。对每个候选：确定性最远点初始化，再执行 DTW k-means；用同一份成对硬 DTW 距离矩阵计算平均轮廓系数，单元素簇按惯例计 0。取轮廓系数最大的候选，并列取较小 k；产生空簇的候选被跳过并可导致 `empty_cluster` 错误。成对矩阵预算在 Int64 内累计，超限在任何 DTW 计算前拒绝；任何候选预算不足都整体报错，不返回部分排名。全同或经对齐不可区分的样本报 `seed_distinct`。
 
+### 0.2.1 新增操作
+
+除原有 `knn` / `subsequence` / `select_k` 外，0.2.1 增加以下版本化 JSON 操作；示例均在 `examples/` 下，可直接用 `node bin/warpfit.mjs examples/<name>.json` 运行。
+
+| operation | 输入要点 | 主要输出 | 示例 |
+|---|---|---|---|
+| `knn_pruned` | `query`、`training`、`options.k/window` | `label`、`neighbors`、`lower_bound_checks`、`full_distance_calls` | `knn-pruned.json` |
+| `subsequence_topk` | `query`、`target`、`top_k` | `matches`（start/end/distance） | `subsequence-topk.json` |
+| `cross_validate` | `data`、`labels`、`options.k/folds` | `accuracy`、`confusion`、`scores`、`predictions` | `cross-validate.json` |
+| `medoids` | `data`、`cluster_count`、`options.first_index` | `medoid_indices`、`labels`、`cost`、`history` | `medoids.json` |
+| `motifs` | `series`、`window`、`top_k`、`options.max_windows` | `pairs`（first_start/second_start/distance） | `motifs.json` |
+| `outliers` | `data`、`options.k` | `scores`（index/score/neighbors） | `outliers.json` |
+| `describe` | `series` | 每特征 min/max/mean/variance/stddev/constant | `describe.json` |
+
+`knn_pruned` 的结果与 `knn` 一致，额外计数器只说明下界排序和 early abandon 节省了多少完整距离调用；`subsequence_topk` 要求返回区间长度不小于查询长度；`cross_validate` 的折按输入下标确定性分配，不是分层抽样。
+
 ### 可保存的聚类模型
 
 `auto_train_model.cluster_count` 为1..min(16,样本数)，最多32条样本；`first_index` 在输入数组范围内。先预处理，再按距最近已选中心最远的样本确定性选择初始中心；并列选最小下标。初始化和聚类共享 `max_work_units`，`total_work_units=seed_work_units+clustering.work_units`。不足以完成初始化或首次完整分配时报错；不能找到足够多非零 DTW 距离的中心时报 `seed_distinct`。它不是随机 k-means++，也不在训练中推断簇数；候选簇数由 `select_k` 在调用方给定范围内按轮廓系数选择。

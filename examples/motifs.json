@@ -1,0 +1,7 @@
+{
+  "schema": "warpfit.request/1",
+  "operation": "motifs",
+  "series": [0, 1, 0, 9, 9, 0, 1, 0],
+  "window": 3,
+  "top_k": 2
+}
