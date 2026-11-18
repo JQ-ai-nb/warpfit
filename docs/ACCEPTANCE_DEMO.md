@@ -45,10 +45,10 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 ## 证据
 
-- CI（0.2.0 源码 `8195d88`）：<https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653>；main 最新 CI 见 <https://github.com/JQ-ai-nb/warpfit/actions>
-- CI（0.2.0 源码 `8195d88`）：<https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653>
-- Mooncakes：<https://mooncakes.io/docs/JQ-ai-nb/warpfit>（0.2.3）
-- 注册表安装验证：`python scripts/registry_consumer.py --version 0.2.3` → `registry install verified: True`，记录见 [evidence/consumer-registry-0.2.3-20261118.json](evidence/consumer-registry-0.2.3-20261118.json)
+- CI（当前 main `8e56c0f`）：<https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089456>
+- 工作台部署（同提交）：<https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089959>
+- Mooncakes：<https://mooncakes.io/docs/JQ-ai-nb/warpfit>（0.2.4）
+- 注册表安装验证：`python scripts/registry_consumer.py --version 0.2.4` → `registry install verified: True`，记录见 [evidence/consumer-registry-0.2.4-20261119.json](evidence/consumer-registry-0.2.4-20261119.json)
 - 验证记录：[VALIDATION.md](VALIDATION.md)；验收自查：[ACCEPTANCE.md](ACCEPTANCE.md)
 - 演示入口：在线工作台（本节第 1 部分）与本地 5 分钟路径（第 2 部分）；仓库不再附带独立演示压缩包。
 

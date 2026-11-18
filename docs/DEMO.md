@@ -1,6 +1,6 @@
 # WarpFit 本地演示包
 
-本包供解压运行和验收复现，来源是蒋琦 / JQ-ai-nb 维护的 [WarpFit 参赛仓库](https://github.com/JQ-ai-nb/warpfit)。0.2.3 是当前维护版本，建立在 2026 年 10 月已公开的 0.1.2 原型和 0.2.0 新申报版本之上；0.2.0 源码已推送至公开 main（`8195d88`）并发布到 [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)；0.1.2 不包含 0.2.0/0.2.1 的新接口。
+本包供解压运行和验收复现，来源是蒋琦 / JQ-ai-nb 维护的 [WarpFit 参赛仓库](https://github.com/JQ-ai-nb/warpfit)。0.2.4 是当前维护版本，建立在 2026 年 10 月已公开的 0.1.2 原型和 0.2.0 新申报版本之上；0.2.0 源码已推送至公开 main（`8195d88`）并发布到 [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)；0.1.2 不包含 0.2.0/0.2.1 的新接口。
 
 需要 Node.js ≥22；数值核心是由 MoonBit 编译的 JavaScript，Node 负责文件和 HTTP 包装。解压后的演示不需要 MoonBit SDK、Python、npm 安装或外部计算服务。完整的 MoonBit 源码、类型接口和开发测试应查看参赛仓库或另行提供的源码包；不要将本运行包作为 Mooncakes 源码包上传。
 

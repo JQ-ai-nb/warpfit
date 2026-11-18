@@ -2,6 +2,14 @@
 
 > 本页分别记录远程验证和推送前的本地验证。历史记录中“未推送 / 未发布”描述当次检查时的状态，不应据此推断当前默认分支或注册表版本；远程结果均对应下列具体提交。2026-11-17 已将 0.2.0 源码推送至公开 main（`8195d88`），三系统 CI 通过。Mooncakes 0.2.0 已于 2026-11-17 发布，`registry_consumer.py --version 0.2.0` 返回 `registry install verified: True`；源码 CI 与注册表安装是两项独立验证。
 
+## 2026-11-19 0.2.4 发布后复核（当前版本）
+
+- 本地全量复跑：`moon fmt --check`、`moon check --target all --deny-warn`、Wasm / Wasm-GC / JS 各 125/125、Node 45/45、`npm run check` 五项全通过（示例 24/24、预算 22/22、确定性 12/12、API 覆盖 22/22、证据 19/19）。
+- 远程：main `8e56c0f` 的 [CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089456) 三系统全绿，同提交 [工作台部署](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089959) 成功。
+- Mooncakes：页面显示 0.2.4 / Apache-2.0；[注册表消费验证](evidence/consumer-registry-0.2.4-20261119.json) `registry_install_verified: True`，10/10，wasm / wasm-gc / js 三目标通过。
+- 本机 native 仍未运行（缺 MSVC），由远程 CI 覆盖；浏览器 24/24 为本地证据，线上最新公开证据仍是 0.2.0 的 22 项。
+- 以下各节为历史记录，其中的 82 / 110 / 113 / 117 项和 0.2.x 版本号只描述当时状态，当前数字以 [STATUS.md](STATUS.md) 为准。
+
 ## 2026-11-18 推送与三系统 CI
 
 - 15:11（UTC+8）推送 10 个提交与 `v0.2.2`、`v0.2.3` 两个 tag 到 `JQ-ai-nb/warpfit`；远程 main 与本地一致。仓库全部提交的作者只有 `蒋琦 <314918884+JQ-ai-nb@users.noreply.github.com>`。

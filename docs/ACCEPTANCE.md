@@ -14,14 +14,16 @@
 | 本期实质新增 | 具备 | 0.2.0：26 个功能提交 / 43 文件 / +2,532 行；0.2.1–0.2.2：7 个新操作 + 5 项修复 | CHANGELOG.md、NOVEMBER.md |
 | 开源合规 | 具备 | Apache-2.0；四类来源声明；UCI 数据 CC BY 4.0（含 DOI 与校验和） | THIRD_PARTY_NOTICES.md、REAL_DATA.md |
 | AI 可解释 | 具备 | 目标与边界、关键取舍、AI 参与环节、人工核对边界 | AI_AND_DECISIONS.md、SEMANTICS.md、WALKTHROUGH.md |
-| 发布到 mooncakes.io | 具备 | 0.2.3，构建 `success`，独立消费验证 `verified: true` | `evidence/consumer-registry-0.2.3-20261118.json` |
-| CI 覆盖检查、构建、测试 | 具备 | 三系统 × 四目标 + 浏览器 + 证据一致性 + 示例稳定性；提交 `a9734c3` 全绿 | [run 44312371517](https://github.com/JQ-ai-nb/warpfit/actions/runs/44312371517) |
+| 发布到 mooncakes.io | 具备 | 0.2.4，构建 `success`，独立消费验证 `verified: true` | `evidence/consumer-registry-0.2.4-20261119.json` |
+| CI 覆盖检查、构建、测试 | 具备 | 三系统 × 四目标 + 浏览器 + 证据一致性 + 示例稳定性；提交 `8e56c0f` 全绿 | [run 44321089456](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089456) |
 
-### 仍差的事项（截至 2026-11-18）
+### 仍差的事项（截至 2026-11-19）
 
-1. **发布通道**：`github.com:443` 在本机不稳定（直连超时、代理 502），必要时用 Git Data API 发布；仓库内容与 CI 结果不受影响。
-1. **申报材料的版本措辞**：申报书正文写的是 0.2.0，当前实际为 0.2.3。是否需要改由参赛者按报名表要求决定。
-2. **十一月确切截止日**：官网写「以官方通知为准」，需按组委会通知核对。
+1. **发布通道**：`github.com:443` 在本机不稳定（直连超时、代理 502）；0.2.4 tag 经 Git Data API 创建，仓库内容与 CI 结果不受影响。
+2. **申报材料的版本措辞**：申报书正文写的是 0.2.0，当前实际为 0.2.4。是否需要改由参赛者按报名表要求决定。
+3. **十一月确切截止日**：官网写「以官方通知为准」，需按组委会通知核对。
+4. **三系统注册表工作流**：`Verify published package` 手动工作流仍为 0 次运行；本地 0.2.4 注册表消费验证已通过，两者不互相替代。
+5. **浏览器证据**：24 项为本地页面结果；线上工作台最新公开证据仍是 0.2.0 的 22 项，不能写成当前版本线上验收。
 
 ---
 
@@ -71,7 +73,7 @@ python scripts/registry_consumer.py --packaged
 python scripts/registry_consumer.py --version 0.2.0
 ```
 
-该模式仅将consumer列为隔离workspace成员，不包含WarpFit本地模块或path替换，指定版本从Mooncakes安装并运行同一个示例，避免上级工程覆盖依赖。新增的手动 `Verify published package` 工作流可在发布后检查三系统及native；该工作流随 0.2.0 源码推送，尚未执行，不能称为已通过。
+该模式仅将consumer列为隔离workspace成员，不包含WarpFit本地模块或path替换，指定版本从Mooncakes安装并运行同一个示例，避免上级工程覆盖依赖。新增的手动 `Verify published package` 工作流可在发布后检查三系统及native；截至 2026-11-19 该工作流仍未运行，本地 0.2.4 注册表消费验证已通过，但不能写成远程三系统已验证。
 
 ## 验收前仍需本人处理
 

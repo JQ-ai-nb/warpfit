@@ -140,7 +140,7 @@ CLI 退出码：0=本次计算正常结束（不代表优化收敛或业务正�
 
 发布前先 `python scripts/package_check.py`，再 `python scripts/registry_consumer.py --packaged`。归档模式校对实际ZIP的模块名、版本和摘要，解出包后用当前SDK支持的 `moon.work` 将consumer与归档包连接，使用 `--frozen` 执行检查和Wasm / Wasm-GC / JS运行；没有引用源码工作区。结果在 `artifacts/consumer-package_archive.json`，明确标记注册表安装未验证。
 
-发布后执行 `python scripts/registry_consumer.py --version 0.2.0`，默认版本来自moon.mod。该模式的隔离workspace只包含consumer，不提供WarpFit本地模块或path覆盖，避免继承上级工程的本地替换；更新注册表并安装指定版本。支持 `--native`，需要C工具链。结果在 `artifacts/consumer-registry.json`，网络或工具失败也会记录失败结果。版本输入会先校验，避免被写成任意manifest片段。
+发布后执行 `python scripts/registry_consumer.py --version 0.2.4`，默认版本来自moon.mod。该模式的隔离workspace只包含consumer，不提供WarpFit本地模块或path覆盖，避免继承上级工程的本地替换；更新注册表并安装指定版本。支持 `--native`，需要C工具链。结果在 `artifacts/consumer-registry.json`，网络或工具失败也会记录失败结果。版本输入会先校验，避免被写成任意manifest片段。
 
 仅在发布已完成后，才使用手动工作流 `Verify published package` 从三系统复核安装；该工作流没有发布步骤。具体执行状态以相应记录为准。
 

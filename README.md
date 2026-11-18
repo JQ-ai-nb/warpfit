@@ -170,7 +170,7 @@ tslearn 单步 DBA 用例     80  ->   80     hard-reference.json
 两行 DP 对照            1200  -> 1200     clean-current.json
 真实数据训练/留出          16  ->   16     uci-model-holdout.json
 浏览器检查                24  ->   24     browser-0.2.2-20261118.json
-注册表消费检查             10  ->   10     consumer-registry-0.2.3-20261118.json
+注册表消费检查             10  ->   10     consumer-registry-0.2.4-20261119.json
 
 数值对照最大绝对误差（tslearn 0.6.4）：2.567e-15；容差 rtol=atol=1e-8
 一致性检查通过：19 项声明与证据文件逐项一致。
@@ -193,7 +193,7 @@ node scripts/benchmark_hard.mjs
 
 `tests/knn_reference.py` 的三种用法：默认只把本次复算写到忽略目录 `artifacts/knn-reference.json`，并在末尾打印证据是否落后（`evidence: current` / `evidence: STALE`，不改变退出码），所以 `python verify.py` 不会弄脏工作树；`--evidence` 同时刷新 `docs/evidence/knn-reference.json`（固定 `newline="\n"`，除 `recorded_at_utc` / `python` 外无变化时跳过并打印 `evidence: unchanged`）；`--check-evidence` 只比较不写入，忽略 `recorded_at_utc`、`python` 与仅表示来源的 `engine_commit`，一致退出 0 打印 `evidence: current`，不一致退出 1 打印 `evidence: STALE` 并逐行列出差异键。
 
-本地执行结果与真实命令见 [VALIDATION.md](docs/VALIDATION.md)，当前测试数与证据索引见 [STATUS.md](docs/STATUS.md)。0.2.0 源码提交 `8195d88` 的 [CI 运行](https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653) 与发布文档提交 `fbd17a5` 的 [CI 运行](https://github.com/JQ-ai-nb/warpfit/actions/runs/44106313819) 均已通过 Linux / macOS / Windows × Wasm / Wasm-GC / JS / native 检查、构建和测试；本机 Wasm / Wasm-GC / JS 各 117 项 MoonBit 测试、Node 43 项、Chromium 浏览器 24 项通过（逐项数字与证据文件见 [STATUS.md](docs/STATUS.md)）。本机仍缺 MSVC，本机 native 未运行；远程 native 已通过。工作台部署随 main 更新；线上工作台在 0.2.0 部署时记录了 22 项检查通过（[证据](docs/evidence/browser-public-0.2.0.json)），当前版本 24 项为本地结果（[证据](docs/evidence/browser-0.2.2-20261118.json)），两者不互相替代。main 最新 CI 见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)。
+本地执行结果与真实命令见 [VALIDATION.md](docs/VALIDATION.md)，当前测试数与证据索引见 [STATUS.md](docs/STATUS.md)。当前 main（`8e56c0f`）的 [CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089456) 已在 Linux / macOS / Windows × Wasm / Wasm-GC / JS / native 全绿，同提交 [工作台部署](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089959) 成功；本机 Wasm / Wasm-GC / JS 各 125 项 MoonBit 测试、Node 45 项、Chromium 浏览器 24 项通过（逐项数字与证据文件见 [STATUS.md](docs/STATUS.md)）。本机仍缺 MSVC，本机 native 未运行；远程 native 已通过。工作台部署随 main 更新；线上工作台在 0.2.0 部署时记录了 22 项检查通过（[证据](docs/evidence/browser-public-0.2.0.json)），当前版本 24 项为本地结果（[证据](docs/evidence/browser-0.2.2-20261118.json)），两者不互相替代。main 最新 CI 见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)。
 
 0.2.1 发布提交为 `d6c15e4`，0.2.0 源码提交 `8195d88` 为上一版；main 最新 CI 见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)。本地验收维护、独立包消费检查与本轮本地新增检查的记录见 [验收自查](docs/ACCEPTANCE.md) 和 [机制与演示](docs/WALKTHROUGH.md)。
 

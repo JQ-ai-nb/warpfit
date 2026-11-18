@@ -2,20 +2,20 @@
 
 本文件是项目所有可量化结论的**唯一出处**。其他文档只引用结论与命令，不重复数字；改数字只改这里，并在同一提交内更新对应证据文件。
 
-记录时间：2026-11-18（UTC+8）｜工作树：干净。本文件不绑定提交哈希——那会在下一次提交后立刻失效；需要定位版本时用 `git log -1`。
+记录时间：2026-11-19（UTC+8）｜工作树：干净。本文件不绑定提交哈希——那会在下一次提交后立刻失效；需要定位版本时用 `git log -1`。
 
 ## 版本与发布
 
 | 项 | 值 | 依据 |
 | --- | --- | --- |
 | 包名 | `JQ-ai-nb/warpfit` | `moon.mod` |
-| 当前版本 | **0.2.3** | `moon.mod` / `package.json` |
+| 当前版本 | **0.2.4** | `moon.mod` / `package.json` |
 | Mooncakes 构建 | `success` | 注册表 API `build_status` |
-| 注册表独立消费验证 | **通过**（`registry_install_verified: true`，10 组检查） | [`evidence/consumer-registry-0.2.3-20261118.json`](evidence/consumer-registry-0.2.3-20261118.json) |
-| 发布 tag | `v0.2.2`、`v0.2.3` 已在本机创建；随下次推送一并上传 | `git tag --list "v0.2*"` |
+| 注册表独立消费验证 | **通过**（`registry_install_verified: true`，10 组检查） | [`evidence/consumer-registry-0.2.4-20261119.json`](evidence/consumer-registry-0.2.4-20261119.json) |
+| 发布 tag | `v0.2.0`–`v0.2.4` 均已推送；`v0.2.4` 指向当前 HEAD | `git tag --list "v0.2*"` 与 GitHub tags API |
 | 推送状态 | 已推送；远程与本地指向同一提交（两条命令的输出应相同） | `git rev-parse HEAD` 与 `git ls-remote origin main` |
 
-版本历史：0.1.2 为原型；0.2.0 本期实质新增；0.2.1 增加 7 个 JSON 操作；0.2.2 修正并列剪枝、top-k 压缩回退、重复样本，并加入 motif 排除半径与分层分折；0.2.3 重写 README 首屏、统一数字出处、新增两条证据命令（无接口变更）。
+版本历史：0.1.2 为原型；0.2.0 本期实质新增；0.2.1 增加 7 个 JSON 操作；0.2.2 修正并列剪枝、top-k 压缩回退、重复样本，并加入 motif 排除半径与分层分折；0.2.3 重写 README 首屏、统一数字出处、新增两条证据命令（无接口变更）；0.2.4 修复六项缺陷、补齐库入口与 22 操作示例，并新增预算/确定性/覆盖三项检查。
 
 ## 代码规模（可复核口径）
 
@@ -63,10 +63,10 @@ node scripts/api_coverage.mjs
 | 层 | 范围 | 结果 | 证据 |
 | --- | --- | --- | --- |
 | MoonBit（本机） | `wasm-gc` / `wasm` / `js` | **125 / 125**，三后端一致 | 本节命令 |
-| MoonBit（远程） | Linux / macOS / Windows × 四目标 + `native` | 提交 `ec82aaf` 三系统全绿（[run 44313624973](https://github.com/JQ-ai-nb/warpfit/actions/runs/44313624973)）；此后提交以 Actions 列表为准 | Actions |
+| MoonBit（远程） | Linux / macOS / Windows × 四目标 + `native` | 提交 `8e56c0f` 三系统全绿（[run 44321089456](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089456)）；同提交 Pages 部署 [44321089959](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089959) 成功 | Actions |
 | Node / CLI | `tests/*.test.mjs` | **45 / 45** | 本节命令 |
 | 浏览器工作台 | 本地 4194，系统 Chrome 158 | **24 / 24**，0 pageerror，0 外部请求 | [`evidence/browser-0.2.2-20261118.json`](evidence/browser-0.2.2-20261118.json) |
-| 注册表消费 | 隔离工程，从 Mooncakes 安装 | 10 / 10，三目标通过 | [`evidence/consumer-registry-0.2.3-20261118.json`](evidence/consumer-registry-0.2.3-20261118.json) |
+| 注册表消费 | 隔离工程，从 Mooncakes 安装 | 10 / 10，三目标通过 | [`evidence/consumer-registry-0.2.4-20261119.json`](evidence/consumer-registry-0.2.4-20261119.json) |
 
 ```text
 moon check --target all --deny-warn
@@ -91,7 +91,8 @@ node --test tests/*.test.mjs
 
 ## 已知缺口
 
-1. **`github.com:443` 不稳定**：本机直连超时、代理返回 502。期间的提交改由 Git Data API 发布（提交树与本地一致），这只影响发布通道，不影响仓库内容。
+1. **`github.com:443` 不稳定**：本机直连超时、代理返回 502；0.2.4 的 tag 改由 Git Data API 创建。仓库内容、CI 与 Pages 结果不受影响。
 2. **本机未跑 `native`**：缺 MSVC，由远程 CI 覆盖；本文件不把远程结果写成本机结果。
-3. **证据文件曾落后于结论**：0.2.2 发布后 `docs/evidence/` 仍只有 0.2.0 的消费记录（`verified:false`）。现每次发布都补一份 `consumer-registry-<版本>-<日期>.json`；0.2.3 首次验证因网络超时失败，第二次通过，证据文件的 `note` 写明这一点。旧文件保留作为历史，不代表当前版本。
-4. **浏览器检查是本地页面**：24 项针对本地 `127.0.0.1:4194`，不构成对已部署站点的断言。
+3. **证据文件曾落后于结论**：0.2.2 发布后 `docs/evidence/` 仍只有 0.2.0 的消费记录（`verified:false`）。现每次发布都补一份 `consumer-registry-<版本>-<日期>.json`；0.2.4 的消费证据已于 2026-11-19 补齐并通过，旧文件保留作为历史，不代表当前版本。
+4. **浏览器检查是本地页面**：24 项针对本地 `127.0.0.1:4194`；线上工作台最新公开证据仍是 0.2.0 部署时的 22 项，两者不互相替代。
+5. **三系统注册表工作流未运行**：`Verify published package` 手动工作流仍为 0 次运行；本地 0.2.4 注册表消费验证已通过，但不能写成远程三系统已验证。
