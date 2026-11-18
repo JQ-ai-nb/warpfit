@@ -50,7 +50,7 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 - Mooncakes：<https://mooncakes.io/docs/JQ-ai-nb/warpfit>（0.2.0）
 - 注册表安装验证：`python scripts/registry_consumer.py --version 0.2.0` → `registry install verified: True`
 - 验证记录：[VALIDATION.md](VALIDATION.md)；验收自查：[ACCEPTANCE.md](ACCEPTANCE.md)
-- 演示包：`deliverables/WarpFit-demo-0.2.0.zip`（53 文件、10 组检查）
+- 演示包：`deliverables/WarpFit-demo-0.2.1.zip`（53 文件、10 组检查）
 
 ## 边界
 
