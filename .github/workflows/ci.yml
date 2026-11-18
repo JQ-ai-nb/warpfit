@@ -41,10 +41,14 @@ jobs:
         run: python exhaustive_oracle.py --check
       - name: Every documented number matches its evidence file
         run: node scripts/evidence_report.mjs
+      - name: Build the engine once for the checks below
+        run: node scripts/build.mjs
       - name: Every example runs twice with identical bytes
-        run: |
-          node scripts/build.mjs
-          node scripts/check_examples.mjs
+        run: node scripts/check_examples.mjs
+      - name: Budgets refuse before the work and accept a generous one
+        run: node scripts/budget_check.mjs
+      - name: Same request, same bytes
+        run: node scripts/determinism_check.mjs
       - name: Browser integration on Linux
         if: runner.os == 'Linux'
         shell: bash

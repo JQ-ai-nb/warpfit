@@ -3,13 +3,17 @@
   "private": true,
   "version": "0.2.3",
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "node --test tests/cli.test.mjs tests/numerical.test.mjs tests/extended.test.mjs tests/exhaustive_hard.test.mjs tests/properties_hard.test.mjs tests/uci_room.test.mjs tests/long_input.test.mjs tests/model.test.mjs tests/model_cli.test.mjs tests/subsequence.test.mjs tests/distance_only.test.mjs tests/auto_model.test.mjs tests/uci_holdout.test.mjs",
     "evidence": "node scripts/evidence_report.mjs",
     "examples": "node scripts/check_examples.mjs",
-    "check": "node scripts/evidence_report.mjs && node scripts/check_examples.mjs",
-    "start": "node scripts/serve.mjs"
+    "check": "node scripts/evidence_report.mjs && node scripts/check_examples.mjs && node scripts/budget_check.mjs && node scripts/determinism_check.mjs",
+    "start": "node scripts/serve.mjs",
+    "budget": "node scripts/budget_check.mjs",
+    "determinism": "node scripts/determinism_check.mjs"
   }
 }

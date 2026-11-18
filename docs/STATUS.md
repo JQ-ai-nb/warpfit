@@ -46,10 +46,14 @@ EOF
 | --- | --- | --- |
 | `node scripts/evidence_report.mjs` | 19 项声明与本目录 `evidence/*.json` 逐项比对（用例数、误差、浏览器项数、注册表验证） | 列出不一致项，退出 1 |
 | `node scripts/check_examples.mjs` | `examples/` 全部 23 个文件：20 个请求断言 `ok:true`、`operation` 匹配、两次运行逐字节一致；3 个数据文件按设计跳过 | 列出失败文件，退出 1 |
+| `node scripts/budget_check.mjs` | 19 个接收预算的操作：预算=1 必须拒绝（`work_budget` 或 `cell_limit`），宽裕预算必须成功 | 列出失败项，退出 1 |
+| `node scripts/determinism_check.mjs` | 12 个生成请求在同一进程内连续跑两次，输出必须逐字节相同（同时暴露跨调用残留状态） | 列出失败项，退出 1 |
 
 ```text
 node scripts/evidence_report.mjs
 node scripts/check_examples.mjs
+node scripts/budget_check.mjs
+node scripts/determinism_check.mjs
 ```
 
 ## 测试矩阵

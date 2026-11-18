@@ -154,8 +154,10 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 先跑两条命令，它们把“结论”和“证据”直接对上，不需要先读测试源码：
 
 ```text
-node scripts/evidence_report.mjs   # 19 项声明与证据文件逐项比对；不一致退出 1
-node scripts/check_examples.mjs    # 20 个示例请求各跑两次，输出逐字节一致
+node scripts/evidence_report.mjs     # 19 项声明与证据文件逐项比对；不一致退出 1
+node scripts/check_examples.mjs      # 20 个示例请求各跑两次，输出逐字节一致
+node scripts/budget_check.mjs        # 预算=1 必须拒绝，宽裕预算必须成功
+node scripts/determinism_check.mjs   # 12 个生成请求，两次输出逐字节相同
 ```
 
 `evidence_report` 的实测输出（2026-11-18，节选）：
@@ -175,6 +177,8 @@ tslearn 单步 DBA 用例     80  ->   80     hard-reference.json
 ```
 
 `check_examples` 覆盖 `examples/` 下全部 23 个文件：20 个请求逐个断言 `ok:true`、`operation` 与请求一致、两次运行字节相同；3 个模型训练/预测数据文件按设计跳过并标注。此前只有 8 个样例被测试引用，其余 15 个无人执行。
+
+`budget_check` 对 19 个接收预算的操作做双向断言：把预算压到 1 必须返回 `work_budget` 或 `cell_limit`，放宽到各自上限必须成功——只测“能拒绝”会漏掉“永远拒绝”的实现。`determinism_check` 用固定种子生成 12 个请求，在同一进程内连续跑两次并比较字节，顺带暴露跨调用残留状态。
 
 再往下是单项算法的重算：
 
