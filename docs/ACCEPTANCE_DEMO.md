@@ -47,10 +47,10 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 - CI（0.2.0 源码 `8195d88`）：<https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653>；main 最新 CI 见 <https://github.com/JQ-ai-nb/warpfit/actions>
 - CI（0.2.0 源码 `8195d88`）：<https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653>
-- Mooncakes：<https://mooncakes.io/docs/JQ-ai-nb/warpfit>（0.2.0）
-- 注册表安装验证：`python scripts/registry_consumer.py --version 0.2.0` → `registry install verified: True`
+- Mooncakes：<https://mooncakes.io/docs/JQ-ai-nb/warpfit>（0.2.3）
+- 注册表安装验证：`python scripts/registry_consumer.py --version 0.2.3` → `registry install verified: True`，记录见 [evidence/consumer-registry-0.2.3-20261118.json](evidence/consumer-registry-0.2.3-20261118.json)
 - 验证记录：[VALIDATION.md](VALIDATION.md)；验收自查：[ACCEPTANCE.md](ACCEPTANCE.md)
-- 演示包：`deliverables/WarpFit-demo-0.2.1.zip`（53 文件、10 组检查）
+- 演示入口：在线工作台（本节第 1 部分）与本地 5 分钟路径（第 2 部分）；仓库不再附带独立演示压缩包。
 
 ## 边界
 

@@ -20,7 +20,7 @@ node bin/warpfit.mjs examples/motifs.json    # 序列里两段植入图案，距
 node scripts/serve.mjs                       # 打开 127.0.0.1:4194，看曲线 / 热图 / 路径
 ```
 
-样例都是合成数据，数值可复算；它们证明算法行为，不代表任何业务准确率。
+样例都是合成数据，数值可复算；它们证明算法行为，不代表任何业务准确率。完整的「60 秒在线 + 5 分钟本地」验收路径见 [ACCEPTANCE_DEMO.md](docs/ACCEPTANCE_DEMO.md)。
 
 | 任务族 | 命令 | 已验证输出 | 你能看到什么 |
 |---|---|---|---|

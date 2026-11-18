@@ -7,6 +7,7 @@
 //   node scripts/evidence_report.mjs
 //   node scripts/evidence_report.mjs --json
 import {readFileSync, existsSync, readdirSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
 
 const root = new URL('..', import.meta.url);
 const read = (name) => {
@@ -106,5 +107,14 @@ if (process.argv.includes('--json')) {
     process.exitCode = 1;
   } else {
     console.log(`\n一致性检查通过：${rows.length} 项声明与证据文件逐项一致。`);
+  }
+  // Deliberately informational: this number changes on every commit, so making
+  // it an assertion would make the check fail for being up to date. The docs
+  // tell readers to run the command instead of quoting a figure.
+  const unpushed = spawnSync('git', ['rev-list', '--count', 'origin/main..HEAD'], {
+    cwd: root, encoding: 'utf8',
+  });
+  if (unpushed.status === 0) {
+    console.log(`未推送提交：${unpushed.stdout.trim()}（动态值，供核对；文档不写死这个数）`);
   }
 }

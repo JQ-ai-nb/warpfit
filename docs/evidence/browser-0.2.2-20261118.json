@@ -1,8 +1,9 @@
 {
+  "base_url": "http://127.0.0.1:4194",
+  "note": "Local browser workbench checks. Not a claim about the deployed site.",
   "recorded_at_utc": "2026-11-18T12:55:04+00:00",
   "commit": "504e1e2",
   "command": "node tests/browser.mjs (local 127.0.0.1:4194, system Chrome)",
-  "note": "Local browser workbench checks. Not a claim about the deployed site.",
   "browser": "158.0.8127.36",
   "checks": [
     "prototype fitting and optimization charts",

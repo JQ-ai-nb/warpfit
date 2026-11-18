@@ -25,9 +25,9 @@
 
 ## 验证证据
 
-- **MoonBit**：0.2.2 发布包四后端各 117/117；0.2.1 为 110/110；0.2.0 为 82/82；本机三后端各 117/117，native 由远程 CI 覆盖。
+- **MoonBit**：本机三后端各 117/117（测试跑在工作树，不是解包后的发布包）；native 由远程 CI 覆盖，CI 最后验证到 `9c3a102`。
 - **Node**：43/43。
-- **浏览器**：24/24，覆盖 12 个场景、模型文件往返、错误输入、预算、取消和 390px 布局；线上页面无 pageerror、无外部数据请求。
+- **浏览器**：本地 24/24（证据 `browser-0.2.2-20261118.json`），覆盖 12 个场景、模型文件往返、错误输入、预算、取消和 390px 布局；线上工作台另有 0.2.0 部署时的 22 项记录（`browser-public-0.2.0.json`），两者不互相替代。
 - **CI**：0.2.0 源码 `8195d88` 的 [44095202653](https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653)；发布文档提交 `fbd17a5` 的 [44106313819](https://github.com/JQ-ai-nb/warpfit/actions/runs/44106313819) 也通过；main 最新 CI 见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)。
 - **Mooncakes**：`JQ-ai-nb/warpfit@0.2.0`，`build_status: success`；`python scripts/registry_consumer.py --version 0.2.0` 返回 `registry install verified: True`。
 - **独立参考**：硬 DTW 240 组全路径穷举；tslearn 对照 160 组硬 DTW、80 组单步 DBA、9 组聚类、100 组预处理；子序列 256 组枚举 + 120 组 tslearn；UCI 16 段训练 / 16 段后续验证与 64 个距离复算。

@@ -12,7 +12,8 @@
 | 当前版本 | **0.2.3** | `moon.mod` / `package.json` |
 | Mooncakes 构建 | `success` | 注册表 API `build_status` |
 | 注册表独立消费验证 | **通过**（`registry_install_verified: true`，10 组检查） | [`evidence/consumer-registry-0.2.3-20261118.json`](evidence/consumer-registry-0.2.3-20261118.json) |
-| 本地仓库写入证据 | 4 个提交未推送（凭据受限） | `git rev-list --count origin/main..HEAD` |
+| 发布 tag | 、 已在本机创建；随下次推送一并上传 | `git tag --list "v0.2*"` |
+| 本地仓库写入证据 | 远程 main 停在 `9c3a102`；本地有未推送提交（数量会随提交变化，用右侧命令查，不写死） | `git rev-list --count origin/main..HEAD` |
 
 版本历史：0.1.2 为原型；0.2.0 本期实质新增；0.2.1 增加 7 个 JSON 操作；0.2.2 修正并列剪枝、top-k 压缩回退、重复样本，并加入 motif 排除半径与分层分折；0.2.3 重写 README 首屏、统一数字出处、新增两条证据命令（无接口变更）。
 
@@ -56,7 +57,7 @@ node scripts/check_examples.mjs
 | 层 | 范围 | 结果 | 证据 |
 | --- | --- | --- | --- |
 | MoonBit（本机） | `wasm-gc` / `wasm` / `js` | **117 / 117**，三后端一致 | 本节命令 |
-| MoonBit（远程） | Linux / macOS / Windows × 四目标 + `native` | 由 CI 覆盖；本机缺 MSVC | Actions |
+| MoonBit（远程） | Linux / macOS / Windows × 四目标 + `native` | CI 最后验证到 `9c3a102`（当时 113 项）；此后提交尚未经 CI | Actions |
 | Node / CLI | `tests/*.test.mjs` | **43 / 43** | 本节命令 |
 | 浏览器工作台 | 本地 4194，系统 Chrome 158 | **24 / 24**，0 pageerror，0 外部请求 | [`evidence/browser-0.2.2-20261118.json`](evidence/browser-0.2.2-20261118.json) |
 | 注册表消费 | 隔离工程，从 Mooncakes 安装 | 10 / 10，三目标通过 | [`evidence/consumer-registry-0.2.3-20261118.json`](evidence/consumer-registry-0.2.3-20261118.json) |
@@ -84,7 +85,7 @@ node --test tests/*.test.mjs
 
 ## 已知缺口
 
-1. **4 个提交未推送**：`git push` 目前被 `DWS-ai-nb` 凭据拒绝，远程 main 停在 `9c3a102`。CI 尚未验证这 4 个提交。
+1. **有未推送提交**：`git push` 目前被 `DWS-ai-nb` 凭据拒绝（403），远程 main 停在 `9c3a102`。待推数量用 `git rev-list --count origin/main..HEAD` 查——本文件不写死这个数，因为它每次提交都会变。
 2. **本机未跑 `native`**：缺 MSVC，由远程 CI 覆盖；本文件不把远程结果写成本机结果。
 3. **证据文件曾落后于结论**：0.2.2 发布后 `docs/evidence/` 仍只有 0.2.0 的消费记录（`verified:false`）。现每次发布都补一份 `consumer-registry-<版本>-<日期>.json`；0.2.3 首次验证因网络超时失败，第二次通过，证据文件的 `note` 写明这一点。旧文件保留作为历史，不代表当前版本。
 4. **浏览器检查是本地页面**：24 项针对本地 `127.0.0.1:4194`，不构成对已部署站点的断言。
