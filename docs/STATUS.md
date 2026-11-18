@@ -37,6 +37,20 @@ for label,g in (("src",[p for p in fs if "wbtest" not in p.name]),("test",[p for
 EOF
 ```
 
+## 自查命令
+
+两条命令覆盖本文件的大部分结论，CI 每次都跑：
+
+| 命令 | 检查什么 | 失败行为 |
+| --- | --- | --- |
+| `node scripts/evidence_report.mjs` | 19 项声明与本目录 `evidence/*.json` 逐项比对（用例数、误差、浏览器项数、注册表验证） | 列出不一致项，退出 1 |
+| `node scripts/check_examples.mjs` | `examples/` 全部 23 个文件：20 个请求断言 `ok:true`、`operation` 匹配、两次运行逐字节一致；3 个数据文件按设计跳过 | 列出失败文件，退出 1 |
+
+```text
+node scripts/evidence_report.mjs
+node scripts/check_examples.mjs
+```
+
 ## 测试矩阵
 
 | 层 | 范围 | 结果 | 证据 |

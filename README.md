@@ -151,6 +151,33 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 ## 验证与可复现性
 
+先跑两条命令，它们把“结论”和“证据”直接对上，不需要先读测试源码：
+
+```text
+node scripts/evidence_report.mjs   # 19 项声明与证据文件逐项比对；不一致退出 1
+node scripts/check_examples.mjs    # 20 个示例请求各跑两次，输出逐字节一致
+```
+
+`evidence_report` 的实测输出（2026-11-18，节选）：
+
+```text
+tslearn 硬 DTW 用例      160  ->  160     hard-reference.json
+tslearn 单步 DBA 用例     80  ->   80     hard-reference.json
+全路径穷举               240  ->  240     clean-current.json
+子序列路径枚举            256  ->  256     clean-current.json
+两行 DP 对照            1200  -> 1200     clean-current.json
+真实数据训练/留出          16  ->   16     uci-model-holdout.json
+浏览器检查                24  ->   24     browser-0.2.2-20261118.json
+注册表消费检查             10  ->   10     consumer-registry-0.2.2-20261118.json
+
+数值对照最大绝对误差（tslearn 0.6.4）：2.567e-15；容差 rtol=atol=1e-8
+一致性检查通过：19 项声明与证据文件逐项一致。
+```
+
+`check_examples` 覆盖 `examples/` 下全部 23 个文件：20 个请求逐个断言 `ok:true`、`operation` 与请求一致、两次运行字节相同；3 个模型训练/预测数据文件按设计跳过并标注。此前只有 8 个样例被测试引用，其余 15 个无人执行。
+
+再往下是单项算法的重算：
+
 ```text
 python verify.py
 python exhaustive_oracle.py --check

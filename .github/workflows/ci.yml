@@ -39,6 +39,12 @@ jobs:
       - run: python verify.py --native
       - name: Recompute independent fixtures with numeric tolerance
         run: python exhaustive_oracle.py --check
+      - name: Every documented number matches its evidence file
+        run: node scripts/evidence_report.mjs
+      - name: Every example runs twice with identical bytes
+        run: |
+          node scripts/build.mjs
+          node scripts/check_examples.mjs
       - name: Browser integration on Linux
         if: runner.os == 'Linux'
         shell: bash
