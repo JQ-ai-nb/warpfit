@@ -25,7 +25,7 @@
 
 ## 验证证据
 
-- **MoonBit**：wasm / wasm-gc / js / native 四个后端各 86/86；本机三后端各 86/86，native 由远程 CI 覆盖。
+- **MoonBit**：0.2.0 发布包四后端各 82/82；main 后续新增 4 项边界测试，当前四后端各 86/86（本机三后端各 86/86，native 由远程 CI 覆盖）。
 - **Node**：43/43。
 - **浏览器**：24/24，覆盖 12 个场景、模型文件往返、错误输入、预算、取消和 390px 布局；线上页面无 pageerror、无外部数据请求。
 - **CI**：0.2.0 源码 `8195d88` 的 [44095202653](https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653)；发布文档提交 `fbd17a5` 的 [44106313819](https://github.com/JQ-ai-nb/warpfit/actions/runs/44106313819) 也通过；main 最新 CI 见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)。
