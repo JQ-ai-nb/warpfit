@@ -5,7 +5,7 @@
 ## 2026-11-17 推送与远程 CI
 
 - `8195d88` 已推送至公开 main；[CI 44095202653](https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653) 在 Linux / macOS / Windows 全部通过，包含 `verify.py --native`、独立数值对照和 Linux 浏览器检查。
-- 本机 Wasm / Wasm-GC / JS 各 82 项 MoonBit 测试、Node 43 项、Chromium 24 项通过；本机 native 缺 MSVC，远程 native 已通过。
+- 本机 Wasm / Wasm-GC / JS 各 86 项 MoonBit 测试、Node 43 项、Chromium 24 项通过；本机 native 缺 MSVC，远程 native 已通过。
 - Mooncakes 0.2.0 已发布；`python scripts/registry_consumer.py --version 0.2.0` 通过（`registry install verified: True`），隔离 workspace 中 Wasm / Wasm-GC / JS 均通过。
 
 ## 2026-11-15 DBA 与逐点平均对照（未推送 / 未发布）
