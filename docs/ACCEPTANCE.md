@@ -2,6 +2,32 @@
 
 检查日期：2026-11-14。参赛人：蒋琦；GitHub / Mooncakes 模块命名：JQ-ai-nb。
 
+## 验收对照表（2026-11-18 复核）
+
+官方口径来自[赛事官网](https://moonbitlang.github.io/Hackathon2026/)与[章程](https://bxup9uklfcb.feishu.cn/wiki/Dx4Bwd6D1i3GfHkajQCcF7SznEd)列出的六条，加上章程验收段落的发布与 CI 要求。数字只在 [STATUS.md](STATUS.md) 维护，本表只做映射。
+
+| 要求 | 状态 | 可核对的东西 | 复核方式 |
+| --- | --- | --- | --- |
+| MoonBit 为主要实现 | 具备 | 核心 27 个 `.mbt`（排除测试）；Node 只做文件、页面与 Worker 包装 | STATUS.md「代码规模」 |
+| 公开仓库与开发记录 | **部分**：main 公开 80 个提交，**4 个提交未推送** | 提交历史、CHANGELOG | `git rev-list --count origin/main..HEAD` |
+| 可运行、可检查、可测试 | 具备 | 117 项 × 三后端、43 项 Node、24 项浏览器、20 个示例 | `node scripts/check_examples.mjs` |
+| 本期实质新增 | 具备 | 0.2.0：26 个功能提交 / 43 文件 / +2,532 行；0.2.1–0.2.2：7 个新操作 + 5 项修复 | CHANGELOG.md、NOVEMBER.md |
+| 开源合规 | 具备 | Apache-2.0；四类来源声明；UCI 数据 CC BY 4.0（含 DOI 与校验和） | THIRD_PARTY_NOTICES.md、REAL_DATA.md |
+| AI 可解释 | 具备 | 目标与边界、关键取舍、AI 参与环节、人工核对边界 | AI_AND_DECISIONS.md、SEMANTICS.md、WALKTHROUGH.md |
+| 发布到 mooncakes.io | 具备 | 0.2.2，构建 `success`，独立消费验证 `verified: true` | `evidence/consumer-registry-0.2.2-20261118.json` |
+| CI 覆盖检查、构建、测试 | 具备 | 三系统 × 四目标 + 浏览器 + 证据一致性 + 示例稳定性 | `.github/workflows/ci.yml` |
+
+### 仍差的事项（截至 2026-11-18）
+
+1. **推送 4 个提交**：`git push` 被本机 `DWS-ai-nb` 凭据拒绝（403），远程 main 停在 `9c3a102`。代码、测试、文档都已在本地完成，缺的只是凭据。这一条不解决，CI 就没有验证过 0.2.2 之后的修复。
+2. **申报材料的版本措辞**：申报书正文写的是 0.2.0，当前实际为 0.2.2。是否需要改由参赛者按报名表要求决定。
+3. **十一月确切截止日**：官网写「以官方通知为准」，需按组委会通知核对。
+
+---
+
+以下为历史记录，保留当时状态。
+
+
 2026-11-17 更新：0.2.0 源码（`8195d88`）已推送；后续文档提交不改变源码，三系统 CI 均通过（main 最新 CI 见 Actions）；Mooncakes 0.2.0 已发布，注册表安装验证通过。以下 2026-11-14 记录保留当时状态：本轮按用户要求只做本地维护，未推送或发布；最近已公开的源码提交当时是 `8695d8a`，其三系统四后端 CI 与在线页面验证见 [VALIDATION.md](VALIDATION.md)。本轮新增独立消费样例和包验证，结果另行记录，不冒充线上版本已有能力。
 
 2026-11-18 更新：0.2.1 已发布（tag `v0.2.1` 指向 `d6c15e4`），四后端各 110 项测试与注册表安装验证通过（该次记录为 113 项；main 现为 117 项，以 [STATUS.md](STATUS.md) 为准）；新增 `knn_pruned`、`subsequence_topk`、`cross_validate`、`medoids`、`motifs`、`outliers`、`describe`。
