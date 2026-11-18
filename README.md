@@ -116,7 +116,7 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 ## 2026-11-18 源码增强（已包含在 0.2.1）
 
-新增 JSON 操作：`knn_pruned`（LB_Keogh 排序 + 精确 early abandon）、`subsequence_topk`、`cross_validate`、`medoids`、`motifs`、`outliers`、`describe`。这些能力已包含在 Mooncakes `0.2.1`，`0.2.0` 包不包含；当前 main 的有效 MoonBit 源码约 5,002 行，测试 110 项。示例：`node bin/warpfit.mjs examples/knn-pruned.json`、`subsequence-topk.json`、`cross-validate.json`、`medoids.json`、`motifs.json`、`outliers.json`、`describe.json`。
+新增 JSON 操作：`knn_pruned`（LB_Keogh 排序 + 精确 early abandon）、`subsequence_topk`、`cross_validate`、`medoids`、`motifs`、`outliers`、`describe`。这些能力已包含在 Mooncakes `0.2.1`，`0.2.0` 包不包含；当前 main 的有效 MoonBit 源码 5,549 行（56 个 `.mbt`，排除 `*_wbtest.mbt`；含测试共 10,528 行），测试 110 项。示例：`node bin/warpfit.mjs examples/knn-pruned.json`、`subsequence-topk.json`、`cross-validate.json`、`medoids.json`、`motifs.json`、`outliers.json`、`describe.json`。
 
 ## 验证与可复现性
 

@@ -2,6 +2,23 @@
 
 > 本页分别记录远程验证和推送前的本地验证。历史记录中“未推送 / 未发布”描述当次检查时的状态，不应据此推断当前默认分支或注册表版本；远程结果均对应下列具体提交。2026-11-17 已将 0.2.0 源码推送至公开 main（`8195d88`），三系统 CI 通过。Mooncakes 0.2.0 已于 2026-11-17 发布，`registry_consumer.py --version 0.2.0` 返回 `registry install verified: True`；源码 CI 与注册表安装是两项独立验证。
 
+## 2026-11-18 验收前复跑（commit `9c3a102`）
+
+验收前对当前 main 做了一次完整复跑，命令与结果如下，均为本机实测（moon 0.1.20261021 / moonc 0.10.17 / Node 22 / Windows）：
+
+| 检查 | 命令 | 结果 |
+| --- | --- | --- |
+| 四目标类型检查 | `moon check --target all --deny-warn` | 通过 |
+| MoonBit 测试（Wasm-GC） | `moon test --target wasm-gc --deny-warn` | 110/110 |
+| MoonBit 测试（Wasm） | `moon test --target wasm --deny-warn` | 110/110 |
+| MoonBit 测试（JS） | `moon test --target js --deny-warn` | 110/110 |
+| Node 测试 | `node --test tests/*.test.mjs` | 43/43 |
+| 浏览器工作台 | `node tests/browser.mjs`（本地 4194，系统 Chrome 158） | 24/24，0 pageerror，0 外部请求 |
+| README 的 11 条 CLI 示例 | `node bin/warpfit.mjs examples/*.json` | 11/11 `ok:true` |
+| 畸形输入 16 例 | 空、截断、`null`、数组顶层、未知 operation、operation 为数字、缺字段、类型错、空序列、`NaN`、重复键、80 层嵌套、5 万元素、未知字段、schema 不匹配 | 全部返回 `ok:false`，无进程崩溃 |
+
+本机 native 未运行（缺 MSVC），由远程 CI 覆盖。源码规模按可复核口径统计：56 个 `.mbt`，排除 `*_wbtest.mbt` 后 5,549 行，含测试 10,528 行。
+
 ## 2026-11-17 推送与远程 CI
 
 - `8195d88` 已推送至公开 main；[CI 44095202653](https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653) 在 Linux / macOS / Windows 全部通过，包含 `verify.py --native`、独立数值对照和 Linux 浏览器检查。
