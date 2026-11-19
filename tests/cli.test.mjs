@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { closeSync, linkSync, mkdirSync, mkdtempSync, openSync, readFileSync,
+  writeFileSync, rmSync, rmdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { run } from '../dist/engine.mjs';
@@ -12,6 +12,18 @@ const cli = (...args) => spawnSync(process.execPath, ['bin/warpfit.mjs', ...args
 const input = source => spawnSync(process.execPath, ['bin/warpfit.mjs', '-'], { cwd: root, input: source, encoding: 'utf8' });
 const request = { schema: 'warpfit.request/1', operation: 'loss', x: [2], y: [5], options: { gamma: 1 } };
 const close = (a, b, tol = 1e-9) => assert.ok(Math.abs(a - b) <= tol, `${a} != ${b}`);
+
+function withOutputDirectory(files, runCheck) {
+  const work = join(root, 'work');
+  mkdirSync(work, { recursive: true });
+  const dir = mkdtempSync(join(work, 'cli-output-'));
+  try {
+    runCheck(dir);
+  } finally {
+    for (const name of files) rmSync(join(dir, name), { force: true });
+    rmdirSync(dir);
+  }
+}
 
 test('file workflow fits a template with strictly descending accepted objectives', () => {
   const r = cli('examples/prototype.json'); assert.equal(r.status, 0, r.stderr);
@@ -65,14 +77,41 @@ test('budget stop returns the last evaluated iterate and uses exit 3', () => {
   const out = JSON.parse(r.stdout); assert.equal(out.stop, 'evaluation_budget');
   assert.equal(out.history.length, 1); close(out.prototype[0][0], 0);
 });
-test('output file contains the same schema and stdout stays empty', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'warpfit-'));
-  try {
+test('a separate output file can be replaced and stdout stays empty', () => {
+  withOutputDirectory(['result.json'], dir => {
     const target = join(dir, 'result.json');
+    writeFileSync(target, 'previous result'.repeat(1000));
     const r = cli('examples/training.json', '--out', target);
     assert.equal(r.status, 0); assert.equal(r.stdout, '');
     assert.equal(JSON.parse(readFileSync(target)).schema, 'warpfit.response/1');
-  } finally { rmSync(dir, { recursive: true }); }
+  });
+});
+test('file output preserves the request when given the same file or a hard link', () => {
+  withOutputDirectory(['request.json', 'alias.json'], dir => {
+    const original = join(dir, 'request.json');
+    const alias = join(dir, 'alias.json');
+    const body = JSON.stringify(request);
+    writeFileSync(original, body);
+    linkSync(original, alias);
+    const check = result => {
+      assert.equal(result.status, 2, result.stderr);
+      assert.equal(result.stdout, '');
+      assert.equal(JSON.parse(result.stderr.trim()).error.code, 'output_io');
+      assert.equal(readFileSync(original, 'utf8'), body);
+      assert.equal(readFileSync(alias, 'utf8'), body);
+    };
+    check(cli(original, '--out', original));
+    check(cli(original, '--out', alias));
+
+    const stdin = openSync(original, 'r');
+    try {
+      check(spawnSync(process.execPath, ['bin/warpfit.mjs', '-', '--out', alias], {
+        cwd: root, encoding: 'utf8', stdio: [stdin, 'pipe', 'pipe'],
+      }));
+    } finally {
+      closeSync(stdin);
+    }
+  });
 });
 test('help and version are available', () => {
   assert.match(cli('--help').stdout, /REQUEST/);

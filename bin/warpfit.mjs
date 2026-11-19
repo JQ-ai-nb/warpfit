@@ -1,5 +1,7 @@
 #!/usr/bin/env node
-import { readFile, writeFile } from 'node:fs/promises';
+import { constants, fstatSync, ReadStream } from 'node:fs';
+import { open, readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { run } from '../dist/engine.mjs';
 
 const args = process.argv.slice(2);
@@ -26,6 +28,27 @@ if (args.length === 1 && args[0] === '--version') {
 
 const failure = (code, message) => ({ schema: 'warpfit.response/1', ok: false, error: { code, message } });
 let response;
+let inputIdentity;
+let inputPath;
+
+async function saveResponse(path, text) {
+  const overlap = () => new CliError('output_io', 'output file must differ from the input file');
+  if (inputPath !== undefined && resolve(path) === inputPath) throw overlap();
+
+  // Open without truncating first. Checking the open file also handles aliases,
+  // including symbolic links and hard links to the file that was read.
+  const output = await open(path, constants.O_CREAT | constants.O_WRONLY);
+  try {
+    if (inputIdentity) {
+      const target = await output.stat({ bigint: true });
+      if (target.dev === inputIdentity.dev && target.ino === inputIdentity.ino) throw overlap();
+    }
+    await output.truncate(0);
+    await output.writeFile(text, 'utf8');
+  } finally {
+    await output.close();
+  }
+}
 
 try {
   if (!([1, 3].includes(args.length)) || (args.length === 3 && args[1] !== '--out')) {
@@ -34,6 +57,11 @@ try {
 
   let data;
   if (args[0] === '-') {
+    // A shell may redirect a regular file to stdin. A pipe has no file identity
+    // to compare with the output path.
+    if (args.length === 3 && process.stdin instanceof ReadStream) {
+      inputIdentity = fstatSync(process.stdin.fd, { bigint: true });
+    }
     const chunks = []; let size = 0;
     for await (const chunk of process.stdin) {
       size += chunk.length;
@@ -42,12 +70,18 @@ try {
     }
     data = Buffer.concat(chunks);
   } else {
-    const { stat } = await import('node:fs/promises');
+    inputPath = resolve(args[0]);
     try {
-      if ((await stat(args[0])).size > 2_000_000) {
-        throw new CliError('io', 'input exceeds 2,000,000 bytes');
+      const input = await open(inputPath, 'r');
+      try {
+        inputIdentity = await input.stat({ bigint: true });
+        if (inputIdentity.size > 2_000_000n) {
+          throw new CliError('io', 'input exceeds 2,000,000 bytes');
+        }
+        data = await input.readFile();
+      } finally {
+        await input.close();
       }
-      data = await readFile(args[0]);
     } catch (error) {
       if (error instanceof CliError) throw error;
       throw new CliError('io', 'cannot read the request file', error.message);
@@ -82,11 +116,12 @@ try {
 
 const text = JSON.stringify(response, null, 2) + '\n';
 try {
-  if (args.length === 3 && args[1] === '--out') await writeFile(args[2], text, 'utf8');
+  if (args.length === 3 && args[1] === '--out') await saveResponse(args[2], text);
   else process.stdout.write(text);
 } catch (error) {
-  process.stderr.write(String(error?.message || error) + '\n');
-  process.stderr.write(JSON.stringify(failure('output_io', 'cannot write the output file')) + '\n');
+  if (!(error instanceof CliError)) process.stderr.write(String(error?.message || error) + '\n');
+  const message = error instanceof CliError ? error.message : 'cannot write the output file';
+  process.stderr.write(JSON.stringify(failure('output_io', message)) + '\n');
   process.exitCode = 2;
 }
 

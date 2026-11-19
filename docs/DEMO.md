@@ -16,6 +16,8 @@ node scripts/check_demo.mjs
 
 `DEMO_MANIFEST.json` 记录源码提交、打包时是否有未提交改动及各文件校验值，用于识别混用文件或损坏，**不是数字签名或第三方验收证明**。若打包时 PATH 中没有 MoonBit，报告的 `sdk_absence_verified` 为 true；日常运行时装有 SDK 也不影响使用。
 
+在源码仓库运行 `python scripts/package_demo.py` 时，脚本先构建并检查候选 ZIP，再更新 `deliverables/` 下的演示包。自检失败时保留已有 ZIP，并在 `artifacts/demo-package.json` 记录失败结果。
+
 ## 三个完整使用场景
 
 1. **有限偏移的周期对齐。** 信号分析开发者输入 `examples/align.json` 中两条四点序列，运行下列命令；窗口为1时得到距离0及完整路径。验证脚本还将窗口改为0，检查平方路径代价为2，展示约束确实影响结果。

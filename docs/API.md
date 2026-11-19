@@ -132,6 +132,8 @@ node bin/warpfit.mjs -
 
 `-` 从标准输入读取到 EOF。无 `--out` 时将 JSON 写入 stdout，指定后写入对应文件。未知字段消息最多显示字段名的前 80 个字符。文件读取错误的路径与诊断通过 stderr 输出。`--help` 和 `--version` 提供帮助与版本。
 
+普通 CLI 可以更新单独的结果文件。`--out` 指向同一个输入文件时，包括通过硬链接指向同一个文件，CLI 保留输入数据，以退出码 2 和 stderr 上的 `output_io` 说明路径冲突。通过重定向直接从文件读取 stdin 时使用同样的检查。
+
 CLI 退出码：0=本次计算正常结束（不代表优化收敛或业务正确），2=输入 / schema / 文件错误，3=矩阵或逻辑预算不足，或 fit / dba / cluster / pipeline / 模型训练在预算耗尽时停止。预算耗尽时可能返回 `ok:true` 的最后一个完整状态；调用者必须检查 stop，pipeline 和模型训练的 stop 位于 `clustering.stop`。`max_steps`、`max_iterations`、`line_search_stalled`、`numerical_stall` 均不保证收敛。聚类如果出现空簇返回 `empty_cluster`，可更换初始中心或减少簇数。
 
 ## 独立消费与发布准备

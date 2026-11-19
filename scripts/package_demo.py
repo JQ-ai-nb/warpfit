@@ -94,7 +94,8 @@ def main():
     output.mkdir(exist_ok=True)
     prefix = f'WarpFit-demo-{version}'
     archive = output / f'{prefix}.zip'
-    # Create a new archive beside the target and replace only our own ZIP.
+    # Stage the archive beside the target, so a verified candidate can replace
+    # it in one operation without exposing a partially checked ZIP.
     fd, temporary_name = tempfile.mkstemp(prefix='demo-build-', suffix='.zip', dir=output)
     os.close(fd)
     temporary = Path(temporary_name)
@@ -102,42 +103,56 @@ def main():
         with ZipFile(temporary, 'w', compression=ZIP_DEFLATED) as package:
             for name, data in sorted(files.items()):
                 package.writestr(f'{prefix}/{name}', data)
-        temporary.replace(archive)
+        candidate_hash = digest(temporary.read_bytes())
+        candidate_bytes = temporary.stat().st_size
+
+        work = ROOT / 'work'
+        work.mkdir(exist_ok=True)
+        extracted = Path(tempfile.mkdtemp(prefix='demo-extracted-', dir=work))
+        with ZipFile(temporary) as package:
+            # Names come from the explicit allowlist above.
+            package.extractall(extracted)
+        runtime = extracted / prefix
+        empty_path = extracted / 'empty-path'
+        empty_path.mkdir()
+        environment = {**os.environ, 'PATH': str(empty_path), 'WARPFIT_REQUIRE_NO_SDK': '1'}
+        command = [node, 'scripts/check_demo.mjs']
+        try:
+            checked = subprocess.run(command, cwd=runtime, env=environment, capture_output=True,
+                                     text=True, encoding='utf-8', errors='replace', timeout=180)
+        except subprocess.TimeoutExpired:
+            checked = subprocess.CompletedProcess(command, 124, '', 'Demo check timed out after 180 seconds')
+        check_path = runtime / 'artifacts/demo-check.json'
+        verification = json.loads(check_path.read_text(encoding='utf-8')) if check_path.is_file() else None
+        passed = checked.returncode == 0 and verification is not None and verification['status'] == 'passed'
+        if passed:
+            temporary.replace(archive)
     finally:
         temporary.unlink(missing_ok=True)
 
-    work = ROOT / 'work'
-    work.mkdir(exist_ok=True)
-    extracted = Path(tempfile.mkdtemp(prefix='demo-extracted-', dir=work))
-    with ZipFile(archive) as package:
-        package.extractall(extracted)  # Names were constructed only from the explicit allowlist above.
-    runtime = extracted / prefix
-    empty_path = extracted / 'empty-path'
-    empty_path.mkdir()
-    environment = {**os.environ, 'PATH': str(empty_path), 'WARPFIT_REQUIRE_NO_SDK': '1'}
-    checked = subprocess.run([node, 'scripts/check_demo.mjs'], cwd=runtime, env=environment,
-                             capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=180)
-    check_path = runtime / 'artifacts/demo-check.json'
-    verification = json.loads(check_path.read_text(encoding='utf-8')) if check_path.exists() else None
     report = {
         'recorded_at_utc': datetime.now(timezone.utc).isoformat(),
-        'status': 'passed' if checked.returncode == 0 and verification and verification['status'] == 'passed' else 'failed',
-        'module': manifest['module'], 'version': version, 'archive': str(archive),
-        'archive_sha256': digest(archive.read_bytes()), 'archive_bytes': archive.stat().st_size,
+        'status': 'passed' if passed else 'failed',
+        'module': manifest['module'], 'version': version, 'requested_archive': str(archive),
+        'archive': str(archive) if passed else None,
+        'archive_sha256': candidate_hash if passed else None,
+        'archive_bytes': candidate_bytes if passed else None,
+        'candidate_sha256': candidate_hash, 'archive_replaced': passed,
         'file_count': len(files), 'source_commit': manifest['source_commit'],
         'source_dirty': manifest['source_dirty'], 'extracted_directory': str(runtime),
-        'command': [node, 'scripts/check_demo.mjs'], 'returncode': checked.returncode,
+        'command': command, 'returncode': checked.returncode,
         'path_is_empty_directory': True, 'verification': verification, 'stderr': checked.stderr,
         'publication_performed': False, 'registry_install_verified': False,
     }
     (ROOT / 'artifacts').mkdir(exist_ok=True)
     (ROOT / 'artifacts/demo-package.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     print(f"Demo bundle: {report['status']}; {len(files)} files; {len(verification['checks']) if verification else 0} check groups; Node {node_version}")
-    print(f'Archive: {archive}')
-    print(f'SHA256: {report["archive_sha256"]}')
-    if report['status'] != 'passed':
+    if not passed:
+        print('The candidate failed verification. Any existing demo ZIP stays in place.')
         print(checked.stdout, checked.stderr)
         return 1
+    print(f'Archive: {archive}')
+    print(f'SHA256: {report["archive_sha256"]}')
     return 0
 
 
