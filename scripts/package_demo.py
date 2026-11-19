@@ -38,13 +38,6 @@ def main():
     module = (ROOT / 'moon.mod').read_text(encoding='utf-8')
     assert re.search(r'^name\s*=\s*"JQ-ai-nb/warpfit"\s*$', module, re.M)
     assert re.search(r'^version\s*=\s*"' + re.escape(version) + r'"\s*$', module, re.M)
-    # The workbench and the bundle must expose the same scenarios: stop with a
-    # non-zero exit instead of silently shipping a subset of web/examples.
-    on_disk = sorted(path.stem for path in (ROOT / 'web/examples').glob('*.json'))
-    declared = sorted(WEB_EXAMPLES)
-    if on_disk != declared:
-        raise SystemExit('web/examples mismatch: missing={} unexpected={}'.format(
-            sorted(set(declared) - set(on_disk)), sorted(set(on_disk) - set(declared))))
     node = shutil.which('node')
     if node is None:
         raise RuntimeError('Node.js >=22 is required.')
@@ -52,6 +45,13 @@ def main():
     node_version = run([node, '--version']).stdout.strip()
     assert int(node_version.removeprefix('v').split('.')[0]) >= 22, node_version
     run([node, 'scripts/build.mjs'])
+    # The build creates web/examples in a fresh checkout. Compare its output
+    # with the bundle allowlist before picking the files to ship.
+    on_disk = {path.stem for path in (ROOT / 'web/examples').glob('*.json')}
+    declared = set(WEB_EXAMPLES)
+    if on_disk != declared:
+        raise SystemExit('web/examples mismatch: missing={} unexpected={}'.format(
+            sorted(declared - on_disk), sorted(on_disk - declared)))
 
     paths = [
         'LICENSE', 'THIRD_PARTY_NOTICES.md', 'docs/REAL_DATA.md', 'docs/SEMANTICS.md',

@@ -76,6 +76,6 @@ if (process.argv.includes('--json')) {
   if (failures.length) {
     console.log(`\n失败 ${failures.length} 项：`);
     for (const f of failures) console.log('  - ' + f);
-    process.exitCode = 1;
   }
 }
+if (failures.length) process.exitCode = 1;

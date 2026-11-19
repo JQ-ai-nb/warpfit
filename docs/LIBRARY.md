@@ -2,7 +2,7 @@
 
 JSON / CLI 只是这层核心的其中一个消费端。核心包 `JQ-ai-nb/warpfit/core` 可以直接被 MoonBit 项目引用，不经过 Node，也不需要 JSON。
 
-完整的可编译示例在 [`cmd/library_demo/main.mbt`](../cmd/library_demo/main.mbt)，CI 会像其他包一样检查它。
+运行 `moon run cmd/library_demo --target js --deny-warn` 可看到两个中心和新批次标签 `[0, 1]`。 [完整示例](../cmd/library_demo/main.mbt)
 
 ## 安装与引用
 
@@ -29,11 +29,11 @@ let series = match @warpfit.Series::from_rows([[0.0], [1.0], [0.0]]) {
   }
 }
 println(series.count.to_string())     // 3
-println(series.at(1, 0).to_string())  // 1.0
+println(series.at(1, 0).to_string())  // 1
 let rows = series.to_rows()  // [[0.0], [1.0], [0.0]]
 ```
 
-`from_rows` 会做与所有公开入口相同的形状检查：空输入、空行、行长不一致、超限都会返回 `series_shape`，不会带着畸形数据进入算法。
+`from_rows` 自 0.2.4 提供，接受 1 至 512 步、1 至 16 个特征，行长度须相同。形状错误返回 `series_shape`，非有限或超出 ±10000 的值返回 `series_value`。需要使用更长的原始序列时，可构造行主序 `Series` 后调用接收长输入的预处理接口。使用 `at` 时，调用方须确保行与特征下标分别在有效范围内。`to_rows` 返回独立数组。
 
 ## 典型路径：训练一次，预测多次
 
@@ -42,8 +42,20 @@ let options : @warpfit.PipelineOptions = {
   preprocessing: @warpfit.preprocess_options(),
   clustering: @warpfit.cluster_options(),
 }
-let fit = @warpfit.train_cluster_model(data, [0, 2], options)   // 两个初始中心
-let prediction = @warpfit.predict_clusters(fit.model, later, 20000000)
+let fit = match @warpfit.train_cluster_model(data, [0, 2], options) {
+  Ok(value) => value
+  Err(error) => {
+    println(error.to_string())
+    return
+  }
+}
+let prediction = match @warpfit.predict_clusters(fit.model, later, 20000000) {
+  Ok(value) => value
+  Err(error) => {
+    println(error.to_string())
+    return
+  }
+}
 let labels = prediction.labels          // 每个新样本的簇编号
 let distances = prediction.distances    // 到所选中心的 DTW 距离
 ```
@@ -64,7 +76,7 @@ let distances = prediction.distances    // 到所选中心的 DTW 距离
 | 分类 | `knn_classify(query, training, knn_options())` | 输出投票，不是概率 |
 | 子序列定位 | `subsequence_dtw(query, target, dtw_options())` | 目标端点开放，返回最早结束的最优区间 |
 | 统计 | `summarize_series(series)` | 总体方差、标准差、常量标记 |
-| 预处理 | `prepare_series(series, preprocess_options())` | 重采样 + 逐维标准化 |
+| 预处理 | `prepare_series(series, preprocess_options())` | 默认逐维标准化，可设置 `target_count` 重采样 |
 
 每个入口都返回 `Result[..., WarpError]`，不抛异常、不修改调用者传入的数组。
 
@@ -77,10 +89,10 @@ match @warpfit.dtw_distance(a, b, options) {
   Ok(value) => println(value.distance.to_string())
   Err(error) => {
     // code 是稳定的，用来分支；message 是给人看的，可能随版本细化
-    if error.code == "work_budget" {
-      println("请提高 max_work_units")
+    if error.code == "cell_limit" {
+      println("请缩短输入或调整 max_cells")
     }
-    println(error.to_string())   // "work_budget: ..."
+    println(error.to_string())   // "cell_limit: ..."
   }
 }
 ```
@@ -89,12 +101,12 @@ match @warpfit.dtw_distance(a, b, options) {
 
 ## 预算
 
-耗时的入口都通过 options 接收预算，并且**在分配内存或开始迭代之前**检查：
+矩阵算法和迭代流程各有预算参数。以硬 DTW 与聚类为例：
 
 - `max_cells`：单次矩阵的格点数上限，默认 262144。
 - `max_work_units`：一次调用的逻辑工作量上限，默认 2000 万。
 
-预算不足时返回 `cell_limit` / `work_budget`，不会返回部分结果。`predict_clusters` 的预算是直接参数，推荐沿用 2000 万。
+矩阵超限返回 `cell_limit`，初始工作超过额度时可能返回 `work_budget`。若迭代中耗尽预算，拟合或 DBA 等操作可能返回最近一次完整结果，调用方应检查 `stop`。`predict_clusters` 将预算作为直接参数。
 
 ## 与 JSON 层的关系
 

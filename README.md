@@ -2,9 +2,9 @@
 
 **给不能引入 Python 运行时的 MoonBit / Wasm 工程，一条从原始序列到分组与检索结果的时间序列分析流水线。**
 
-对齐 → 模板学习 → 聚类 → 最近邻分类 → 子序列检索，22 个 JSON 操作；工作量在计算前校验，排不出来时返回原因而不是崩溃或空结果。
+对齐 → 模板学习 → 聚类 → 最近邻分类 → 子序列检索。库与 JSON 接口提供输入上限、工作量预算与明确的停止状态。
 
-[在线工作台](https://jq-ai-nb.github.io/warpfit/) ｜ [Mooncakes 0.2.4](https://mooncakes.io/docs/JQ-ai-nb/warpfit) ｜ [当前状态与全部实测数字](docs/STATUS.md) ｜ Apache-2.0
+[在线工作台](https://jq-ai-nb.github.io/warpfit/) ｜ [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit) ｜ [版本与验证状态](docs/STATUS.md) ｜ Apache-2.0
 
 ![本地工作台：曲线、对齐轨迹与热图](docs/screenshots/desktop.png)
 
@@ -29,9 +29,9 @@ node scripts/serve.mjs                       # 打开 127.0.0.1:4194，看曲线
 | 预处理 + 聚类 | `node bin/warpfit.mjs examples/pipeline.json` | 标签 `[0,0,1,1]` | 预处理统计与簇中心 |
 | 最近邻分类 | `node bin/warpfit.mjs examples/knn.json` | `rise`，投票 `[2,1]` | 3 个邻居的距离与下标 |
 | 候选簇数选择 | `node bin/warpfit.mjs examples/select-k.json` | `best_k=3`，轮廓系数 0.9544 | 各候选的轮廓系数对比 |
-| 模型保存与复用 | `node bin/warpfit-model.mjs train examples/model_train.json work/cluster-model.json && node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predict_data.json` | 新数据标签 `[0,1,0]` | 可下载、可重新导入的模型文件 |
+| 模型保存与复用 | 见下方模型文件流程 | 新数据标签 `[0,1,0]` | 可下载、可重新导入的模型文件 |
 
-**版本**：源码与 Mooncakes 均为 0.2.4，注册表独立消费验证通过（证据见 [STATUS.md](docs/STATUS.md)）。本地检查、远程 CI 与注册表结果分开记录，本地结果不推断已发布状态。
+版本、独立安装、源码测试和部署结果可按提交及包版本核对。 [版本与验证状态](docs/STATUS.md)
 
 ## 为什么在 MoonBit 重做
 
@@ -52,11 +52,10 @@ flowchart LR
     C --> D["响应 JSON<br/>warpfit.response/1<br/>ok / 错误码 / 工作量"]
     D --> E["CLI<br/>bin/warpfit.mjs"]
     D --> F["浏览器 Worker<br/>web/worker.mjs"]
-    D --> G["MoonBit 库调用<br/>cmd/series_pipeline"]
-    C -. "同一份 wasm-gc / wasm / js 产物" .-> F
+    C --> G["MoonBit 库调用<br/>cmd/library_demo"]
 ```
 
-预算、边界和失败语义都在 `B` 与 `C` 之间校验：请求先过字段白名单和数值范围，再进算法；算不出来时返回 `Infeasible` 式的错误码与原因，不返回半个结果。
+JSON 入口检查字段和类型，核心检查形状、取值和预算。部分迭代操作在耗尽预算时返回最近一次完整状态及停止原因。 [接口与错误说明](docs/API.md)
 
 ## 快速运行
 
@@ -98,7 +97,7 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 另有训练与验证分开的公开传感器数据流程：`node scripts/evaluate_holdout.mjs`。16段较早记录用于训练，另16段不重叠的后续记录用于文件模型加载后的预测；脚本输出训练状态、测试距离及训练初始中心的基线，完整方法见 [真实数据说明](docs/REAL_DATA.md)。单次固定划分只证明对应输入的结果，不能解读为分类准确率或生产效果。
 
-库包导入：`"JQ-ai-nb/warpfit/core" @warpfit`。0.2.4 已发布到 [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)；0.1.2 不包含本期新增接口。库用法见 [LIBRARY.md](docs/LIBRARY.md)（构造 `Series`、训练→预测、错误处理、预算），可编译示例见 [cmd/library_demo](cmd/library_demo/main.mbt) 与 [cmd/series_pipeline](cmd/series_pipeline/main.mbt)，签名见 [pkg.generated.mbti](core/pkg.generated.mbti)，JSON 与 CLI 契约见 [API.md](docs/API.md)。
+在 MoonBit 项目中以 `"JQ-ai-nb/warpfit/core" @warpfit` 导入库。构造 `Series`、训练及预测均有可运行的示例。 [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit) · [库用法](docs/LIBRARY.md) · [可编译示例](cmd/library_demo/main.mbt) · [接口签名](core/pkg.generated.mbti) · [JSON 与 CLI](docs/API.md)
 
 ## 完整工作流
 
@@ -127,7 +126,7 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 ## 实现范围
 
 - 硬 DTW：加权平方局部代价、完整路径、确定性并列顺序及 Sakoe-Chiba 窗口；不等长窗口沿较长轴延伸。距离专用接口只保留两行 DP，并只计算允许的带内格点，供聚类分配与预测使用。
-- 子序列 DTW：消费完整查询，允许目标的起止点开放，返回一个最小代价连续区间和路径；并列时选最早结束位置。支持多变量权重与矩阵预算，当前不支持窗口约束或多结果检索。
+- 子序列 DTW 使用完整查询和开放的目标端点。`subsequence` 返回一个最佳区间及路径，并列时取最早结束位置。`subsequence_topk` 另提供多个匹配及排除半径，具体约束见 API 文档。
 - 加权 DBA：按硬对齐路径迭代更新固定长度模板；明确记录目标、预算和停止原因，支持不同长度及特征权重。
 - 最近邻分类：硬 DTW 距离上的 k 近邻多数投票，返回 k 个邻居、投票分布与每项距离；票数并列时比距离和，仍并列时按邻居顺序决胜。结果是投票而非概率，训练集上限 32 条。
 - 簇数选择：候选 k 各自用确定性最远点初始化训练，按硬 DTW 距离计算平均轮廓系数并取最大；并列取较小 k，产生空簇的候选记为缺席。成对距离矩阵只算一次，与聚类共享预算。
@@ -151,34 +150,18 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 ## 验证与可复现性
 
-先跑两条命令，它们把“结论”和“证据”直接对上，不需要先读测试源码：
+构建引擎后可核对证据和运行示例。完整测试结果及报告文件见 [版本与验证状态](docs/STATUS.md)。
 
 ```text
-node scripts/evidence_report.mjs     # 19 项声明与证据文件逐项比对；不一致退出 1
-node scripts/check_examples.mjs      # 24 个示例请求各跑两次，输出逐字节一致
-node scripts/budget_check.mjs        # 预算=1 必须拒绝，宽裕预算必须成功
-node scripts/determinism_check.mjs   # 12 个生成请求，两次输出逐字节相同
+node scripts/build.mjs
+node scripts/evidence_report.mjs
+node scripts/check_examples.mjs
+node scripts/budget_check.mjs
+node scripts/determinism_check.mjs
+node scripts/api_coverage.mjs
 ```
 
-`evidence_report` 的实测输出（2026-11-18，节选）：
-
-```text
-tslearn 硬 DTW 用例      160  ->  160     hard-reference.json
-tslearn 单步 DBA 用例     80  ->   80     hard-reference.json
-全路径穷举               240  ->  240     clean-current.json
-子序列路径枚举            256  ->  256     clean-current.json
-两行 DP 对照            1200  -> 1200     clean-current.json
-真实数据训练/留出          16  ->   16     uci-model-holdout.json
-浏览器检查                24  ->   24     browser-0.2.2-20261118.json
-注册表消费检查             10  ->   10     consumer-registry-0.2.3-20261118.json
-
-数值对照最大绝对误差（tslearn 0.6.4）：2.567e-15；容差 rtol=atol=1e-8
-一致性检查通过：19 项声明与证据文件逐项一致。
-```
-
-`check_examples` 覆盖 `examples/` 下全部 27 个文件：24 个请求逐个断言 `ok:true`、`operation` 与请求一致、两次运行字节相同；3 个模型训练/预测数据文件按设计跳过并标注。此前只有 8 个样例被测试引用，其余无人执行。`api_coverage` 进一步保证 **22 个操作每个都至少有一个可运行示例**，并出现在 `API.md` 里。
-
-`budget_check` 对所有接收预算的操作（当前 22 个示例请求）做双向断言：把预算压到 1 必须返回 `work_budget` 或 `cell_limit`，放宽到各自上限必须成功——只测“能拒绝”会漏掉“永远拒绝”的实现。`determinism_check` 用固定种子生成 12 个请求，在同一进程内连续跑两次并比较字节，顺带暴露跨调用残留状态。
+`evidence_report` 比对固定参考数据，并按源码版本查找浏览器和注册表报告。`check_examples` 执行请求两次，核对响应、操作名与输出字节。只作输入的 JSON 数据文件单列。`api_coverage` 核对每个操作是否有示例和文档。`budget_check` 检查示例收紧或放宽预算后的结果，`determinism_check` 在同一进程内重复执行固定种子的请求。
 
 再往下是单项算法的重算：
 
@@ -193,11 +176,7 @@ node scripts/benchmark_hard.mjs
 
 `tests/knn_reference.py` 的三种用法：默认只把本次复算写到忽略目录 `artifacts/knn-reference.json`，并在末尾打印证据是否落后（`evidence: current` / `evidence: STALE`，不改变退出码），所以 `python verify.py` 不会弄脏工作树；`--evidence` 同时刷新 `docs/evidence/knn-reference.json`（固定 `newline="\n"`，除 `recorded_at_utc` / `python` 外无变化时跳过并打印 `evidence: unchanged`）；`--check-evidence` 只比较不写入，忽略 `recorded_at_utc`、`python` 与仅表示来源的 `engine_commit`，一致退出 0 打印 `evidence: current`，不一致退出 1 打印 `evidence: STALE` 并逐行列出差异键。
 
-本地执行结果与真实命令见 [VALIDATION.md](docs/VALIDATION.md)，当前测试数与证据索引见 [STATUS.md](docs/STATUS.md)。0.2.0 源码提交 `8195d88` 的 [CI 运行](https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653) 与发布文档提交 `fbd17a5` 的 [CI 运行](https://github.com/JQ-ai-nb/warpfit/actions/runs/44106313819) 均已通过 Linux / macOS / Windows × Wasm / Wasm-GC / JS / native 检查、构建和测试；本机 Wasm / Wasm-GC / JS 各 117 项 MoonBit 测试、Node 43 项、Chromium 浏览器 24 项通过（逐项数字与证据文件见 [STATUS.md](docs/STATUS.md)）。本机仍缺 MSVC，本机 native 未运行；远程 native 已通过。工作台部署随 main 更新；线上工作台在 0.2.0 部署时记录了 22 项检查通过（[证据](docs/evidence/browser-public-0.2.0.json)），当前版本 24 项为本地结果（[证据](docs/evidence/browser-0.2.2-20261118.json)），两者不互相替代。main 最新 CI 见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)。
-
-0.2.1 发布提交为 `d6c15e4`，0.2.0 源码提交 `8195d88` 为上一版；main 最新 CI 见 [Actions](https://github.com/JQ-ai-nb/warpfit/actions)。本地验收维护、独立包消费检查与本轮本地新增检查的记录见 [验收自查](docs/ACCEPTANCE.md) 和 [机制与演示](docs/WALKTHROUGH.md)。
-
-版本发布链：0.2.0 于 2026-11-17、0.2.1 与 0.2.2 于 2026-11-18、0.2.3 与 0.2.4 于 2026-11-18 发布到 [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit)；当前版本的独立消费验证结果只写在 [STATUS.md](docs/STATUS.md)，避免本文件与证据文件口径不一致。
+源码测试、工作台和包安装都有对应的版本与运行记录。 [版本与验证状态](docs/STATUS.md) · [历史验证记录](docs/VALIDATION.md) · [验收自查](docs/ACCEPTANCE.md) · [GitHub Actions](https://github.com/JQ-ai-nb/warpfit/actions)
 
 发布前可运行 `python scripts/package_check.py` 和 `python scripts/registry_consumer.py --packaged`：它在独立工程中只使用实际归档包，以冻结本地workspace检查并运行10组公共能力（原有8组，另加最近邻分类`knn`与选簇数`select_k`）。默认不带`--packaged`才从注册表安装。归档验证不能写成Mooncakes安装已通过，详情见 [消费验证说明](docs/API.md#独立消费与发布准备)。
 
@@ -222,4 +201,4 @@ Soft-DTW 和自项校正来自 [Cuturi / Blondel 2017](https://proceedings.mlr.p
 
 ## 维护者与许可
 
-维护者 / 个人参赛申请人：**蒋琦**；GitHub / Mooncakes：**JQ-ai-nb**。Apache-2.0。设计、编码与测试使用 AI 辅助；维护者负责目标、边界、关键数值与发布结论的最终核对，AI 生成内容经过测试、独立参考与 CI 复核。算法来自公开论文，**不宣称算法首创或世界唯一**。
+维护者及个人参赛人为**蒋琦**，GitHub 与 Mooncakes 命名空间为 **JQ-ai-nb**。代码采用 Apache-2.0。设计、编码与测试使用 AI 辅助，维护者负责核对目标、边界与结果。 [参赛仓库](https://github.com/JQ-ai-nb/warpfit) · [来源和依赖](THIRD_PARTY_NOTICES.md)

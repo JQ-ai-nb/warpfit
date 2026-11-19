@@ -1,0 +1,106 @@
+{
+  "recorded_at_utc": "2026-11-18T15:56:20.492550+00:00",
+  "source_commit": "8e56c0f110cd7fd1d39b433e0d024eeef4779adc",
+  "module": "JQ-ai-nb/warpfit",
+  "version": "0.2.4",
+  "status": "passed",
+  "tools": {
+    "moon": "0.1.20261021",
+    "moonc": "0.10.17+093cb8f9c",
+    "node": "v24.22.1",
+    "os": "Windows"
+  },
+  "commands": "python verify.py",
+  "test_results": [
+    {
+      "tool": "MoonBit",
+      "target": "wasm",
+      "total": 125,
+      "passed": 125,
+      "failed": 0
+    },
+    {
+      "tool": "MoonBit",
+      "target": "wasm-gc",
+      "total": 125,
+      "passed": 125,
+      "failed": 0
+    },
+    {
+      "tool": "MoonBit",
+      "target": "js",
+      "total": 125,
+      "passed": 125,
+      "failed": 0
+    },
+    {
+      "tool": "Node",
+      "total": 45,
+      "passed": 45,
+      "failed": 0
+    }
+  ],
+  "checks": {
+    "check_examples": {
+      "passed": 24,
+      "requests": 24,
+      "skipped": 3
+    },
+    "api_coverage": {
+      "passed": 22,
+      "total": 22
+    },
+    "budget_check": {
+      "passed": 22,
+      "budgeted": 22,
+      "unbudgeted": 2
+    },
+    "determinism_check": {
+      "passed": 12,
+      "total": 12
+    }
+  },
+  "moonbit_line_counts": {
+    "source": {
+      "files": 28,
+      "total_lines": 5898,
+      "code_lines": 5264
+    },
+    "test": {
+      "files": 30,
+      "total_lines": 5228,
+      "code_lines": 4948
+    }
+  },
+  "local_native_run": false,
+  "archive": {
+    "status": "passed",
+    "checks": [
+      "dtw",
+      "distance_only",
+      "dba",
+      "cluster_model",
+      "subsequence",
+      "long_preprocess",
+      "soft_gradient",
+      "fit_rank",
+      "knn",
+      "select_k"
+    ],
+    "archive_sha256": "a7efa2800843c077b42f1675c4a89424ee0462ec3b46f5e02c6817b9ad455738",
+    "runtime_targets": [
+      "wasm",
+      "wasm-gc",
+      "js"
+    ],
+    "registry_install_verified": false
+  },
+  "package_file_count": 195,
+  "demo": {
+    "status": "passed",
+    "checks": 10,
+    "sha256": "f9f9eaf0604956b35eea311e9065188aee8c53d3f456abc6e585302eb3531070",
+    "unpacked_runtime_verified": true,
+    "without_moon_on_path": true
+  }
+}

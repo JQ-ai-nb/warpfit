@@ -27,7 +27,7 @@ def main() -> int:
     metadata = (ROOT/"moon.mod").read_text(encoding="utf-8")
     source_version = re.search(r'^version\s*=\s*"([^"]+)"', metadata, re.M)[1]
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--version", default=os.environ.get("WARPFIT_RELEASE_VERSION", source_version))
+    parser.add_argument("--version", default=os.environ.get("WARPFIT_RELEASE_VERSION") or source_version)
     parser.add_argument("--native", action="store_true", help="Also run native; needs a C toolchain")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--packaged", action="store_true", help="Use _build/publish archive for the selected version")

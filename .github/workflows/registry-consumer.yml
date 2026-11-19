@@ -3,9 +3,8 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Already-published Mooncakes version to verify
-        required: true
-        default: '0.2.0'
+        description: Published version to verify. Leave blank to use moon.mod.
+        required: false
         type: string
 permissions:
   contents: read

@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 // Run every example through the CLI twice and require a stable, successful
-// answer. Fifteen of the twenty-three files were never executed by any test, so
-// they could rot silently while the README still pointed at them.
+// answer. This catches broken examples even when no individual test uses them.
 //
 // Files without an `operation` field are inputs to the model workflow (training
 // and prediction payloads), not requests; they are listed as skipped, not
@@ -26,6 +25,7 @@ for (const file of files) {
     doc = JSON.parse(raw);
   } catch {
     failures.push(`${file}: not valid JSON`);
+    rows.push({file, status: 'fail', operation: '-', note: 'invalid JSON'});
     continue;
   }
   if (!doc.operation) {
@@ -35,11 +35,13 @@ for (const file of files) {
   const run = () => spawnSync(process.execPath, ['bin/warpfit.mjs', `examples/${file}`], {
     cwd: root,
     encoding: 'utf8',
+    timeout: 30_000,
   });
   const first = run();
   const second = run();
-  if (first.status !== 0) {
-    failures.push(`${file}: exit ${first.status}: ${(first.stderr || '').slice(0, 120)}`);
+  const failure = [first, second].find((result) => result.status !== 0);
+  if (failure) {
+    failures.push(`${file}: exit ${failure.status}: ${(failure.error?.message || failure.stderr || '').slice(0, 120)}`);
     rows.push({file, status: 'fail', operation: doc.operation, note: 'non-zero exit'});
     continue;
   }
@@ -85,6 +87,6 @@ if (process.argv.includes('--json')) {
   if (failures.length) {
     console.log(`\n失败 ${failures.length} 项：`);
     for (const f of failures) console.log('  - ' + f);
-    process.exitCode = 1;
   }
 }
+if (failures.length) process.exitCode = 1;

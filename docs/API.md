@@ -130,7 +130,7 @@ node bin/warpfit.mjs examples/training.json --out training-result.json
 node bin/warpfit.mjs -
 ```
 
-`-` 从标准输入读取到 EOF。无 `--out` 时输出 JSON 到 stdout；指定后写入对应文件，stdout 为空。错误不回显序列数值；未知字段错误会包含字段名。`--help` / `--version` 提供帮助。
+`-` 从标准输入读取到 EOF。无 `--out` 时将 JSON 写入 stdout，指定后写入对应文件。未知字段消息最多显示字段名的前 80 个字符。文件读取错误的路径与诊断通过 stderr 输出。`--help` 和 `--version` 提供帮助与版本。
 
 CLI 退出码：0=本次计算正常结束（不代表优化收敛或业务正确），2=输入 / schema / 文件错误，3=矩阵或逻辑预算不足，或 fit / dba / cluster / pipeline / 模型训练在预算耗尽时停止。预算耗尽时可能返回 `ok:true` 的最后一个完整状态；调用者必须检查 stop，pipeline 和模型训练的 stop 位于 `clustering.stop`。`max_steps`、`max_iterations`、`line_search_stalled`、`numerical_stall` 均不保证收敛。聚类如果出现空簇返回 `empty_cluster`，可更换初始中心或减少簇数。
 
@@ -140,7 +140,7 @@ CLI 退出码：0=本次计算正常结束（不代表优化收敛或业务正�
 
 发布前先 `python scripts/package_check.py`，再 `python scripts/registry_consumer.py --packaged`。归档模式校对实际ZIP的模块名、版本和摘要，解出包后用当前SDK支持的 `moon.work` 将consumer与归档包连接，使用 `--frozen` 执行检查和Wasm / Wasm-GC / JS运行；没有引用源码工作区。结果在 `artifacts/consumer-package_archive.json`，明确标记注册表安装未验证。
 
-发布后执行 `python scripts/registry_consumer.py --version 0.2.0`，默认版本来自moon.mod。该模式的隔离workspace只包含consumer，不提供WarpFit本地模块或path覆盖，避免继承上级工程的本地替换；更新注册表并安装指定版本。支持 `--native`，需要C工具链。结果在 `artifacts/consumer-registry.json`，网络或工具失败也会记录失败结果。版本输入会先校验，避免被写成任意manifest片段。
+发布后可运行 `python scripts/registry_consumer.py --version 0.2.4` 固定安装版本。省略 `--version` 时默认使用 `moon.mod`，也可由 `WARPFIT_RELEASE_VERSION` 指定。独立工作区仅包括调用方，WarpFit 从注册表安装。可在具备 C 工具链的环境增测 `--native`。成功或失败的完整结果都会写入 `artifacts/consumer-registry.json`。
 
 仅在发布已完成后，才使用手动工作流 `Verify published package` 从三系统复核安装；该工作流没有发布步骤。具体执行状态以相应记录为准。
 

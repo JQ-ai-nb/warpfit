@@ -1,0 +1,173 @@
+{
+  "recorded_at_utc": "2026-11-18T15:57:23.487239+00:00",
+  "repository": {
+    "url": "https://api.github.com/repos/JQ-ai-nb/warpfit",
+    "http": 200,
+    "full_name": "JQ-ai-nb/warpfit",
+    "private": false,
+    "default_branch": "main",
+    "html_url": "https://github.com/JQ-ai-nb/warpfit"
+  },
+  "release_main": {
+    "url": "https://api.github.com/repos/JQ-ai-nb/warpfit/commits/main",
+    "http": 200,
+    "sha": "8e56c0f110cd7fd1d39b433e0d024eeef4779adc",
+    "author": "JQ-ai-nb",
+    "committer": "JQ-ai-nb",
+    "author_name": "蒋琦",
+    "committer_name": "蒋琦"
+  },
+  "ci": {
+    "url": "https://api.github.com/repos/JQ-ai-nb/warpfit/actions/runs/44321089456",
+    "http": 200,
+    "name": "CI",
+    "id": 44321089456,
+    "event": "push",
+    "head_branch": "main",
+    "head_sha": "8e56c0f110cd7fd1d39b433e0d024eeef4779adc",
+    "html_url": "https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089456",
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "ci_jobs": {
+    "url": "https://api.github.com/repos/JQ-ai-nb/warpfit/actions/runs/44321089456/jobs",
+    "http": 200,
+    "jobs": [
+      {
+        "name": "verify (ubuntu-latest)",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Run python verify.py --native",
+            "conclusion": "success"
+          },
+          {
+            "name": "Recompute independent fixtures with numeric tolerance",
+            "conclusion": "success"
+          },
+          {
+            "name": "Every documented number matches its evidence file",
+            "conclusion": "success"
+          },
+          {
+            "name": "Every example runs twice with identical bytes",
+            "conclusion": "success"
+          },
+          {
+            "name": "Budgets refuse before the work and accept a generous one",
+            "conclusion": "success"
+          },
+          {
+            "name": "Same request, same bytes",
+            "conclusion": "success"
+          },
+          {
+            "name": "Every operation has an example and a doc entry",
+            "conclusion": "success"
+          },
+          {
+            "name": "Browser integration on Linux",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "name": "verify (macos-latest)",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Run python verify.py --native",
+            "conclusion": "success"
+          },
+          {
+            "name": "Recompute independent fixtures with numeric tolerance",
+            "conclusion": "success"
+          },
+          {
+            "name": "Every documented number matches its evidence file",
+            "conclusion": "success"
+          },
+          {
+            "name": "Every example runs twice with identical bytes",
+            "conclusion": "success"
+          },
+          {
+            "name": "Budgets refuse before the work and accept a generous one",
+            "conclusion": "success"
+          },
+          {
+            "name": "Same request, same bytes",
+            "conclusion": "success"
+          },
+          {
+            "name": "Every operation has an example and a doc entry",
+            "conclusion": "success"
+          },
+          {
+            "name": "Browser integration on Linux",
+            "conclusion": "skipped"
+          }
+        ]
+      },
+      {
+        "name": "verify (windows-latest)",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Run python verify.py --native",
+            "conclusion": "success"
+          },
+          {
+            "name": "Recompute independent fixtures with numeric tolerance",
+            "conclusion": "success"
+          },
+          {
+            "name": "Every documented number matches its evidence file",
+            "conclusion": "success"
+          },
+          {
+            "name": "Every example runs twice with identical bytes",
+            "conclusion": "success"
+          },
+          {
+            "name": "Budgets refuse before the work and accept a generous one",
+            "conclusion": "success"
+          },
+          {
+            "name": "Same request, same bytes",
+            "conclusion": "success"
+          },
+          {
+            "name": "Every operation has an example and a doc entry",
+            "conclusion": "success"
+          },
+          {
+            "name": "Browser integration on Linux",
+            "conclusion": "skipped"
+          }
+        ]
+      }
+    ]
+  },
+  "pages": {
+    "url": "https://api.github.com/repos/JQ-ai-nb/warpfit/actions/runs/44321089959",
+    "http": 200,
+    "name": "Deploy workbench",
+    "id": 44321089959,
+    "event": "push",
+    "head_branch": "main",
+    "head_sha": "8e56c0f110cd7fd1d39b433e0d024eeef4779adc",
+    "html_url": "https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089959",
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "registry": {
+    "url": "https://mooncakes.io/api/v0/modules/JQ-ai-nb/warpfit",
+    "http": 200,
+    "module": "JQ-ai-nb/warpfit",
+    "version": "0.2.4",
+    "latest_version": "0.2.4",
+    "yanked": false,
+    "build_status": "success"
+  }
+}

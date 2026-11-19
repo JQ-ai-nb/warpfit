@@ -15,6 +15,7 @@
 ```text
 moon check --target all --deny-warn
 moon test --target wasm-gc --deny-warn
+moon run cmd/library_demo --target js --deny-warn
 node scripts/build.mjs
 node bin/warpfit.mjs examples/align.json
 node bin/warpfit.mjs examples/dba.json
@@ -23,7 +24,7 @@ node bin/warpfit.mjs examples/select-k.json
 node bin/warpfit.mjs examples/pipeline.json
 ```
 
-预期：
+库示例将打印 `centers: 2` 和 `labels: [0, 1]`。其余命令的主要输出如下。
 
 | 命令 | 关键输出 |
 |---|---|
@@ -33,7 +34,7 @@ node bin/warpfit.mjs examples/pipeline.json
 | `select-k` | `best_k=3`，轮廓系数 0.9544 |
 | `pipeline` | 标签 `[0,0,1,1]` |
 
-模型文件流程：
+以下命令保存并重新加载模型，输出路径需尚不存在。
 
 ```text
 node -e "require('node:fs').mkdirSync('work',{recursive:true})"
@@ -45,12 +46,9 @@ node bin/warpfit-model.mjs predict work/cluster-model.json examples/model_predic
 
 ## 证据
 
-- CI（0.2.0 源码 `8195d88`）：<https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653>；main 最新 CI 见 <https://github.com/JQ-ai-nb/warpfit/actions>
-- CI（0.2.0 源码 `8195d88`）：<https://github.com/JQ-ai-nb/warpfit/actions/runs/44095202653>
-- Mooncakes：<https://mooncakes.io/docs/JQ-ai-nb/warpfit>（0.2.3）
-- 注册表安装验证：`python scripts/registry_consumer.py --version 0.2.3` → `registry install verified: True`，记录见 [evidence/consumer-registry-0.2.3-20261118.json](evidence/consumer-registry-0.2.3-20261118.json)
-- 验证记录：[VALIDATION.md](VALIDATION.md)；验收自查：[ACCEPTANCE.md](ACCEPTANCE.md)
-- 演示入口：在线工作台（本节第 1 部分）与本地 5 分钟路径（第 2 部分）；仓库不再附带独立演示压缩包。
+- 从注册表独立安装已发布的 `0.2.4`，可运行 `python scripts/registry_consumer.py --version 0.2.4`。 [Mooncakes](https://mooncakes.io/docs/JQ-ai-nb/warpfit) · [安装记录](evidence/consumer-registry-0.2.4-20261119.json)
+- 想离线演示时，可以运行 `python scripts/package_demo.py` 生成 `deliverables/` 下的本地 ZIP。解压后用 Node.js ≥22 运行。 [演示包说明](DEMO.md)
+- 按版本与提交核对 CI、部署、浏览器与本机结果。 [状态与证据](STATUS.md) · [验收自查](ACCEPTANCE.md)
 
 ## 边界
 

@@ -1,6 +1,13 @@
 # 已运行的验证与结果
 
-> 本页分别记录远程验证和推送前的本地验证。历史记录中“未推送 / 未发布”描述当次检查时的状态，不应据此推断当前默认分支或注册表版本；远程结果均对应下列具体提交。2026-11-17 已将 0.2.0 源码推送至公开 main（`8195d88`），三系统 CI 通过。Mooncakes 0.2.0 已于 2026-11-17 发布，`registry_consumer.py --version 0.2.0` 返回 `registry install verified: True`；源码 CI 与注册表安装是两项独立验证。
+远程测试、注册表安装和本地复跑均按运行环境及源码提交记录。历史段落描述各次验证时的状态。 [当前状态与证据](STATUS.md)
+
+## 0.2.4 验证记录（汇总于 2026-11-19）
+
+- `8e56c0f` 在三系统的源码 CI 及 Pages 部署均通过。 [源码 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089456) · [Pages 部署](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089959) · [公开版本核查](evidence/release-0.2.4-20261119.json)
+- 在新的注册表缓存与独立工程执行 `python scripts/registry_consumer.py --version 0.2.4`，下载 `JQ-ai-nb/warpfit@0.2.4` 并通过三个后端的公共接口检查。同一安装中运行库示例，得到两个中心和标签 `[0, 1]`。 [安装证据](evidence/consumer-registry-0.2.4-20261119.json)
+- 基线本机通过 `python verify.py`，构建并验证本地演示 ZIP。对解压的本机工作台完成浏览器检查，所有请求均限定在本机。native 的运行记录来自上述 CI。 [本机验证](evidence/validation-0.2.4-20261119.json) · [本地浏览器验证](evidence/browser-0.2.4-20261119.json)
+- 本轮本地维护补齐上述证据，修正自动检查的退出状态与版本选择，并让干净检出目录可以直接生成演示包。
 
 ## 2026-11-18 推送与三系统 CI
 
@@ -25,9 +32,9 @@
 
 ## 2026-11-18 验收前复跑（commit `9c3a102`）
 
-> 本节是 `9c3a102` 当时的历史记录，表内为 113 项。此后新增 4 条回归测试（并列剪枝、top-k 回退、常量 medoids、标签顺序），当前 main 为 117 项，以 [STATUS.md](STATUS.md) 为准。
+本节记录 `9c3a102` 的验证结果。后续新增的测试及当前计数见 [状态与证据](STATUS.md)。
 
-验收前对当前 main 做了一次完整复跑，命令与结果如下，均为本机实测（moon 0.1.20261021 / moonc 0.10.17 / Node 22 / Windows）：
+本机在该次验收准备中复跑了以下检查（moon 0.1.20261021 / moonc 0.10.17 / Node 22 / Windows）。
 
 | 检查 | 命令 | 结果 |
 | --- | --- | --- |
@@ -51,7 +58,7 @@
 ## 2026-11-18 边界测试增强
 
 - 新增 4 项边界回归测试（`core/robustness_wbtest.mbt`，72 行）：极端 gamma、k 等于训练集大小且距离全等、窗口覆盖全矩阵、8192→512 重采样。
-- 当前 main 的四后端各 110/110（2026-11-18 复跑后为 113/113）；0.2.1 发布包（tag `v0.2.1`）为 110/110；0.2.0 发布包为 82/82。
+- 0.2.1 发布阶段记录的测试为 110 项，后续历史复跑为 113 项；0.2.0 发布阶段为 82 项。当前计数见状态页。
 - 新增 JSON 操作：`knn_pruned`、`subsequence_topk`、`cross_validate`、`medoids`、`motifs`、`outliers`、`describe`；这些已包含在 0.2.1，0.2.0 不包含。
 - 2026-11-18：0.2.1 已发布到 Mooncakes；tag `v0.2.1` 指向 `d6c15e4`；`registry_consumer --version 0.2.1` 返回 `registry install verified: True`。
 
