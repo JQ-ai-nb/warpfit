@@ -1,0 +1,22 @@
+{
+  "recorded_at_utc": "2026-11-19T01:16:59.309536+00:00",
+  "commit": "5408228ada119e7a6b3e7574b47aba044ddfcc4c",
+  "module": "JQ-ai-nb/warpfit",
+  "status": "passed",
+  "moonbit_per_backend": {
+    "wasm": 125,
+    "wasm-gc": 125,
+    "js": 125
+  },
+  "node_pass": 46,
+  "cli_examples_passed": 24,
+  "demo_checks": 10,
+  "failure_preserved_existing_archive": true,
+  "demo_sha256": "9200a74fcf4e95e1cd17ded12e84558b875b38c3a51ac76b599d04aba095341c",
+  "scope": "local tests against GitHub source commit",
+  "published_mooncakes_version": "0.2.4",
+  "validation_command": "python verify.py",
+  "native_run_locally": false,
+  "archive_candidate_failure_kept_sha256": "ca9c3c317f6bb3cfd132bed47875e8b1ffb8beb30e5c8d4a913e8c26a01e9109",
+  "rejected_candidate_sha256": "199422652d62b5fe78eef0f5dc7bcdececc373abafa26e82cc9f5233a320113a"
+}

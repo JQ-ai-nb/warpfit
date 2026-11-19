@@ -2,6 +2,10 @@
 
 远程测试、注册表安装和本地复跑均按运行环境及源码提交记录。历史段落描述各次验证时的状态。 [当前状态与证据](STATUS.md)
 
+## 2026-11-19 文件保护修订
+
+源码 `5408228` 的 `python verify.py` 通过。额外复测了直接路径、硬链接和文件重定向输入的覆盖保护，并确认自检失败时已有演示 ZIP 的 SHA-256 保持一致。 [源码验证证据](evidence/file-preservation-5408228.json)
+
 ## 0.2.4 验证记录（汇总于 2026-11-19）
 
 - `8e56c0f` 在三系统的源码 CI 及 Pages 部署均通过。跟进核实了公开 `v0.2.4` 标签及文档提交 `8fb904c` 的 CI 和部署。 [发布提交 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089456) · [公开 main CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/44347124218) · [公开版本核查](evidence/release-0.2.4-20261119.json)

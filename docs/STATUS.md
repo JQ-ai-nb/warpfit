@@ -1,20 +1,20 @@
-# WarpFit 当前状态
+# WarpFit 版本与验收验证
 
 汇总于 2026-11-19（UTC+8）。参赛人蒋琦，项目登记名为 **WarpFit：时序对齐、模板学习与聚类**，账号与包命名空间为 `JQ-ai-nb`。参赛者提供的十一月通知确认**报名初审已通过**，最终验收以组委会通知为准。
 
-0.2.4 的发布基线为 `8e56c0f`。核查时公开 `main` 为 `8fb904c`，该提交补充了文档和安装记录。本地 `local/acceptance-024` 已纳入这次更新，并继续校对验收文档与检查脚本。
+Mooncakes 已发布 `JQ-ai-nb/warpfit@0.2.4`，发布基线为 `v0.2.4`（`8e56c0f`）。GitHub `main` 汇集后续验收文档和源码修复。以下验证记录标明实际验证的包版本或源码提交。
 
 ## 版本与交付
 
 | 项目 | 已核对事实 | 依据 |
 | --- | --- | --- |
-| 参赛仓库 | `JQ-ai-nb/warpfit`，公开，默认分支 `main`，核查时为 `8fb904c` | [GitHub 参赛仓库](https://github.com/JQ-ai-nb/warpfit) · [公开版本核查](evidence/release-0.2.4-20261119.json) |
+| 参赛仓库 | `JQ-ai-nb/warpfit`，公开，默认分支 `main` | [GitHub 参赛仓库](https://github.com/JQ-ai-nb/warpfit) · [公开版本核查](evidence/release-0.2.4-20261119.json) |
 | 版本标签 | 公开标签 `v0.2.4` 指向 `8e56c0f` | [该标签的源码](https://github.com/JQ-ai-nb/warpfit/tree/v0.2.4) · [公开版本核查](evidence/release-0.2.4-20261119.json) |
-| 源码版本 | `0.2.4`，`moon.mod` 与 `package.json` 一致 | [模块声明](../moon.mod) · [Node 工具元数据](../package.json) |
-| Mooncakes | `JQ-ai-nb/warpfit@0.2.4` 已可下载，构建状态 `success` | [包页面](https://mooncakes.io/docs/JQ-ai-nb/warpfit) · [公开版本核查](evidence/release-0.2.4-20261119.json) |
+| 仓库模块元数据 | `moon.mod` 与 `package.json` 均声明 `0.2.4` | [模块声明](../moon.mod) · [Node 工具元数据](../package.json) |
+| Mooncakes | `JQ-ai-nb/warpfit@0.2.4` 已可下载，构建状态 `success` | [0.2.4 包页面](https://mooncakes.io/docs/JQ-ai-nb/warpfit@0.2.4) · [公开版本核查](evidence/release-0.2.4-20261119.json) |
 | 独立安装 | 空注册表缓存安装精确版本 `0.2.4`，Wasm、Wasm-GC、JS 各通过 10 组公共接口检查。库示例也在该环境中返回两个中心和标签 `[0, 1]` | [空缓存的安装证据](evidence/consumer-registry-0.2.4-20261118.json) · [另一次安装记录](evidence/consumer-registry-0.2.4-20261119.json) |
-| 远程 CI | 发布提交 `8e56c0f` 和文档更新 `8fb904c` 的 Linux、macOS、Windows 三个任务均通过。发布提交的任务使用 `verify.py --native`，Linux 另外运行浏览器检查 | [发布提交 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089456) · [公开 main CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/44347124218) |
-| 工作台 | 公开 `8fb904c` 的 Pages 部署通过 | [部署 44347124171](https://github.com/JQ-ai-nb/warpfit/actions/runs/44347124171) · [在线工作台](https://jq-ai-nb.github.io/warpfit/) |
+| 远程 CI | 发布提交 `8e56c0f` 和验收文档更新 `7796505` 均通过 Linux、macOS、Windows 的检查、构建和测试 | [发布提交 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089456) · [验收文档更新 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/44431383508) · [main 的 CI 列表](https://github.com/JQ-ai-nb/warpfit/actions/workflows/ci.yml?query=branch%3Amain) |
+| 工作台 | 公开提交 `7796505` 的 Pages 部署后复测通过 | [部署记录](https://github.com/JQ-ai-nb/warpfit/actions/runs/44431383824) · [在线工作台](https://jq-ai-nb.github.io/warpfit/) |
 
 0.1.2 是十月公开原型。十一月版本加入约束 DTW、DBA、聚类与模型复用、分类和子序列检索，0.2.1 至 0.2.4 继续补全与修复。各版本变更见 [CHANGELOG.md](../CHANGELOG.md) 和 [十一月新增说明](NOVEMBER.md)。
 
@@ -33,6 +33,12 @@
 | 本地浏览器 | 对解压演示包运行 24/24 项 Chromium 检查，页面错误及外部网络请求均为 0 | [本地浏览器证据](evidence/browser-0.2.4-20261119.json) |
 
 本机未运行 native 测试或构建。基线在远程 CI 的三个操作系统上已运行对应检查。CLI 从 Mooncakes 下载的包另有独立安装记录。
+
+## 发布后的源码维护
+
+`5408228` 改善了命令行保存结果和生成演示包的行为。输入与输出指向同一文件时，CLI 会保留原输入。演示 ZIP 通过解压自检后才替换旧包。
+
+该提交的本机全量验证通过。Wasm、Wasm-GC、JS 各通过 125 项 MoonBit 测试，Node 通过 46 项。24 个 CLI 请求示例和解压演示包的 10 组检查全部通过。另验证了候选 ZIP 自检失败时旧包的内容保持一致。 [本轮源码验证](evidence/file-preservation-5408228.json)
 
 ## 复核命令
 
