@@ -1,0 +1,122 @@
+{
+  "recorded_at_utc": "2026-11-18T15:58:41.507191+00:00",
+  "module": "JQ-ai-nb/warpfit",
+  "version": "0.2.4",
+  "mode": "registry",
+  "path_dependency": false,
+  "archive_sha256": null,
+  "runtime_targets": [
+    "wasm",
+    "wasm-gc",
+    "js"
+  ],
+  "registry_install_verified": true,
+  "source_checkout_dependency": false,
+  "checks": [
+    "dtw",
+    "distance_only",
+    "dba",
+    "cluster_model",
+    "subsequence",
+    "long_preprocess",
+    "soft_gradient",
+    "fit_rank",
+    "knn",
+    "select_k"
+  ],
+  "results": [
+    {
+      "command": [
+        "moon",
+        "version",
+        "--all"
+      ],
+      "returncode": 0,
+      "stdout": "moon 0.1.20261021 (a4f8933 2026-10-21)\nmoonc v0.10.17+093cb8f9c (2026-10-21)\nmoonrun 0.1.20261021 (a4f8933 2026-10-21)\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "moon",
+        "update"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "Registry index cloned successfully\nSymbols updated successfully\n"
+    },
+    {
+      "command": [
+        "moon",
+        "check",
+        "--target",
+        "all",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "Downloading JQ-ai-nb/warpfit@0.2.4\nFinished. moon: ran 13 tasks, now up to date\n"
+    },
+    {
+      "command": [
+        "moon",
+        "run",
+        ".",
+        "--target",
+        "wasm",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout": "warpfit_consumer_ok: dtw, distance_only, dba, cluster_model, subsequence, long_preprocess, soft_gradient, fit_rank, knn, select_k\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "moon",
+        "run",
+        ".",
+        "--target",
+        "wasm-gc",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout": "warpfit_consumer_ok: dtw, distance_only, dba, cluster_model, subsequence, long_preprocess, soft_gradient, fit_rank, knn, select_k\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "moon",
+        "run",
+        ".",
+        "--target",
+        "js",
+        "--deny-warn"
+      ],
+      "returncode": 0,
+      "stdout": "warpfit_consumer_ok: dtw, distance_only, dba, cluster_model, subsequence, long_preprocess, soft_gradient, fit_rank, knn, select_k\n",
+      "stderr": ""
+    }
+  ],
+  "dependency_sync": "registry_update",
+  "status": "passed",
+  "source_commit": "8e56c0f110cd7fd1d39b433e0d024eeef4779adc",
+  "command": "python scripts/registry_consumer.py --version 0.2.4",
+  "fresh_registry_cache": true,
+  "publication_performed": false,
+  "library_example": {
+    "installed_module": "JQ-ai-nb/warpfit",
+    "installed_version": "0.2.4",
+    "installed_core_and_api_files_match_source": 56,
+    "command": [
+      "moon",
+      "run",
+      "library_demo",
+      "--target",
+      "js",
+      "--frozen",
+      "--deny-warn"
+    ],
+    "returncode": 0,
+    "stdout": "centers: 2\nlabels: [0, 1]\n",
+    "status": "passed"
+  }
+}

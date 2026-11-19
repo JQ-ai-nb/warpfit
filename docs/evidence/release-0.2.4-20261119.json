@@ -169,5 +169,72 @@
     "latest_version": "0.2.4",
     "yanked": false,
     "build_status": "success"
+  },
+  "followup": {
+    "recorded_at_utc": "2026-11-19T00:08:03.950383+00:00",
+    "main": {
+      "url": "https://api.github.com/repos/JQ-ai-nb/warpfit/commits/main",
+      "http": 200,
+      "sha": "8fb904c5fc84a5a379055b3b6c07ae26a30aabda",
+      "author": "JQ-ai-nb",
+      "committer": "JQ-ai-nb",
+      "author_name": "蒋琦",
+      "committer_name": "蒋琦"
+    },
+    "tag": {
+      "url": "https://api.github.com/repos/JQ-ai-nb/warpfit/git/ref/tags/v0.2.4",
+      "http": 200,
+      "ref": "refs/tags/v0.2.4",
+      "object": {
+        "sha": "8e56c0f110cd7fd1d39b433e0d024eeef4779adc",
+        "type": "commit",
+        "url": "https://api.github.com/repos/JQ-ai-nb/warpfit/git/commits/8e56c0f110cd7fd1d39b433e0d024eeef4779adc"
+      }
+    },
+    "latest_ci": {
+      "url": "https://api.github.com/repos/JQ-ai-nb/warpfit/actions/runs?head_sha=8fb904c5fc84a5a379055b3b6c07ae26a30aabda&per_page=10",
+      "http": 200,
+      "runs": [
+        {
+          "id": 44347124171,
+          "name": "Deploy workbench",
+          "head_sha": "8fb904c5fc84a5a379055b3b6c07ae26a30aabda",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/JQ-ai-nb/warpfit/actions/runs/44347124171"
+        },
+        {
+          "id": 44347124218,
+          "name": "CI",
+          "head_sha": "8fb904c5fc84a5a379055b3b6c07ae26a30aabda",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/JQ-ai-nb/warpfit/actions/runs/44347124218"
+        }
+      ]
+    },
+    "ci_jobs": {
+      "http": 200,
+      "url": "https://api.github.com/repos/JQ-ai-nb/warpfit/actions/runs/44347124218/jobs",
+      "jobs": [
+        {
+          "name": "verify (windows-latest)",
+          "conclusion": "success"
+        },
+        {
+          "name": "verify (macos-latest)",
+          "conclusion": "success"
+        },
+        {
+          "name": "verify (ubuntu-latest)",
+          "conclusion": "success"
+        }
+      ]
+    },
+    "registry_workflow": {
+      "http": 200,
+      "url": "https://api.github.com/repos/JQ-ai-nb/warpfit/actions/workflows/registry-consumer.yml/runs?per_page=1",
+      "total_count": 0
+    }
   }
 }

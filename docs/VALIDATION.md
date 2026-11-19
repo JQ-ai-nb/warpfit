@@ -4,8 +4,8 @@
 
 ## 0.2.4 验证记录（汇总于 2026-11-19）
 
-- `8e56c0f` 在三系统的源码 CI 及 Pages 部署均通过。 [源码 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089456) · [Pages 部署](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089959) · [公开版本核查](evidence/release-0.2.4-20261119.json)
-- 在新的注册表缓存与独立工程执行 `python scripts/registry_consumer.py --version 0.2.4`，下载 `JQ-ai-nb/warpfit@0.2.4` 并通过三个后端的公共接口检查。同一安装中运行库示例，得到两个中心和标签 `[0, 1]`。 [安装证据](evidence/consumer-registry-0.2.4-20261119.json)
+- `8e56c0f` 在三系统的源码 CI 及 Pages 部署均通过。跟进核实了公开 `v0.2.4` 标签及文档提交 `8fb904c` 的 CI 和部署。 [发布提交 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089456) · [公开 main CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/44347124218) · [公开版本核查](evidence/release-0.2.4-20261119.json)
+- 在新的注册表缓存与独立工程执行 `python scripts/registry_consumer.py --version 0.2.4`，下载 `JQ-ai-nb/warpfit@0.2.4` 并通过三个后端的公共接口检查。同一安装中运行库示例，得到两个中心和标签 `[0, 1]`。 [安装证据](evidence/consumer-registry-0.2.4-20261118.json)
 - 基线本机通过 `python verify.py`，构建并验证本地演示 ZIP。对解压的本机工作台完成浏览器检查，所有请求均限定在本机。native 的运行记录来自上述 CI。 [本机验证](evidence/validation-0.2.4-20261119.json) · [本地浏览器验证](evidence/browser-0.2.4-20261119.json)
 - 本轮本地维护补齐上述证据，修正自动检查的退出状态与版本选择，并让干净检出目录可以直接生成演示包。
 

@@ -2,18 +2,19 @@
 
 汇总于 2026-11-19（UTC+8）。参赛人蒋琦，项目登记名为 **WarpFit：时序对齐、模板学习与聚类**，账号与包命名空间为 `JQ-ai-nb`。参赛者提供的十一月通知确认**报名初审已通过**，最终验收以组委会通知为准。
 
-以下已发布和已验证的源码基线为 `8e56c0f`。本次维护在本地 `local/acceptance-024` 工作树完成，验收文档与检查脚本的改动尚未同步到公开仓库。
+0.2.4 的发布基线为 `8e56c0f`。核查时公开 `main` 为 `8fb904c`，该提交补充了文档和安装记录。本地 `local/acceptance-024` 已纳入这次更新，并继续校对验收文档与检查脚本。
 
 ## 版本与交付
 
 | 项目 | 已核对事实 | 依据 |
 | --- | --- | --- |
-| 参赛仓库 | `JQ-ai-nb/warpfit`，公开，默认分支 `main`，核查时为 `8e56c0f` | [GitHub 参赛仓库](https://github.com/JQ-ai-nb/warpfit) · [公开版本核查](evidence/release-0.2.4-20261119.json) |
+| 参赛仓库 | `JQ-ai-nb/warpfit`，公开，默认分支 `main`，核查时为 `8fb904c` | [GitHub 参赛仓库](https://github.com/JQ-ai-nb/warpfit) · [公开版本核查](evidence/release-0.2.4-20261119.json) |
+| 版本标签 | 公开标签 `v0.2.4` 指向 `8e56c0f` | [该标签的源码](https://github.com/JQ-ai-nb/warpfit/tree/v0.2.4) · [公开版本核查](evidence/release-0.2.4-20261119.json) |
 | 源码版本 | `0.2.4`，`moon.mod` 与 `package.json` 一致 | [模块声明](../moon.mod) · [Node 工具元数据](../package.json) |
 | Mooncakes | `JQ-ai-nb/warpfit@0.2.4` 已可下载，构建状态 `success` | [包页面](https://mooncakes.io/docs/JQ-ai-nb/warpfit) · [公开版本核查](evidence/release-0.2.4-20261119.json) |
-| 独立安装 | 空注册表缓存安装精确版本 `0.2.4`，Wasm、Wasm-GC、JS 各通过 10 组公共接口检查。库示例也在该环境中返回两个中心和标签 `[0, 1]` | [实际安装证据](evidence/consumer-registry-0.2.4-20261119.json) |
-| 远程 CI | `8e56c0f` 的 Linux、macOS、Windows 三个任务全部通过，均运行 `verify.py --native`，Linux 另外运行浏览器检查 | [CI 44321089456](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089456) |
-| 工作台 | 同一提交的 Pages 部署通过 | [部署 44321089959](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089959) · [在线工作台](https://jq-ai-nb.github.io/warpfit/) |
+| 独立安装 | 空注册表缓存安装精确版本 `0.2.4`，Wasm、Wasm-GC、JS 各通过 10 组公共接口检查。库示例也在该环境中返回两个中心和标签 `[0, 1]` | [空缓存的安装证据](evidence/consumer-registry-0.2.4-20261118.json) · [另一次安装记录](evidence/consumer-registry-0.2.4-20261119.json) |
+| 远程 CI | 发布提交 `8e56c0f` 和文档更新 `8fb904c` 的 Linux、macOS、Windows 三个任务均通过。发布提交的任务使用 `verify.py --native`，Linux 另外运行浏览器检查 | [发布提交 CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/44321089456) · [公开 main CI](https://github.com/JQ-ai-nb/warpfit/actions/runs/44347124218) |
+| 工作台 | 公开 `8fb904c` 的 Pages 部署通过 | [部署 44347124171](https://github.com/JQ-ai-nb/warpfit/actions/runs/44347124171) · [在线工作台](https://jq-ai-nb.github.io/warpfit/) |
 
 0.1.2 是十月公开原型。十一月版本加入约束 DTW、DBA、聚类与模型复用、分类和子序列检索，0.2.1 至 0.2.4 继续补全与修复。各版本变更见 [CHANGELOG.md](../CHANGELOG.md) 和 [十一月新增说明](NOVEMBER.md)。
 

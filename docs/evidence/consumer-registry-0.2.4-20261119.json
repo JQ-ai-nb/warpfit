@@ -1,5 +1,5 @@
 {
-  "recorded_at_utc": "2026-11-18T15:58:41.507191+00:00",
+  "recorded_at_utc": "2026-11-18T16:20:45.545193+00:00",
   "module": "JQ-ai-nb/warpfit",
   "version": "0.2.4",
   "mode": "registry",
@@ -42,7 +42,7 @@
       ],
       "returncode": 0,
       "stdout": "",
-      "stderr": "Registry index cloned successfully\nSymbols updated successfully\n"
+      "stderr": "Registry index updated successfully\nSymbols updated successfully\n"
     },
     {
       "command": [
@@ -98,25 +98,7 @@
   ],
   "dependency_sync": "registry_update",
   "status": "passed",
-  "source_commit": "8e56c0f110cd7fd1d39b433e0d024eeef4779adc",
+  "commit": "8e56c0f110cd7fd1d39b433e0d024eeef4779adc",
   "command": "python scripts/registry_consumer.py --version 0.2.4",
-  "fresh_registry_cache": true,
-  "publication_performed": false,
-  "library_example": {
-    "installed_module": "JQ-ai-nb/warpfit",
-    "installed_version": "0.2.4",
-    "installed_core_and_api_files_match_source": 56,
-    "command": [
-      "moon",
-      "run",
-      "library_demo",
-      "--target",
-      "js",
-      "--frozen",
-      "--deny-warn"
-    ],
-    "returncode": 0,
-    "stdout": "centers: 2\nlabels: [0, 1]\n",
-    "status": "passed"
-  }
+  "note": "Isolated consumer workspace installed from the Mooncakes registry after the 0.2.4 release; 10/10 checks and wasm / wasm-gc / js all passed. Earlier 0.2.3 evidence is retained as history."
 }
